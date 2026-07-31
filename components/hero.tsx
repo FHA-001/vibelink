@@ -1,8 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, QrCode, User, Mail, Link } from "lucide-react";
+import { ArrowRight, QrCode, User, Mail, Link as LinkIcon } from "lucide-react";
 import { Button } from "./ui/button";
+import Link from "next/link";
 
 export function Hero() {
   return (
@@ -42,13 +43,15 @@ export function Hero() {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
             >
-              <Button
-                size="lg"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground text-base px-8 py-6 rounded-2xl"
-              >
-                Get Started
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+              <Link href="/welcome">
+                <Button
+                  size="lg"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground text-base px-8 py-6 rounded-2xl"
+                >
+                  Get Started
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
               <Button
                 size="lg"
                 variant="outline"
@@ -102,13 +105,13 @@ export function Hero() {
                   href="#"
                   className="w-10 h-10 rounded-xl bg-foreground/5 hover:bg-foreground/10 flex items-center justify-center transition-colors"
                 >
-                  <Link className="w-5 h-5 text-foreground/70" />
+                  <LinkIcon className="w-5 h-5 text-foreground/70" />
                 </a>
                 <a
                   href="#"
                   className="w-10 h-10 rounded-xl bg-foreground/5 hover:bg-foreground/10 flex items-center justify-center transition-colors"
                 >
-                  <Link className="w-5 h-5 text-foreground/70" />
+                  <LinkIcon className="w-5 h-5 text-foreground/70" />
                 </a>
               </div>
 

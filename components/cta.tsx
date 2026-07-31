@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "./ui/button";
+import Link from "next/link";
 
 export function CTA() {
   return (
@@ -58,13 +59,15 @@ export function CTA() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.5 }}
             >
-              <Button
-                size="lg"
-                className="bg-white text-primary hover:bg-white/90 text-base px-8 py-6 rounded-2xl shadow-lg hover:shadow-xl transition-all"
-              >
-                Create Your VibeLink
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+              <Link href="/welcome">
+                <Button
+                  size="lg"
+                  className="bg-white text-primary hover:bg-white/90 text-base px-8 py-6 rounded-2xl shadow-lg hover:shadow-xl transition-all"
+                >
+                  Create Your VibeLink
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
             </motion.div>
           </div>
         </motion.div>

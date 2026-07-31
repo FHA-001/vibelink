@@ -24,6 +24,10 @@ export function Navigation() {
     { name: "About", href: "#about" },
   ];
 
+  const handleGetStarted = () => {
+    window.location.href = "/welcome";
+  };
+
   return (
     <motion.nav
       initial={{ y: -100 }}
@@ -60,7 +64,10 @@ export function Navigation() {
             >
               Sign In
             </a>
-            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+            <Button 
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              onClick={handleGetStarted}
+            >
               Get Started
             </Button>
           </div>
@@ -111,7 +118,10 @@ export function Navigation() {
               </a>
               <Button
                 className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  handleGetStarted();
+                }}
               >
                 Get Started
               </Button>
