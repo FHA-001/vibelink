@@ -275,8 +275,8 @@ export async function getPendingRequests(userId: string): Promise<ConnectionRequ
     .from('connection_requests')
     .select(`
       *,
-      sender_profile:profiles!connection_requests_sender_id_fkey(*),
-      receiver_profile:profiles!connection_requests_receiver_id_fkey(*)
+      sender_profile:profiles!sender_id(id, username, full_name, bio, job_title, profile_photo),
+      receiver_profile:profiles!receiver_id(id, username, full_name, bio, job_title, profile_photo)
     `)
     .eq('receiver_id', userId)
     .eq('status', 'pending')
