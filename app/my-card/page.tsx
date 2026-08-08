@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Loader2, Share2, Download, Edit, QrCode, UserPlus, Check, X } from "lucide-react";
-import { getCurrentUser, getUserProfile, signOut, Profile, getPendingRequests, updateConnectionRequestStatus, ConnectionRequestWithProfile } from "@/lib/auth";
+import { Loader2, Share2, Download, Edit, QrCode } from "lucide-react";
+import { getCurrentUser, getUserProfile, signOut, Profile } from "@/lib/auth";
 import { ProfileCard } from "@/components/profile/profile-card";
 import { QRCode } from "@/components/profile/qr-code";
 import { BottomNav } from "@/components/bottom-nav";
@@ -17,17 +17,10 @@ export default function MyCardPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showQR, setShowQR] = useState(false);
-  const [pendingRequests, setPendingRequests] = useState<ConnectionRequestWithProfile[]>([]);
 
   useEffect(() => {
     checkAuth();
   }, []);
-
-  useEffect(() => {
-    if (user) {
-      loadPendingRequests();
-    }
-  }, [user]);
 
   const checkAuth = async () => {
     try {
@@ -50,39 +43,6 @@ export default function MyCardPage() {
       router.push("/signin");
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const loadPendingRequests = async () => {
-    try {
-      const requests = await getPendingRequests(user.id);
-      setPendingRequests(requests);
-    } catch (error) {
-      console.error("Error loading pending requests:", error);
-    }
-  };
-
-  const handleAcceptRequest = async (requestId: string) => {
-    try {
-      const result = await updateConnectionRequestStatus(requestId, 'accepted');
-      if (result.success) {
-        // Reload pending requests
-        loadPendingRequests();
-      }
-    } catch (error) {
-      console.error("Error accepting request:", error);
-    }
-  };
-
-  const handleDeclineRequest = async (requestId: string) => {
-    try {
-      const result = await updateConnectionRequestStatus(requestId, 'declined');
-      if (result.success) {
-        // Reload pending requests
-        loadPendingRequests();
-      }
-    } catch (error) {
-      console.error("Error declining request:", error);
     }
   };
 
@@ -157,61 +117,6 @@ export default function MyCardPage() {
             transition={{ duration: 0.6 }}
           >
             <h1 className="text-2xl font-bold text-foreground mb-6">My Card</h1>
-
-            {/* Pending Requests Section */}
-            {pendingRequests.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="mb-6"
-              >
-                <div className="bg-card rounded-2xl shadow-lg p-4 border-2 border-primary/20">
-                  <div className="flex items-center gap-2 mb-4">
-                    <UserPlus className="w-5 h-5 text-primary" />
-                    <h2 className="text-lg font-semibold text-foreground">
-                      Pending Requests ({pendingRequests.length})
-                    </h2>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    {pendingRequests.map((request) => (
-                      <div
-                        key={request.id}
-                        className="bg-muted/30 rounded-xl p-3 flex items-center justify-between gap-3"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-foreground text-sm">
-                            @{request.sender_profile?.username}
-                          </p>
-                          {request.sender_profile?.bio && (
-                            <p className="text-xs text-foreground/70 truncate">
-                              {request.sender_profile.bio}
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleAcceptRequest(request.id)}
-                            className="p-2 bg-green-500/10 hover:bg-green-500/20 text-green-600 rounded-lg transition-colors"
-                            aria-label="Accept request"
-                          >
-                            <Check className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDeclineRequest(request.id)}
-                            className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-600 rounded-lg transition-colors"
-                            aria-label="Decline request"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            )}
 
             {/* Profile Card */}
             <ProfileCard
