@@ -334,3 +334,198 @@ export async function getConnectionRequestStatus(senderId: string, receiverId: s
 
   return data as ConnectionRequest | null;
 }
+
+export interface Connection {
+  id: string;
+  user_one_id: string;
+  user_two_id: string;
+  created_at: string;
+}
+
+export interface ConnectionWithProfile extends Connection {
+  other_user_profile: Profile;
+}
+
+export async function getUserConnections(userId: string): Promise<ConnectionWithProfile[]> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from('connections')
+    .select('*')
+    .or(`user_one_id.eq.${userId},user_two_id.eq.${userId}`)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching connections:', error);
+    return [];
+  }
+
+  // Fetch other user's profile for each connection
+  const connectionsWithProfiles = await Promise.all(
+    (data || []).map(async (connection) => {
+      const otherUserId = connection.user_one_id === userId ? connection.user_two_id : connection.user_one_id;
+      
+      const { data: otherProfile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', otherUserId)
+        .single();
+      
+      return {
+        ...connection,
+        other_user_profile: otherProfile,
+      } as ConnectionWithProfile;
+    })
+  );
+
+  return connectionsWithProfiles;
+}
+
+export async function areUsersConnected(userA: string, userB: string): Promise<boolean> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from('connections')
+    .select('id')
+    .or(`and(user_one_id.eq.${userA},user_two_id.eq.${userB}),and(user_one_id.eq.${userB},user_two_id.eq.${userA})`)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Error checking connection:', error);
+    return false;
+  }
+
+  return !!data;
+}
+
+export async function deleteConnection(connectionId: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .from('connections')
+    .delete()
+    .eq('id', connectionId);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function getConnectionStatus(userA: string, userB: string): Promise<'connected' | 'pending_sent' | 'pending_received' | 'declined' | 'none'> {
+  const supabase = createClient();
+
+  // Check if connected
+  const { data: connection } = await supabase
+    .from('connections')
+    .select('id')
+    .or(`and(user_one_id.eq.${userA},user_two_id.eq.${userB}),and(user_one_id.eq.${userB},user_two_id.eq.${userA})`)
+    .maybeSingle();
+
+  if (connection) {
+    return 'connected';
+  }
+
+  // Check request status
+  const { data: sentRequest } = await supabase
+    .from('connection_requests')
+    .select('status')
+    .eq('sender_id', userA)
+    .eq('receiver_id', userB)
+    .maybeSingle();
+
+  if (sentRequest) {
+    if (sentRequest.status === 'pending') return 'pending_sent';
+    if (sentRequest.status === 'declined') return 'declined';
+  }
+
+  const { data: receivedRequest } = await supabase
+    .from('connection_requests')
+    .select('status')
+    .eq('sender_id', userB)
+    .eq('receiver_id', userA)
+    .maybeSingle();
+
+  if (receivedRequest && receivedRequest.status === 'pending') {
+    return 'pending_received';
+  }
+
+  return 'none';
+}
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  type: 'connection_request' | 'connection_accepted' | 'connection_declined';
+  title: string;
+  message: string;
+  related_request_id?: string;
+  is_read: boolean;
+  created_at: string;
+}
+
+export async function getUserNotifications(userId: string): Promise<Notification[]> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from('notifications')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching notifications:', error);
+    return [];
+  }
+
+  return data as Notification[];
+}
+
+export async function getUnreadNotificationCount(userId: string): Promise<number> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from('notifications')
+    .select('id', { count: 'exact' })
+    .eq('user_id', userId)
+    .eq('is_read', false);
+
+  if (error) {
+    console.error('Error fetching unread count:', error);
+    return 0;
+  }
+
+  return data?.length || 0;
+}
+
+export async function markNotificationAsRead(notificationId: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .from('notifications')
+    .update({ is_read: true })
+    .eq('id', notificationId);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function markAllNotificationsAsRead(userId: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .from('notifications')
+    .update({ is_read: true })
+    .eq('user_id', userId)
+    .eq('is_read', false);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}

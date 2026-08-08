@@ -7,11 +7,12 @@ import { ProfileAvatar } from "./profile-avatar";
 import { ProfileTags } from "./profile-tags";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2, Clock, XCircle } from "lucide-react";
 
 interface PublicProfilePreviewProps {
   profile: Profile;
   isOwner: boolean;
+  connectionStatus?: 'connected' | 'pending_sent' | 'pending_received' | 'declined' | 'none';
   onRequestSent?: () => void;
   onRequestError?: (error: string) => void;
 }
@@ -19,6 +20,7 @@ interface PublicProfilePreviewProps {
 export function PublicProfilePreview({
   profile,
   isOwner,
+  connectionStatus = 'none',
   onRequestSent,
   onRequestError,
 }: PublicProfilePreviewProps) {
@@ -131,7 +133,43 @@ export function PublicProfilePreview({
           {/* Know More Button */}
           {!isOwner && (
             <div className="pt-4">
-              {requestStatus === 'sent' ? (
+              {connectionStatus === 'pending_sent' ? (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <Alert>
+                    <Clock className="h-4 w-4" />
+                    <AlertDescription>
+                      Request pending - waiting for response
+                    </AlertDescription>
+                  </Alert>
+                </motion.div>
+              ) : connectionStatus === 'pending_received' ? (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <Alert>
+                    <Clock className="h-4 w-4" />
+                    <AlertDescription>
+                      They sent you a connection request - check your Connections tab
+                    </AlertDescription>
+                  </Alert>
+                </motion.div>
+              ) : connectionStatus === 'declined' ? (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <Alert variant="destructive">
+                    <XCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      Connection request was declined
+                    </AlertDescription>
+                  </Alert>
+                </motion.div>
+              ) : requestStatus === 'sent' ? (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}

@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Loader2, ArrowLeft, Share2 } from "lucide-react";
-import { getProfileByUsername, Profile, getCurrentUser } from "@/lib/auth";
+import { getProfileByUsername, Profile, getCurrentUser, getConnectionStatus, areUsersConnected } from "@/lib/auth";
 import { PublicProfilePreview } from "@/components/profile/public-profile-preview";
+import { ProfileCard } from "@/components/profile/profile-card";
 import { Logo } from "@/components/logo";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
@@ -18,6 +19,8 @@ export default function PublicProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isOwner, setIsOwner] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'pending_sent' | 'pending_received' | 'declined' | 'none'>('none');
 
   useEffect(() => {
     loadProfile();
@@ -35,6 +38,13 @@ export default function PublicProfilePage() {
       // Check if current user is the profile owner
       const currentUser = await getCurrentUser();
       setIsOwner(currentUser?.id === userProfile.id);
+
+      // Check connection status if not owner
+      if (currentUser && currentUser.id !== userProfile.id) {
+        const status = await getConnectionStatus(currentUser.id, userProfile.id);
+        setConnectionStatus(status);
+        setIsConnected(status === 'connected');
+      }
     } catch (error) {
       console.error("Error loading profile:", error);
       setError("Failed to load profile");
@@ -122,7 +132,7 @@ export default function PublicProfilePage() {
             transition={{ duration: 0.6 }}
           >
             {isOwner ? (
-              // If owner, show full profile (redirect to my-card)
+              // STATE 1: Profile owner - redirect to my-card
               <div className="text-center py-12">
                 <h2 className="text-xl font-semibold text-foreground mb-2">
                   This is your profile
@@ -137,11 +147,24 @@ export default function PublicProfilePage() {
                   Go to My Card
                 </Link>
               </div>
+            ) : isConnected ? (
+              // STATE 3: Connected user - show full profile
+              <div>
+                <div className="mb-4 flex items-center justify-center gap-2 bg-green-500/10 text-green-600 px-4 py-2 rounded-full">
+                  <span className="text-sm font-medium">✓ Connected</span>
+                </div>
+                <ProfileCard
+                  profile={profile}
+                  isOwner={false}
+                  showActions={false}
+                />
+              </div>
             ) : (
-              // If visitor, show limited preview with Know More button
+              // STATE 2: Not connected - show limited preview with Know More button
               <PublicProfilePreview
                 profile={profile}
                 isOwner={false}
+                connectionStatus={connectionStatus}
               />
             )}
           </motion.div>
