@@ -273,11 +273,7 @@ export async function getPendingRequests(userId: string): Promise<ConnectionRequ
 
   const { data, error } = await supabase
     .from('connection_requests')
-    .select(`
-      *,
-      sender_profile:profiles!sender_id(id, username, full_name, bio, job_title, profile_photo),
-      receiver_profile:profiles!receiver_id(id, username, full_name, bio, job_title, profile_photo)
-    `)
+    .select('*')
     .eq('receiver_id', userId)
     .eq('status', 'pending')
     .order('created_at', { ascending: false });
@@ -287,7 +283,23 @@ export async function getPendingRequests(userId: string): Promise<ConnectionRequ
     return [];
   }
 
-  return data as ConnectionRequestWithProfile[];
+  // Fetch sender profiles separately
+  const requestsWithProfiles = await Promise.all(
+    (data || []).map(async (request) => {
+      const { data: senderProfile } = await supabase
+        .from('profiles')
+        .select('id, username, full_name, bio, job_title, profile_photo')
+        .eq('id', request.sender_id)
+        .single();
+      
+      return {
+        ...request,
+        sender_profile: senderProfile,
+      } as ConnectionRequestWithProfile;
+    })
+  );
+
+  return requestsWithProfiles;
 }
 
 export async function updateConnectionRequestStatus(requestId: string, status: 'accepted' | 'declined'): Promise<{ success: boolean; error?: string }> {
