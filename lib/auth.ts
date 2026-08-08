@@ -230,3 +230,95 @@ export async function saveUserProfile(userId: string, profileData: {
 
   return { success: true };
 }
+
+export interface ConnectionRequest {
+  id: string;
+  sender_id: string;
+  receiver_id: string;
+  status: 'pending' | 'accepted' | 'declined';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ConnectionRequestWithProfile extends ConnectionRequest {
+  sender_profile?: Profile;
+  receiver_profile?: Profile;
+}
+
+export async function createConnectionRequest(senderId: string, receiverId: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+
+  // Prevent requesting own profile
+  if (senderId === receiverId) {
+    return { success: false, error: "You cannot send a connection request to yourself" };
+  }
+
+  const { error } = await supabase
+    .from('connection_requests')
+    .insert({
+      sender_id: senderId,
+      receiver_id: receiverId,
+      status: 'pending',
+    });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function getPendingRequests(userId: string): Promise<ConnectionRequestWithProfile[]> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from('connection_requests')
+    .select(`
+      *,
+      sender_profile:profiles!connection_requests_sender_id_fkey(*),
+      receiver_profile:profiles!connection_requests_receiver_id_fkey(*)
+    `)
+    .eq('receiver_id', userId)
+    .eq('status', 'pending')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching pending requests:', error);
+    return [];
+  }
+
+  return data as ConnectionRequestWithProfile[];
+}
+
+export async function updateConnectionRequestStatus(requestId: string, status: 'accepted' | 'declined'): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .from('connection_requests')
+    .update({ status })
+    .eq('id', requestId);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function getConnectionRequestStatus(senderId: string, receiverId: string): Promise<ConnectionRequest | null> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from('connection_requests')
+    .select('*')
+    .eq('sender_id', senderId)
+    .eq('receiver_id', receiverId)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Error checking connection request status:', error);
+    return null;
+  }
+
+  return data as ConnectionRequest | null;
+}

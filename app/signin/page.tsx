@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,10 +11,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Logo } from "@/components/logo";
 import { signIn, getUserProfile } from "@/lib/auth";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function SignInPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get('redirect');
+  
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -59,8 +62,8 @@ export default function SignInPage() {
         const profile = await getUserProfile(result.user.id);
         
         if (profile) {
-          // User has completed profile, redirect to My Card
-          router.push("/my-card");
+          // User has completed profile, redirect to redirect URL or My Card
+          router.push(redirect || "/my-card");
         } else {
           // User needs to complete profile
           router.push("/complete-profile");
@@ -69,7 +72,8 @@ export default function SignInPage() {
         setAuthError(result.error || "Sign in failed");
       }
     } catch (error) {
-      setAuthError("An unexpected error occurred");
+      console.error("Sign in error:", error);
+      setAuthError(error instanceof Error ? error.message : "An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }

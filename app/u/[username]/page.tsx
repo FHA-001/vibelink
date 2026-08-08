@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Loader2, ArrowLeft, Share2 } from "lucide-react";
-import { getProfileByUsername, Profile } from "@/lib/auth";
-import { ProfileCard } from "@/components/profile/profile-card";
+import { getProfileByUsername, Profile, getCurrentUser } from "@/lib/auth";
+import { PublicProfilePreview } from "@/components/profile/public-profile-preview";
 import { Logo } from "@/components/logo";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
@@ -17,6 +17,7 @@ export default function PublicProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isOwner, setIsOwner] = useState(false);
 
   useEffect(() => {
     loadProfile();
@@ -30,6 +31,10 @@ export default function PublicProfilePage() {
         return;
       }
       setProfile(userProfile);
+
+      // Check if current user is the profile owner
+      const currentUser = await getCurrentUser();
+      setIsOwner(currentUser?.id === userProfile.id);
     } catch (error) {
       console.error("Error loading profile:", error);
       setError("Failed to load profile");
@@ -116,11 +121,29 @@ export default function PublicProfilePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <ProfileCard
-              profile={profile}
-              isOwner={false}
-              showActions={false}
-            />
+            {isOwner ? (
+              // If owner, show full profile (redirect to my-card)
+              <div className="text-center py-12">
+                <h2 className="text-xl font-semibold text-foreground mb-2">
+                  This is your profile
+                </h2>
+                <p className="text-foreground/70 mb-6">
+                  View your full profile on your card page
+                </p>
+                <Link
+                  href="/my-card"
+                  className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-2xl font-medium transition-colors"
+                >
+                  Go to My Card
+                </Link>
+              </div>
+            ) : (
+              // If visitor, show limited preview with Know More button
+              <PublicProfilePreview
+                profile={profile}
+                isOwner={false}
+              />
+            )}
           </motion.div>
         </div>
       </main>
