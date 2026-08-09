@@ -46,24 +46,6 @@ export default function ScanPage() {
         return;
       }
 
-      // Request camera permission explicitly for iOS Safari
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        try {
-          await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-          // Stop the stream immediately - we just wanted to trigger the permission prompt
-        } catch (permErr) {
-          console.error("Permission request error:", permErr);
-          if (permErr instanceof Error) {
-            if (permErr.name === 'NotAllowedError' || permErr.name === 'PermissionDeniedError') {
-              setState("permission_denied");
-              setError("Camera access was denied. Please allow camera access in your browser settings.");
-              return;
-            }
-          }
-          // Continue to try html5-qrcode anyway
-        }
-      }
-
       const html5QrCode = new Html5Qrcode("reader");
       scannerRef.current = html5QrCode;
 
