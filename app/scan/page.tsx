@@ -39,6 +39,31 @@ export default function ScanPage() {
     setState("requesting_permission");
     
     try {
+      // Check if HTTPS (required for camera on iOS)
+      if (typeof window !== 'undefined' && window.location.protocol !== 'https:') {
+        setState("camera_unavailable");
+        setError("Camera access requires HTTPS. Please use the secure version of this site.");
+        return;
+      }
+
+      // Request camera permission explicitly for iOS Safari
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        try {
+          await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+          // Stop the stream immediately - we just wanted to trigger the permission prompt
+        } catch (permErr) {
+          console.error("Permission request error:", permErr);
+          if (permErr instanceof Error) {
+            if (permErr.name === 'NotAllowedError' || permErr.name === 'PermissionDeniedError') {
+              setState("permission_denied");
+              setError("Camera access was denied. Please allow camera access in your browser settings.");
+              return;
+            }
+          }
+          // Continue to try html5-qrcode anyway
+        }
+      }
+
       const html5QrCode = new Html5Qrcode("reader");
       scannerRef.current = html5QrCode;
 
@@ -56,15 +81,18 @@ export default function ScanPage() {
       console.error("Camera error:", err);
       
       if (err instanceof Error) {
-        if (err.message.includes("Permission denied") || err.message.includes("NotAllowedError")) {
+        console.error("Error message:", err.message);
+        console.error("Error name:", err.name);
+        
+        if (err.message.includes("Permission denied") || err.message.includes("NotAllowedError") || err.name === 'NotAllowedError') {
           setState("permission_denied");
           setError("Camera access was denied. Please allow camera access in your browser settings.");
-        } else if (err.message.includes("NotFoundError") || err.message.includes("no camera")) {
+        } else if (err.message.includes("NotFoundError") || err.message.includes("no camera") || err.name === 'NotFoundError') {
           setState("camera_unavailable");
           setError("No camera found on this device.");
         } else {
           setState("camera_unavailable");
-          setError("Unable to access camera. Please check your device settings.");
+          setError(`Unable to access camera: ${err.message}`);
         }
       } else {
         setState("camera_unavailable");
