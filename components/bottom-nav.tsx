@@ -133,7 +133,7 @@ export function BottomNav() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
-          className="absolute bottom-full left-4 right-4 mb-2 bg-card rounded-2xl shadow-xl border border-border max-h-96 overflow-hidden"
+          className="absolute bottom-full left-4 right-4 mb-2 bg-card rounded-2xl shadow-xl border border-border max-h-96 overflow-hidden z-[60]"
         >
           <div className="p-4 border-b border-border flex items-center justify-between">
             <h3 className="font-semibold text-foreground">Notifications</h3>
