@@ -274,9 +274,9 @@ export default function ScanPage() {
                 </div>
               )}
 
+              <div id="reader" className={state === "scanning" ? "w-full" : "hidden"} />
               {state === "scanning" && (
                 <div className="relative">
-                  <div id="reader" className="w-full" />
                   <div className="absolute top-4 right-4">
                     <button
                       onClick={stopScanner}
