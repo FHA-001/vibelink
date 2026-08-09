@@ -274,7 +274,7 @@ export default function ScanPage() {
                 </div>
               )}
 
-              <div id="reader" className={state === "scanning" ? "w-full" : "hidden"} />
+              <div id="reader" className={state === "scanning" || state === "requesting_permission" ? "w-full" : "hidden"} />
               {state === "scanning" && (
                 <div className="relative">
                   <div className="absolute top-4 right-4">
