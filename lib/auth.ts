@@ -305,6 +305,18 @@ export async function getPendingRequests(userId: string): Promise<ConnectionRequ
 export async function updateConnectionRequestStatus(requestId: string, status: 'accepted' | 'declined'): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient();
 
+  // First, get the request details to know which users are involved
+  const { data: requestData, error: fetchError } = await supabase
+    .from('connection_requests')
+    .select('sender_id, receiver_id')
+    .eq('id', requestId)
+    .single();
+
+  if (fetchError) {
+    return { success: false, error: fetchError.message };
+  }
+
+  // Update the request status
   const { error } = await supabase
     .from('connection_requests')
     .update({ status })
@@ -312,6 +324,25 @@ export async function updateConnectionRequestStatus(requestId: string, status: '
 
   if (error) {
     return { success: false, error: error.message };
+  }
+
+  // If accepting, verify the connection was created by the trigger
+  if (status === 'accepted' && requestData) {
+    const { data: connection, error: connectionError } = await supabase
+      .from('connections')
+      .select('id')
+      .or(`and(user_one_id.eq.${requestData.sender_id},user_two_id.eq.${requestData.receiver_id}),and(user_one_id.eq.${requestData.receiver_id},user_two_id.eq.${requestData.sender_id})`)
+      .maybeSingle();
+
+    if (connectionError) {
+      console.error('Error verifying connection:', connectionError);
+      // Don't fail the whole operation if verification fails, but log it
+    }
+
+    if (!connection) {
+      console.error('Connection was not created by trigger');
+      return { success: false, error: 'Connection was not created. Please try again.' };
+    }
   }
 
   return { success: true };

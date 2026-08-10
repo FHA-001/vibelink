@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 import { Profile } from "@/lib/auth";
 import { ProfileAvatar } from "./profile-avatar";
 import { ProfileTags } from "./profile-tags";
@@ -24,6 +25,7 @@ export function PublicProfilePreview({
   onRequestSent,
   onRequestError,
 }: PublicProfilePreviewProps) {
+  const router = useRouter();
   const [isSending, setIsSending] = useState(false);
   const [requestStatus, setRequestStatus] = useState<'idle' | 'sent' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
@@ -39,8 +41,8 @@ export function PublicProfilePreview({
       const currentUser = await getCurrentUser();
       
       if (!currentUser) {
-        // Redirect to sign in with return URL
-        window.location.href = `/signin?redirect=${encodeURIComponent(window.location.pathname)}`;
+        // Redirect to sign in with return URL using Next.js router
+        router.push(`/signin?redirect=${encodeURIComponent(window.location.pathname)}`);
         return;
       }
 
