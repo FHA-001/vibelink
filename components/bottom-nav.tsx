@@ -49,10 +49,6 @@ export function BottomNav() {
       if (user) {
         const userNotifications = await getUserNotifications(user.id);
         setNotifications(userNotifications);
-        // Mark all notifications as read when opening the dropdown
-        await markAllNotificationsAsRead(user.id);
-        // Reload unread count after marking as read
-        loadUnreadCount();
       }
     } catch (error) {
       console.error("Error loading notifications:", error);
@@ -103,12 +99,19 @@ export function BottomNav() {
           
           {/* Notification Button */}
           <button
-            onClick={() => {
+            onClick={async () => {
               if (showNotifications) {
                 setShowNotifications(false);
               } else {
-                loadNotifications();
+                await loadNotifications();
                 setShowNotifications(true);
+                // Mark all notifications as read when opening the dropdown
+                const user = await getCurrentUser();
+                if (user) {
+                  await markAllNotificationsAsRead(user.id);
+                  // Reload unread count after marking as read
+                  loadUnreadCount();
+                }
               }
             }}
             className={cn(

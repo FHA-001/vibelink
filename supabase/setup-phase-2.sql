@@ -75,7 +75,8 @@ BEGIN
   END IF;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public;
 
 -- Trigger to create connection when request is accepted
 DROP TRIGGER IF EXISTS create_connection_trigger ON public.connection_requests;
