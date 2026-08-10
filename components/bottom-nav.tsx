@@ -108,9 +108,14 @@ export function BottomNav() {
                 // Mark all notifications as read when opening the dropdown
                 const user = await getCurrentUser();
                 if (user) {
-                  await markAllNotificationsAsRead(user.id);
-                  // Reload unread count after marking as read
-                  loadUnreadCount();
+                  const result = await markAllNotificationsAsRead(user.id);
+                  if (result.success) {
+                    console.log("Successfully marked all notifications as read");
+                    // Reload unread count after marking as read
+                    loadUnreadCount();
+                  } else {
+                    console.error("Failed to mark notifications as read:", result.error);
+                  }
                 }
               }
             }}

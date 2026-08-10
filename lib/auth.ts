@@ -555,6 +555,7 @@ export async function markAllNotificationsAsRead(userId: string): Promise<{ succ
     .eq('is_read', false);
 
   if (error) {
+    console.error('Error marking all notifications as read:', error);
     return { success: false, error: error.message };
   }
 

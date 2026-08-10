@@ -128,9 +128,14 @@ CREATE POLICY "Users cannot create arbitrary notifications"
   ON public.notifications FOR INSERT
   WITH CHECK (false);
 
+DROP POLICY IF EXISTS "Users can mark own notifications as read"
+ON public.notifications;
+
 CREATE POLICY "Users can mark own notifications as read"
-  ON public.notifications FOR UPDATE
-  USING (auth.uid() = user_id AND is_read = false);
+ON public.notifications
+FOR UPDATE
+USING (auth.uid() = user_id AND is_read = false)
+WITH CHECK (auth.uid() = user_id);
 
 CREATE POLICY "Users cannot delete notifications"
   ON public.notifications FOR DELETE
