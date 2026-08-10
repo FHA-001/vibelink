@@ -75,9 +75,13 @@ export default function ConnectionsPage() {
       if (result.success) {
         loadPendingRequests();
         loadConnections();
+      } else {
+        console.error("Accept request failed:", result.error);
+        alert(`Failed to accept request: ${result.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error("Error accepting request:", error);
+      alert("Failed to accept request. Please try again.");
     }
   };
 

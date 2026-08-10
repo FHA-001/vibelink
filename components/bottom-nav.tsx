@@ -6,7 +6,7 @@ import { Home, Scan, Users, Settings, Bell, X, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { getCurrentUser, getUnreadNotificationCount, getUserNotifications, markNotificationAsRead, Notification } from "@/lib/auth";
+import { getCurrentUser, getUnreadNotificationCount, getUserNotifications, markNotificationAsRead, markAllNotificationsAsRead, Notification } from "@/lib/auth";
 
 interface NavItem {
   label: string;
@@ -49,6 +49,10 @@ export function BottomNav() {
       if (user) {
         const userNotifications = await getUserNotifications(user.id);
         setNotifications(userNotifications);
+        // Mark all notifications as read when opening the dropdown
+        await markAllNotificationsAsRead(user.id);
+        // Reload unread count after marking as read
+        loadUnreadCount();
       }
     } catch (error) {
       console.error("Error loading notifications:", error);
