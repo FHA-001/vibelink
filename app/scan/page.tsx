@@ -28,6 +28,12 @@ export default function ScanPage() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
+    // Reset state when component mounts (fixes browser Back behavior)
+    setState("idle");
+    setError("");
+    setScannedUrl("");
+    setIsProcessing(false);
+    
     return () => {
       if (scannerRef.current) {
         scannerRef.current.stop().catch(console.error);
@@ -175,9 +181,10 @@ export default function ScanPage() {
   const handleSuccessfulScan = async (username: string, url: string) => {
     setState("success");
     
-    // Stop scanning
+    // Stop scanning and cleanup
     if (scannerRef.current) {
       await scannerRef.current.stop();
+      scannerRef.current = null;
     }
 
     // Check if user is scanning their own QR
@@ -190,9 +197,7 @@ export default function ScanPage() {
         
         if (userProfile && userProfile.id === currentUser.id) {
           // User scanned their own QR - redirect to my-card
-          setTimeout(() => {
-            router.push("/my-card");
-          }, 500);
+          router.push("/my-card");
           return;
         }
       }
@@ -200,21 +205,37 @@ export default function ScanPage() {
       console.error("Error checking self-scan:", err);
     }
 
-    // Navigate to the scanned profile
-    setTimeout(() => {
-      router.push(`/u/${username}`);
-    }, 500);
+    // Navigate to the scanned profile immediately after cleanup
+    router.push(`/u/${username}`);
   };
 
   const stopScanner = async () => {
     if (scannerRef.current) {
-      await scannerRef.current.stop();
+      try {
+        await scannerRef.current.stop();
+        await scannerRef.current.clear();
+      } catch (err) {
+        console.error("Error stopping scanner:", err);
+      }
+      scannerRef.current = null;
     }
     setState("idle");
     setIsProcessing(false);
   };
 
-  const tryAgain = () => {
+  const tryAgain = async () => {
+    // Stop and cleanup the existing scanner
+    if (scannerRef.current) {
+      try {
+        await scannerRef.current.stop();
+        await scannerRef.current.clear();
+      } catch (err) {
+        console.error("Error stopping scanner:", err);
+      }
+      scannerRef.current = null;
+    }
+    
+    // Reset all state
     setState("idle");
     setError("");
     setScannedUrl("");
