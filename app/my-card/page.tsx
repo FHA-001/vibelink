@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { Loader2, Share2, Download, Edit, QrCode } from "lucide-react";
 import { getCurrentUser, getUserProfile, signOut, Profile } from "@/lib/auth";
@@ -17,6 +17,8 @@ export default function MyCardPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showQR, setShowQR] = useState(false);
+  const [downloadError, setDownloadError] = useState("");
+  const qrRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     checkAuth();
@@ -68,6 +70,35 @@ export default function MyCardPage() {
 
   const handleDownloadQR = () => {
     setShowQR(true);
+  };
+
+  const handleDownloadQRImage = () => {
+    setDownloadError("");
+    
+    if (!qrRef.current) {
+      setDownloadError("Failed to access QR code. Please try again.");
+      return;
+    }
+
+    try {
+      const canvas = qrRef.current;
+      
+      // Convert canvas to data URL (PNG)
+      const dataUrl = canvas.toDataURL('image/png');
+      
+      // Create download link
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `vibelink-qr-${profile?.username || 'code'}.png`;
+      
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error downloading QR:", error);
+      setDownloadError("Failed to download QR code. Please try again.");
+    }
   };
 
   const handleEdit = () => {
@@ -151,19 +182,35 @@ export default function MyCardPage() {
                   </div>
                   
                   <div className="flex justify-center mb-4">
-                    <QRCode value={publicProfileUrl} size={200} />
+                    <QRCode ref={qrRef} value={publicProfileUrl} size={200} />
                   </div>
 
                   <p className="text-xs text-foreground/50 text-center mb-4">
                     {publicProfileUrl}
                   </p>
 
-                  <button
-                    onClick={() => setShowQR(false)}
-                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 rounded-2xl font-medium transition-colors"
-                  >
-                    Close
-                  </button>
+                  {/* Download Error */}
+                  {downloadError && (
+                    <p className="text-sm text-destructive text-center mb-4">
+                      {downloadError}
+                    </p>
+                  )}
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleDownloadQRImage}
+                      className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground py-3 rounded-2xl font-medium transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      Download
+                    </button>
+                    <button
+                      onClick={() => setShowQR(false)}
+                      className="flex-1 border-2 border-border hover:border-primary/50 text-foreground py-3 rounded-2xl font-medium transition-colors"
+                    >
+                      Close
+                    </button>
+                  </div>
                 </motion.div>
               </motion.div>
             )}
