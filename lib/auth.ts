@@ -67,6 +67,36 @@ export async function signOut(): Promise<AuthResult> {
   return { success: true };
 }
 
+export async function forgotPassword(email: string): Promise<AuthResult> {
+  const supabase = createClient();
+  
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/reset-password`,
+  });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function resetPassword(newPassword: string): Promise<AuthResult> {
+  const supabase = createClient();
+  
+  const { data, error } = await supabase.auth.updateUser({
+    password: newPassword,
+  });
+
+  if (error) {
+    console.error("Password update error:", error);
+    return { success: false, error: error.message };
+  }
+
+  console.log("Password updated successfully for user:", data.user?.id);
+  return { success: true };
+}
+
 export async function getCurrentUser() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();

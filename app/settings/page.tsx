@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Loader2, Settings, LogOut, User, Key, Bell, Shield } from "lucide-react";
+import { Loader2, LogOut, User, Key } from "lucide-react";
 import { getCurrentUser, signOut, getUserProfile, Profile } from "@/lib/auth";
 import { BottomNav } from "@/components/bottom-nav";
 import { Logo } from "@/components/logo";
@@ -60,21 +60,9 @@ export default function SettingsPage() {
     },
     {
       icon: Key,
-      label: "Change Password",
-      description: "Update your password",
-      href: "/change-password",
-    },
-    {
-      icon: Bell,
-      label: "Notifications",
-      description: "Manage notification preferences",
-      href: "/notifications",
-    },
-    {
-      icon: Shield,
-      label: "Privacy",
-      description: "Manage your privacy settings",
-      href: "/privacy",
+      label: "Reset Password",
+      description: "Reset your password via email",
+      href: "/forgot-password",
     },
   ];
 
@@ -139,13 +127,6 @@ export default function SettingsPage() {
               <LogOut className="w-5 h-5" />
               Sign Out
             </button>
-
-            {/* Coming Soon Notice */}
-            <div className="mt-8 bg-muted/30 rounded-2xl p-6 border-2 border-dashed border-border">
-              <p className="text-sm text-foreground/50 text-center">
-                Advanced settings coming soon
-              </p>
-            </div>
           </motion.div>
         </div>
       </main>
