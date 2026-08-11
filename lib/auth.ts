@@ -561,3 +561,89 @@ export async function markAllNotificationsAsRead(userId: string): Promise<{ succ
 
   return { success: true };
 }
+
+// Profile Photo Functions
+
+export async function uploadProfilePhoto(userId: string, file: File): Promise<{ success: boolean; url?: string; error?: string }> {
+  const supabase = createClient();
+  
+  // Validate file
+  const validation = validateProfilePhoto(file);
+  if (!validation.valid) {
+    return { success: false, error: validation.error };
+  }
+
+  try {
+    // Generate unique filename
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${userId}/${Date.now()}.${fileExt}`;
+    
+    // Upload to Supabase Storage
+    const { data, error: uploadError } = await supabase.storage
+      .from('profile-photos')
+      .upload(fileName, file, {
+        upsert: true,
+        contentType: file.type
+      });
+
+    if (uploadError) {
+      console.error('Upload error:', uploadError);
+      return { success: false, error: uploadError.message };
+    }
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('profile-photos')
+      .getPublicUrl(fileName);
+
+    return { success: true, url: publicUrl };
+  } catch (error) {
+    console.error('Error uploading photo:', error);
+    return { success: false, error: 'Failed to upload photo' };
+  }
+}
+
+export async function deleteProfilePhoto(photoUrl: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  
+  try {
+    // Extract path from URL
+    const url = new URL(photoUrl);
+    const pathParts = url.pathname.split('/profile-photos/');
+    if (pathParts.length < 2) {
+      return { success: false, error: 'Invalid photo URL' };
+    }
+    
+    const filePath = pathParts[1];
+    
+    const { error } = await supabase.storage
+      .from('profile-photos')
+      .remove([filePath]);
+
+    if (error) {
+      console.error('Delete error:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting photo:', error);
+    return { success: false, error: 'Failed to delete photo' };
+  }
+}
+
+export function validateProfilePhoto(file: File): { valid: boolean; error?: string } {
+  // Check file type
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+  if (!allowedTypes.includes(file.type)) {
+    return { valid: false, error: 'Only JPEG, PNG, and WebP images are allowed' };
+  }
+
+  // Check file size (5 MB max)
+  const maxSize = 5 * 1024 * 1024; // 5 MB in bytes
+  if (file.size > maxSize) {
+    return { valid: false, error: 'File size must be less than 5 MB' };
+  }
+
+  return { valid: true };
+}

@@ -2,14 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Loader2, CheckCircle2, User, Briefcase, MessageSquare, Link as LinkIcon, Building2, ArrowLeft } from "lucide-react";
+import { Loader2, CheckCircle2, User, Briefcase, MessageSquare, Link as LinkIcon, Building2, ArrowLeft, Camera, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Logo } from "@/components/logo";
-import { getCurrentUser, getUserProfile, saveUserProfile, isUsernameAvailable, Profile } from "@/lib/auth";
+import { getCurrentUser, getUserProfile, saveUserProfile, isUsernameAvailable, uploadProfilePhoto, deleteProfilePhoto, validateProfilePhoto, Profile } from "@/lib/auth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -38,6 +38,12 @@ export default function EditProfilePage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  
+  // Photo upload state
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [photoError, setPhotoError] = useState("");
+  const [currentPhotoUrl, setCurrentPhotoUrl] = useState<string | undefined>(undefined);
+  const [newPhotoFile, setNewPhotoFile] = useState<File | null>(null);
 
   useEffect(() => {
     checkAuth();
@@ -60,6 +66,7 @@ export default function EditProfilePage() {
 
       setUser(currentUser);
       setProfile(userProfile);
+      setCurrentPhotoUrl(userProfile.profile_photo || undefined);
 
       // Pre-populate form with existing profile data
       setFormData({
@@ -184,8 +191,8 @@ export default function EditProfilePage() {
         twitter: formData.twitter,
         github: formData.github,
         instagram: formData.instagram,
-        // Preserve existing profile photo
-        profile_photo: profile?.profile_photo,
+        // Use current photo URL (may have been updated by photo upload)
+        profile_photo: currentPhotoUrl,
       });
 
       if (!result.success) {
@@ -209,6 +216,119 @@ export default function EditProfilePage() {
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setPhotoError("");
+    
+    // Validate file
+    const validation = validateProfilePhoto(file);
+    if (!validation.valid) {
+      setPhotoError(validation.error || "Invalid file");
+      return;
+    }
+
+    setNewPhotoFile(file);
+  };
+
+  const handlePhotoUpload = async () => {
+    if (!newPhotoFile || !user) return;
+
+    setIsUploadingPhoto(true);
+    setPhotoError("");
+
+    try {
+      // Upload new photo
+      const uploadResult = await uploadProfilePhoto(user.id, newPhotoFile);
+      
+      if (!uploadResult.success || !uploadResult.url) {
+        setPhotoError(uploadResult.error || "Failed to upload photo");
+        return;
+      }
+
+      // Delete old photo if exists
+      if (currentPhotoUrl) {
+        await deleteProfilePhoto(currentPhotoUrl);
+      }
+
+      // Update state
+      setCurrentPhotoUrl(uploadResult.url);
+      setNewPhotoFile(null);
+      
+      // Update profile in database
+      const result = await saveUserProfile(user.id, {
+        username: formData.username,
+        full_name: formData.fullName,
+        job_title: formData.jobTitle,
+        company_school: formData.companySchool,
+        bio: formData.bio,
+        interests: formData.interests.split(",").map(i => i.trim()).filter(i => i),
+        website: formData.website,
+        linkedin: formData.linkedin,
+        twitter: formData.twitter,
+        github: formData.github,
+        instagram: formData.instagram,
+        profile_photo: uploadResult.url,
+      });
+
+      if (!result.success) {
+        setPhotoError("Photo uploaded but failed to update profile");
+        return;
+      }
+
+      // Update local profile state
+      setProfile(prev => prev ? { ...prev, profile_photo: uploadResult.url } : null);
+    } catch (error) {
+      console.error("Error uploading photo:", error);
+      setPhotoError("Failed to upload photo");
+    } finally {
+      setIsUploadingPhoto(false);
+    }
+  };
+
+  const handlePhotoRemove = async () => {
+    if (!currentPhotoUrl || !user) return;
+
+    setIsUploadingPhoto(true);
+    setPhotoError("");
+
+    try {
+      // Delete from storage
+      await deleteProfilePhoto(currentPhotoUrl);
+
+      // Update database
+      const result = await saveUserProfile(user.id, {
+        username: formData.username,
+        full_name: formData.fullName,
+        job_title: formData.jobTitle,
+        company_school: formData.companySchool,
+        bio: formData.bio,
+        interests: formData.interests.split(",").map(i => i.trim()).filter(i => i),
+        website: formData.website,
+        linkedin: formData.linkedin,
+        twitter: formData.twitter,
+        github: formData.github,
+        instagram: formData.instagram,
+        profile_photo: undefined,
+      });
+
+      if (!result.success) {
+        setPhotoError("Failed to remove photo from profile");
+        return;
+      }
+
+      // Update state
+      setCurrentPhotoUrl(undefined);
+      setProfile(prev => prev ? { ...prev, profile_photo: undefined } : null);
+    } catch (error) {
+      console.error("Error removing photo:", error);
+      setPhotoError("Failed to remove photo");
+    } finally {
+      setIsUploadingPhoto(false);
     }
   };
 
@@ -272,6 +392,114 @@ export default function EditProfilePage() {
                     </Alert>
                   </motion.div>
                 )}
+
+                {/* Photo Error Alert */}
+                {photoError && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    <Alert variant="destructive">
+                      <AlertDescription>{photoError}</AlertDescription>
+                    </Alert>
+                  </motion.div>
+                )}
+
+                {/* Profile Photo Section */}
+                <div className="space-y-4">
+                  <Label className="text-base font-semibold">Profile Photo</Label>
+                  
+                  <div className="flex items-center gap-6">
+                    {/* Current Avatar */}
+                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold overflow-hidden">
+                      {currentPhotoUrl ? (
+                        <img
+                          src={currentPhotoUrl}
+                          alt="Profile"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-2xl">
+                          {formData.fullName.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Photo Controls */}
+                    <div className="flex-1 space-y-2">
+                      <input
+                        type="file"
+                        id="photo-upload"
+                        accept="image/jpeg,image/jpg,image/png,image/webp"
+                        onChange={handlePhotoSelect}
+                        className="hidden"
+                        disabled={isUploadingPhoto}
+                      />
+                      
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => document.getElementById('photo-upload')?.click()}
+                          disabled={isUploadingPhoto}
+                        >
+                          <Camera className="w-4 h-4 mr-2" />
+                          Change Photo
+                        </Button>
+
+                        {currentPhotoUrl && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={handlePhotoRemove}
+                            disabled={isUploadingPhoto}
+                          >
+                            <X className="w-4 h-4 mr-2" />
+                            Remove
+                          </Button>
+                        )}
+                      </div>
+
+                      {newPhotoFile && (
+                        <div className="flex items-center gap-2">
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={handlePhotoUpload}
+                            disabled={isUploadingPhoto}
+                          >
+                            {isUploadingPhoto ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Uploading...
+                              </>
+                            ) : (
+                              <>
+                                <CheckCircle2 className="w-4 h-4 mr-2" />
+                                Upload New Photo
+                              </>
+                            )}
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setNewPhotoFile(null)}
+                            disabled={isUploadingPhoto}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      )}
+
+                      <p className="text-xs text-foreground/50">
+                        JPEG, PNG, or WebP. Max 5 MB.
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
                 {/* Username Field */}
                 <div className="space-y-2">
