@@ -97,6 +97,68 @@ export async function resetPassword(newPassword: string): Promise<AuthResult> {
   return { success: true };
 }
 
+export async function deleteAccount(): Promise<AuthResult> {
+  const supabase = createClient();
+  
+  try {
+    // Get current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      console.error("Error getting current user:", userError);
+      return { success: false, error: "Failed to get current user" };
+    }
+
+    // Get user profile to check for profile photo
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('profile_photo')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (profileError) {
+      console.error("Error fetching profile:", profileError);
+      return { success: false, error: "Failed to fetch profile" };
+    }
+
+    // Delete profile photo if it exists
+    if (profile?.profile_photo) {
+      const fileName = profile.profile_photo.split('/').pop();
+      if (fileName) {
+        const { error: storageError } = await supabase.storage
+          .from('profile-photos')
+          .remove([`${user.id}/${fileName}`]);
+        
+        if (storageError) {
+          console.error("Error deleting profile photo:", storageError);
+          // Continue with deletion even if photo deletion fails
+          // Log the error but don't block account deletion
+        }
+      }
+    }
+
+    // Call the PostgreSQL function to delete account data
+    const { error: deleteError } = await supabase.rpc('delete_user_account');
+
+    if (deleteError) {
+      console.error("Error deleting account:", deleteError);
+      return { success: false, error: deleteError.message || "Failed to delete account" };
+    }
+
+    // Sign out to clear local session
+    const { error: signOutError } = await supabase.auth.signOut();
+    if (signOutError) {
+      console.error("Error signing out:", signOutError);
+      // Account is deleted, but sign out failed - this is acceptable
+    }
+
+    console.log("Account deleted successfully for user:", user.id);
+    return { success: true };
+  } catch (error) {
+    console.error("Unexpected error during account deletion:", error);
+    return { success: false, error: "An unexpected error occurred" };
+  }
+}
+
 export async function getCurrentUser() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
