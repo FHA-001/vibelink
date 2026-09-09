@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { motion } from "framer-motion";
 import { Loader2, ArrowLeft, CheckCircle2, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,6 @@ import { createClient } from "@/lib/supabse";
 function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const hasCheckedSession = useRef(false);
   
   const [formData, setFormData] = useState({
     password: "",
@@ -33,128 +32,32 @@ function ResetPasswordContent() {
   const [isCheckingSession, setIsCheckingSession] = useState(true);
 
   useEffect(() => {
-    if (hasCheckedSession.current) return;
-    hasCheckedSession.current = true;
-
-    const supabase = createClient();
-    let isMounted = true;
-
-    const processRecoverySession = async () => {
+    const checkSession = async () => {
       try {
-        const code = searchParams.get('code');
-        const tokenHash = searchParams.get('token_hash');
-        const type = searchParams.get('type');
-        
-        // Try PKCE flow first (code parameter)
-        if (code) {
-          const { data: sessionData, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+        const supabase = createClient();
+        const { data: { user }, error } = await supabase.auth.getUser();
 
-          if (exchangeError) {
-            console.error("Code exchange error:", exchangeError);
-            if (isMounted) {
-              setAuthError("Invalid or expired reset link. Please request a new password reset.");
-              setHasValidSession(false);
-              setIsCheckingSession(false);
-            }
-            return;
-          }
-
-          // Verify the session is valid
-          const { data: { user }, error } = await supabase.auth.getUser();
-
-          if (error) {
-            console.error("Session check error:", error);
-            if (isMounted) {
-              setAuthError("Invalid or expired reset link. Please request a new password reset.");
-              setHasValidSession(false);
-              setIsCheckingSession(false);
-            }
-          } else if (user) {
-            // User has a valid recovery session
-            if (isMounted) {
-              setHasValidSession(true);
-              setIsCheckingSession(false);
-              
-              // Strip query parameters from URL to prevent re-verification
-              window.history.replaceState({}, document.title, window.location.pathname);
-            }
-          } else {
-            // No session - invalid or expired link
-            if (isMounted) {
-              setAuthError("Invalid or expired reset link. Please request a new password reset.");
-              setHasValidSession(false);
-              setIsCheckingSession(false);
-            }
-          }
-          return;
-        }
-
-        // Fallback to token_hash flow
-        if (tokenHash && type === 'recovery') {
-          // Verify the OTP token (stateless, works cross-browser)
-          const { data, error: verifyError } = await supabase.auth.verifyOtp({
-            token_hash: tokenHash,
-            type: 'recovery',
-          });
-
-          if (verifyError) {
-            console.error("OTP verification error:", verifyError);
-            if (isMounted) {
-              setAuthError("Invalid or expired reset link. Please request a new password reset.");
-              setHasValidSession(false);
-              setIsCheckingSession(false);
-            }
-            return;
-          }
-
-          // Verify the session is valid
-          const { data: { user }, error } = await supabase.auth.getUser();
-
-          if (error) {
-            console.error("Session check error:", error);
-            if (isMounted) {
-              setAuthError("Invalid or expired reset link. Please request a new password reset.");
-              setHasValidSession(false);
-              setIsCheckingSession(false);
-            }
-          } else if (user) {
-            // User has a valid recovery session
-            if (isMounted) {
-              setHasValidSession(true);
-              setIsCheckingSession(false);
-              
-              // Strip query parameters from URL to prevent re-verification
-              window.history.replaceState({}, document.title, window.location.pathname);
-            }
-          } else {
-            // No session - invalid or expired link
-            if (isMounted) {
-              setAuthError("Invalid or expired reset link. Please request a new password reset.");
-              setHasValidSession(false);
-              setIsCheckingSession(false);
-            }
-          }
-          return;
-        }
-
-        // Neither code nor token_hash found
-        if (isMounted) {
+        if (error) {
+          console.error("Session check error:", error);
           setAuthError("Invalid or expired reset link. Please request a new password reset.");
           setHasValidSession(false);
-          setIsCheckingSession(false);
+        } else if (user) {
+          setHasValidSession(true);
+        } else {
+          setAuthError("Invalid or expired reset link. Please request a new password reset.");
+          setHasValidSession(false);
         }
       } catch (error) {
         console.error("Session check failed:", error);
-        if (isMounted) {
-          setAuthError("Failed to verify reset link. Please try again.");
-          setHasValidSession(false);
-          setIsCheckingSession(false);
-        }
+        setAuthError("Failed to verify reset link. Please try again.");
+        setHasValidSession(false);
+      } finally {
+        setIsCheckingSession(false);
       }
     };
 
-    processRecoverySession();
-  }, [searchParams]);
+    checkSession();
+  }, []);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};

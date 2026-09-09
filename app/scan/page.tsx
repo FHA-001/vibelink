@@ -143,8 +143,9 @@ export default function ScanPage() {
     try {
       const urlObj = new URL(url);
       
-      // Validate hostname is the VibeLink production domain
-      if (urlObj.hostname !== 'vibelinks.vercel.app') {
+      // Validate hostname matches the current domain (supports both dev and production)
+      const currentHostname = typeof window !== 'undefined' ? window.location.hostname : 'vibelink.name.ng';
+      if (urlObj.hostname !== currentHostname) {
         return false;
       }
       

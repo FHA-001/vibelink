@@ -59,7 +59,7 @@ export function Navigation() {
               </a>
             ))}
             <a
-              href="#signin"
+              href="/signin"
               className="text-foreground/80 hover:text-foreground transition-colors text-sm font-medium"
             >
               Sign In
@@ -110,7 +110,7 @@ export function Navigation() {
                 </a>
               ))}
               <a
-                href="#signin"
+                href="/signin"
                 className="block text-foreground/80 hover:text-foreground transition-colors text-base font-medium py-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >

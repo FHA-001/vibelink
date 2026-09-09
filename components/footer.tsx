@@ -8,21 +8,20 @@ export function Footer() {
 
   const footerLinks = {
     product: [
-      { name: "Features", href: "#features" },
-      { name: "How It Works", href: "#how-it-works" },
-      { name: "Pricing", href: "#pricing" },
-      { name: "FAQ", href: "#faq" },
+      { name: "Features", href: "/features" },
+      { name: "How It Works", href: "/how-it-works" },
+      { name: "Pricing", href: "/pricing" },
+      { name: "FAQ", href: "/faq" },
     ],
     company: [
-      { name: "About", href: "#about" },
-      { name: "Blog", href: "#blog" },
-      { name: "Careers", href: "#careers" },
-      { name: "Contact", href: "#contact" },
+      { name: "About", href: "/about" },
+      { name: "Careers", href: "/careers" },
+      { name: "Contact", href: "/contact" },
     ],
     legal: [
-      { name: "Privacy Policy", href: "#privacy" },
-      { name: "Terms of Service", href: "#terms" },
-      { name: "Cookie Policy", href: "#cookies" },
+      { name: "Privacy Policy", href: "/privacy" },
+      { name: "Terms of Service", href: "/terms" },
+      { name: "Cookie Policy", href: "/cookies" },
     ],
   };
 
@@ -116,7 +115,7 @@ export function Footer() {
             © {currentYear} VibeLink. All rights reserved.
           </p>
           <p className="text-sm text-foreground/50">
-            Made with ❤️ for meaningful connections
+            Made by FHA
           </p>
         </div>
       </div>
