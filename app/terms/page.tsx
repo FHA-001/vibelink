@@ -1,3 +1,5 @@
+"use client";
+
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import { motion } from "framer-motion";
@@ -254,3 +256,4 @@ export default function TermsOfServicePage() {
     </div>
   );
 }
+
