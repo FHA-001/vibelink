@@ -122,9 +122,9 @@ END;
 $$;
 
 -- Revoke public execute, grant to anon and authenticated
-REVOKE EXECUTE ON FUNCTION public.is_username_available FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.is_username_available TO anon;
-GRANT EXECUTE ON FUNCTION public.is_username_available TO authenticated;
+REVOKE EXECUTE ON FUNCTION public.is_username_available(text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.is_username_available(text) TO anon;
+GRANT EXECUTE ON FUNCTION public.is_username_available(text) TO authenticated;
 
 -- ============================================
 -- 5. PENDING REQUEST SENDER PREVIEW RPC FUNCTION
@@ -171,8 +171,8 @@ END;
 $$;
 
 -- Revoke public execute, grant to authenticated only
-REVOKE EXECUTE ON FUNCTION public.get_pending_request_sender_preview FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.get_pending_request_sender_preview TO authenticated;
+REVOKE EXECUTE ON FUNCTION public.get_pending_request_sender_preview(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.get_pending_request_sender_preview(uuid) TO authenticated;
 
 -- ============================================
 -- 6. SECURE PROFILE VIEW RPC FUNCTION
@@ -258,9 +258,9 @@ END;
 $$;
 
 -- Revoke public execute, grant to anon and authenticated
-REVOKE EXECUTE ON FUNCTION public.get_profile_for_view FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.get_profile_for_view TO anon;
-GRANT EXECUTE ON FUNCTION public.get_profile_for_view TO authenticated;
+REVOKE EXECUTE ON FUNCTION public.get_profile_for_view(text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.get_profile_for_view(text) TO anon;
+GRANT EXECUTE ON FUNCTION public.get_profile_for_view(text) TO authenticated;
 
 -- ============================================
 -- 7. REVOKE UNNECESSARY TRIGGER FUNCTION EXECUTE
