@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Logo } from "@/components/logo";
-import { getCurrentUser, signOut, getUserProfile, saveUserProfile, isUsernameAvailable } from "@/lib/auth";
+import { getCurrentUser, signOut, getUserProfile, saveUserProfile, isUsernameAvailable, ProfileVisibility } from "@/lib/auth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -37,6 +37,21 @@ export default function CompleteProfilePage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  
+  // Default visibility configuration for new users
+  const defaultVisibility: ProfileVisibility = {
+    profile_photo: true,
+    full_name: false,
+    job_title: true,
+    company_school: true,
+    bio: true,
+    interests: true,
+    website: false,
+    linkedin: false,
+    twitter: false,
+    github: false,
+    instagram: false,
+  };
 
   useEffect(() => {
     checkAuth();
@@ -162,6 +177,7 @@ export default function CompleteProfilePage() {
         twitter: formData.twitter,
         github: formData.github,
         instagram: formData.instagram,
+        profile_visibility: defaultVisibility,
       });
 
       if (!result.success) {

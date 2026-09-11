@@ -7,22 +7,52 @@ export interface AuthResult {
   user?: User;
 }
 
-export interface Profile {
+export interface ProfileVisibility {
+  profile_photo: boolean;
+  full_name: boolean;
+  job_title: boolean;
+  company_school: boolean;
+  bio: boolean;
+  interests: boolean;
+  website: boolean;
+  linkedin: boolean;
+  twitter: boolean;
+  github: boolean;
+  instagram: boolean;
+}
+
+// Public profile type - fields can be null if not visible to strangers
+export interface PublicProfile {
   id: string;
   username: string;
+  full_name: string | null;
+  job_title: string | null;
+  company_school: string | null;
+  bio: string | null;
+  profile_photo: string | null;
+  interests: string[] | null;
+  website: string | null;
+  linkedin: string | null;
+  twitter: string | null;
+  github: string | null;
+  instagram: string | null;
+}
+
+// Connected profile type - what connected users get from RPC
+// Same as PublicProfile but with created_at, no updated_at or profile_visibility
+export interface ConnectedProfile extends PublicProfile {
+  created_at: string;
+}
+
+// Owner profile type - what owner gets from direct profile query
+// All fields non-null where appropriate, includes internal fields
+export interface Profile extends ConnectedProfile {
   full_name: string;
   job_title: string;
-  company_school?: string;
+  company_school: string | null;
   bio: string;
-  profile_photo?: string;
-  interests?: string[];
-  website?: string;
-  linkedin?: string;
-  twitter?: string;
-  github?: string;
-  instagram?: string;
-  created_at: string;
   updated_at: string;
+  profile_visibility: ProfileVisibility;
 }
 
 export async function signUp(email: string, password: string): Promise<AuthResult> {
@@ -217,28 +247,26 @@ export async function profileExists(userId: string): Promise<boolean> {
 export async function isUsernameAvailable(username: string): Promise<boolean> {
   const supabase = createClient();
   
+  // Use secure RPC for username availability check
   const { data, error } = await supabase
-    .from('profiles')
-    .select('id')
-    .eq('username', username)
-    .maybeSingle();
+    .rpc('is_username_available', { candidate_username: username });
 
   if (error) {
     console.error('Error checking username availability:', error);
     return false;
   }
 
-  return !data; // Returns true if username is available (no data found)
+  return data as boolean;
 }
 
-export async function getProfileByUsername(username: string): Promise<Profile | null> {
+export async function getProfileByUsername(username: string): Promise<ConnectedProfile | PublicProfile | null> {
   const supabase = createClient();
   
+  // Use secure RPC for public profile access
+  // This function is used for viewing OTHER users' profiles, not own profile
+  // Own profile is retrieved via getUserProfile() which uses direct SELECT
   const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('username', username)
-    .maybeSingle();
+    .rpc('get_profile_for_view', { target_username: username });
 
   if (error) {
     console.error('Error fetching profile by username:', error);
@@ -249,7 +277,17 @@ export async function getProfileByUsername(username: string): Promise<Profile | 
     return null;
   }
 
-  return data as Profile;
+  // Determine the type based on which fields are present
+  // Strangers don't get created_at, connected users do
+  const hasCreatedAt = 'created_at' in data && data.created_at !== null;
+  
+  if (hasCreatedAt) {
+    // Connected user gets full profile without internal fields
+    return data as ConnectedProfile;
+  } else {
+    // Stranger gets limited profile based on visibility settings
+    return data as PublicProfile;
+  }
 }
 
 export async function saveUserProfile(userId: string, profileData: {
@@ -265,6 +303,7 @@ export async function saveUserProfile(userId: string, profileData: {
   twitter?: string;
   github?: string;
   instagram?: string;
+  profile_visibility?: ProfileVisibility;
 }): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient();
   
@@ -289,6 +328,7 @@ export async function saveUserProfile(userId: string, profileData: {
         twitter: profileData.twitter || null,
         github: profileData.github || null,
         instagram: profileData.instagram || null,
+        profile_visibility: profileData.profile_visibility,
         updated_at: new Date().toISOString(),
       })
       .eq('id', userId);
@@ -311,6 +351,7 @@ export async function saveUserProfile(userId: string, profileData: {
         twitter: profileData.twitter || null,
         github: profileData.github || null,
         instagram: profileData.instagram || null,
+        profile_visibility: profileData.profile_visibility,
         updated_at: new Date().toISOString(),
       });
     error = result.error;
@@ -332,8 +373,16 @@ export interface ConnectionRequest {
   updated_at: string;
 }
 
+// Minimal sender preview for pending requests
+export interface SenderPreview {
+  id: string;
+  username: string;
+  profile_photo: string | null;
+  bio: string | null;
+}
+
 export interface ConnectionRequestWithProfile extends ConnectionRequest {
-  sender_profile?: Profile;
+  sender_profile?: SenderPreview;
   receiver_profile?: Profile;
 }
 
@@ -375,18 +424,15 @@ export async function getPendingRequests(userId: string): Promise<ConnectionRequ
     return [];
   }
 
-  // Fetch sender profiles separately
+  // Fetch sender previews using secure RPC
   const requestsWithProfiles = await Promise.all(
     (data || []).map(async (request) => {
-      const { data: senderProfile } = await supabase
-        .from('profiles')
-        .select('id, username, full_name, bio, job_title, profile_photo')
-        .eq('id', request.sender_id)
-        .single();
+      const { data: senderPreview } = await supabase
+        .rpc('get_pending_request_sender_preview', { request_id: request.id });
       
       return {
         ...request,
-        sender_profile: senderProfile,
+        sender_profile: senderPreview as SenderPreview | undefined,
       } as ConnectionRequestWithProfile;
     })
   );

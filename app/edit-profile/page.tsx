@@ -2,14 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Loader2, CheckCircle2, User, Briefcase, MessageSquare, Link as LinkIcon, Building2, ArrowLeft, Camera, X } from "lucide-react";
+import { Loader2, CheckCircle2, User, Briefcase, MessageSquare, Link as LinkIcon, Building2, ArrowLeft, Camera, X, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Logo } from "@/components/logo";
-import { getCurrentUser, getUserProfile, saveUserProfile, isUsernameAvailable, uploadProfilePhoto, deleteProfilePhoto, validateProfilePhoto, Profile } from "@/lib/auth";
+import { getCurrentUser, getUserProfile, saveUserProfile, isUsernameAvailable, uploadProfilePhoto, deleteProfilePhoto, validateProfilePhoto, Profile, ProfileVisibility } from "@/lib/auth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -44,6 +44,21 @@ export default function EditProfilePage() {
   const [photoError, setPhotoError] = useState("");
   const [currentPhotoUrl, setCurrentPhotoUrl] = useState<string | undefined>(undefined);
   const [newPhotoFile, setNewPhotoFile] = useState<File | null>(null);
+  
+  // Visibility settings state
+  const [visibilityConfig, setVisibilityConfig] = useState<ProfileVisibility>({
+    profile_photo: true,
+    full_name: false,
+    job_title: true,
+    company_school: true,
+    bio: true,
+    interests: true,
+    website: false,
+    linkedin: false,
+    twitter: false,
+    github: false,
+    instagram: false,
+  });
 
   useEffect(() => {
     checkAuth();
@@ -81,6 +96,21 @@ export default function EditProfilePage() {
         twitter: userProfile.twitter || "",
         github: userProfile.github || "",
         instagram: userProfile.instagram || "",
+      });
+      
+      // Initialize visibility config from profile or use defaults
+      setVisibilityConfig(userProfile.profile_visibility || {
+        profile_photo: true,
+        full_name: false,
+        job_title: true,
+        company_school: true,
+        bio: true,
+        interests: true,
+        website: false,
+        linkedin: false,
+        twitter: false,
+        github: false,
+        instagram: false,
       });
     } catch (error) {
       setAuthError("Failed to load profile");
@@ -193,6 +223,7 @@ export default function EditProfilePage() {
         instagram: formData.instagram,
         // Use current photo URL (may have been updated by photo upload)
         profile_photo: currentPhotoUrl,
+        profile_visibility: visibilityConfig,
       });
 
       if (!result.success) {
@@ -273,6 +304,7 @@ export default function EditProfilePage() {
         github: formData.github,
         instagram: formData.instagram,
         profile_photo: uploadResult.url,
+        profile_visibility: visibilityConfig,
       });
 
       if (!result.success) {
@@ -281,7 +313,7 @@ export default function EditProfilePage() {
       }
 
       // Update local profile state
-      setProfile(prev => prev ? { ...prev, profile_photo: uploadResult.url } : null);
+      setProfile(prev => prev ? { ...prev, profile_photo: uploadResult.url || null } : null);
     } catch (error) {
       console.error("Error uploading photo:", error);
       setPhotoError("Failed to upload photo");
@@ -314,6 +346,7 @@ export default function EditProfilePage() {
         github: formData.github,
         instagram: formData.instagram,
         profile_photo: undefined,
+        profile_visibility: visibilityConfig,
       });
 
       if (!result.success) {
@@ -323,7 +356,7 @@ export default function EditProfilePage() {
 
       // Update state
       setCurrentPhotoUrl(undefined);
-      setProfile(prev => prev ? { ...prev, profile_photo: undefined } : null);
+      setProfile(prev => prev ? { ...prev, profile_photo: null } : null);
     } catch (error) {
       console.error("Error removing photo:", error);
       setPhotoError("Failed to remove photo");
@@ -738,6 +771,43 @@ export default function EditProfilePage() {
                       onChange={handleChange}
                       disabled={isSaving}
                     />
+                  </div>
+                </div>
+
+                {/* Profile Visibility Settings */}
+                <div className="space-y-4 pt-4 border-t border-border">
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-primary" />
+                    <Label className="text-base font-semibold">Profile Visibility</Label>
+                  </div>
+                  <p className="text-sm text-foreground/70">
+                    Choose which fields are visible to people you're not connected with
+                  </p>
+                  
+                  <div className="space-y-3 bg-muted/30 p-4 rounded-xl">
+                    {Object.keys(visibilityConfig).map((field) => (
+                      <div key={field} className="flex items-center justify-between">
+                        <Label htmlFor={`visibility-${field}`} className="text-sm capitalize">
+                          {field.replace('_', ' ')}
+                        </Label>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-foreground/50">
+                            {visibilityConfig[field as keyof ProfileVisibility] ? 'Public' : 'Private'}
+                          </span>
+                          <input
+                            type="checkbox"
+                            id={`visibility-${field}`}
+                            checked={visibilityConfig[field as keyof ProfileVisibility]}
+                            onChange={(e) => setVisibilityConfig(prev => ({
+                              ...prev,
+                              [field]: e.target.checked
+                            }))}
+                            disabled={isSaving}
+                            className="w-4 h-4 rounded border-border accent-primary"
+                          />
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
 

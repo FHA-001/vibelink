@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { Profile } from "@/lib/auth";
+import { Profile, PublicProfile, ConnectedProfile } from "@/lib/auth";
 import { ProfileAvatar } from "./profile-avatar";
 import { ProfileTags } from "./profile-tags";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle2, Loader2, Clock, XCircle } from "lucide-react";
 
 interface PublicProfilePreviewProps {
-  profile: Profile;
+  profile: Profile | ConnectedProfile | PublicProfile;
   isOwner: boolean;
   connectionStatus?: 'connected' | 'pending_sent' | 'pending_received' | 'declined' | 'none';
   onRequestSent?: () => void;
@@ -95,15 +95,17 @@ export function PublicProfilePreview({
       <div className="relative bg-gradient-to-br from-primary/20 to-secondary/20 pt-8 pb-16 px-6">
         <div className="flex flex-col items-center">
           <ProfileAvatar
-            src={profile.profile_photo}
-            name={profile.full_name}
+            src={profile.profile_photo || undefined}
+            name={profile.full_name || profile.username}
             size="xl"
             className="mb-4"
           />
           <h1 className="text-2xl font-bold text-foreground text-center">
             @{profile.username}
           </h1>
-          <p className="text-foreground/70 text-center">{profile.job_title}</p>
+          {profile.job_title && (
+            <p className="text-foreground/70 text-center">{profile.job_title}</p>
+          )}
         </div>
       </div>
 
@@ -129,6 +131,13 @@ export function PublicProfilePreview({
           {profile.company_school && (
             <div className="text-center">
               <p className="text-foreground/70">{profile.company_school}</p>
+            </div>
+          )}
+
+          {/* Full Name (if visible) */}
+          {profile.full_name && (
+            <div className="text-center">
+              <p className="text-foreground font-medium">{profile.full_name}</p>
             </div>
           )}
 

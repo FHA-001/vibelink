@@ -1,14 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Profile } from "@/lib/auth";
+import { ConnectedProfile, Profile } from "@/lib/auth";
 import { ProfileAvatar } from "./profile-avatar";
 import { ProfileTags } from "./profile-tags";
 import { SocialLinks } from "./social-links";
 import { Calendar, MapPin } from "lucide-react";
 
 interface ProfileCardProps {
-  profile: Profile;
+  profile: ConnectedProfile; // Covers both ConnectedProfile and Profile (owner) since Profile extends ConnectedProfile
   isOwner?: boolean;
   showActions?: boolean;
   onEdit?: () => void;
@@ -35,13 +35,13 @@ export function ProfileCard({
       <div className="relative bg-gradient-to-br from-primary/20 to-secondary/20 pt-8 pb-16 px-6">
         <div className="flex flex-col items-center">
           <ProfileAvatar
-            src={profile.profile_photo}
-            name={profile.full_name}
+            src={profile.profile_photo || undefined}
+            name={profile.full_name || profile.username}
             size="xl"
             className="mb-4"
           />
           <h1 className="text-2xl font-bold text-foreground text-center">
-            {profile.full_name}
+            {profile.full_name || profile.username}
           </h1>
           <p className="text-foreground/70 text-center">@{profile.username}</p>
         </div>
@@ -79,10 +79,12 @@ export function ProfileCard({
           <SocialLinks profile={profile} />
 
           {/* Joined Date */}
-          <div className="flex items-center justify-center gap-2 text-xs text-foreground/50">
-            <Calendar className="w-4 h-4" />
-            <span>Joined {new Date(profile.created_at).toLocaleDateString()}</span>
-          </div>
+          {profile.created_at && (
+            <div className="flex items-center justify-center gap-2 text-xs text-foreground/50">
+              <Calendar className="w-4 h-4" />
+              <span>Joined {new Date(profile.created_at).toLocaleDateString()}</span>
+            </div>
+          )}
         </div>
 
         {/* Action Buttons */}

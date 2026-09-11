@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Loader2, ArrowLeft, Share2 } from "lucide-react";
-import { getProfileByUsername, Profile, getCurrentUser, getConnectionStatus, areUsersConnected } from "@/lib/auth";
+import { getProfileByUsername, PublicProfile, ConnectedProfile, getCurrentUser, getConnectionStatus, areUsersConnected } from "@/lib/auth";
 import { PublicProfilePreview } from "@/components/profile/public-profile-preview";
 import { ProfileCard } from "@/components/profile/profile-card";
 import { Logo } from "@/components/logo";
@@ -15,12 +15,17 @@ export default function PublicProfilePage() {
   const params = useParams();
   const username = params.username as string;
   
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profile, setProfile] = useState<ConnectedProfile | PublicProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isOwner, setIsOwner] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'pending_sent' | 'pending_received' | 'declined' | 'none'>('none');
+
+  // Type guard to check if profile has full connected user data
+  const isFullProfile = (profile: ConnectedProfile | PublicProfile): profile is ConnectedProfile => {
+    return 'created_at' in profile && profile.created_at !== null;
+  };
 
   useEffect(() => {
     loadProfile();
@@ -147,7 +152,7 @@ export default function PublicProfilePage() {
                   Go to My Card
                 </Link>
               </div>
-            ) : isConnected ? (
+            ) : isConnected && isFullProfile(profile) ? (
               // STATE 3: Connected user - show full profile
               <div>
                 <div className="mb-4 flex items-center justify-center gap-2 bg-green-500/10 text-green-600 px-4 py-2 rounded-full">

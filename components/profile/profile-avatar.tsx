@@ -4,7 +4,7 @@ import { User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ProfileAvatarProps {
-  src?: string;
+  src?: string | null;
   name: string;
   size?: "sm" | "md" | "lg" | "xl";
   className?: string;
@@ -40,7 +40,7 @@ export function ProfileAvatar({ src, name, size = "md", className }: ProfileAvat
         className
       )}
     >
-      {src ? (
+      {src && src.length > 0 ? (
         <img
           src={src}
           alt={name}
