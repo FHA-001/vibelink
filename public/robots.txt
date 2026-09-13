@@ -1,0 +1,34 @@
+# VibeLink robots.txt
+# Allow search engines to crawl public marketing pages
+# Block authenticated and private routes
+
+User-agent: *
+Allow: /
+Allow: /features
+Allow: /how-it-works
+Allow: /about
+Allow: /pricing
+Allow: /faq
+Allow: /careers
+Allow: /contact
+Allow: /privacy
+Allow: /terms
+Allow: /cookies
+
+# Block authenticated and private routes
+Disallow: /signin
+Disallow: /signup
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /edit-profile
+Disallow: /complete-profile
+Disallow: /my-card
+Disallow: /connections
+Disallow: /scan
+Disallow: /welcome
+
+# Sitemap
+Sitemap: https://vibelink.name.ng/sitemap.xml
