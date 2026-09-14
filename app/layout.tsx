@@ -32,11 +32,20 @@ export const metadata: Metadata = {
     title: 'VibeLink - Break the ice. Build real connections.',
     description: 'VibeLink lets people share their profile through QR codes and build real-world connections.',
     siteName: 'VibeLink',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'VibeLink - Break the ice. Build real connections.',
+      },
+    ],
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: 'VibeLink - Break the ice. Build real connections.',
     description: 'VibeLink lets people share their profile through QR codes and build real-world connections.',
+    images: ['/og-image.png'],
   },
   robots: {
     index: true,
