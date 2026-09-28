@@ -37,7 +37,7 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
           {/* Logo and description */}
           <div className="col-span-2 md:col-span-4 lg:col-span-1">
-            <a href="#" className="inline-block mb-4">
+            <a href="/" className="inline-block mb-4">
               <Logo />
             </a>
             <p className="text-sm text-foreground/70 mb-4">

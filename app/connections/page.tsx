@@ -120,14 +120,14 @@ export default function ConnectionsPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col pb-20">
       {/* Header */}
-      <header className="p-4 border-b border-border">
+      <header className="p-4 sm:p-6 border-b border-border">
         <Link href="/">
           <Logo />
         </Link>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 px-4 py-6">
+      <main className="flex-1 px-4 sm:px-6 py-6">
         <div className="max-w-lg mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

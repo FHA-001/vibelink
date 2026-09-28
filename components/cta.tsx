@@ -14,7 +14,7 @@ export function CTA() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="relative bg-gradient-to-br from-primary via-primary/90 to-secondary rounded-3xl p-8 sm:p-12 lg:p-16 shadow-2xl overflow-hidden"
+          className="relative bg-gradient-to-br from-primary via-primary/90 to-secondary rounded-3xl p-5 sm:p-8 lg:p-16 shadow-2xl overflow-hidden"
         >
           {/* Decorative elements */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
@@ -27,10 +27,10 @@ export function CTA() {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 mb-6"
+              className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-3 sm:px-4 py-2 mb-6"
             >
-              <Sparkles className="w-4 h-4 text-white" />
-              <span className="text-white text-sm font-medium">Start your journey today</span>
+              <Sparkles className="w-4 h-4 text-white flex-shrink-0" />
+              <span className="text-white text-xs sm:text-sm font-medium">Start your journey today</span>
             </motion.div>
 
             <motion.h2
@@ -38,7 +38,7 @@ export function CTA() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6"
+              className="text-2xl sm:text-3xl lg:text-5xl font-bold text-white mb-6 break-words"
             >
               Ready to make your next introduction unforgettable?
             </motion.h2>
@@ -48,7 +48,7 @@ export function CTA() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="text-lg text-white/90 mb-8 max-w-2xl mx-auto"
+              className="text-base sm:text-lg text-white/90 mb-8 max-w-2xl mx-auto"
             >
               Join thousands of professionals who are already transforming how they connect with others.
             </motion.p>
@@ -58,11 +58,12 @@ export function CTA() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.5 }}
+              className="w-full max-w-sm mx-auto"
             >
               <Link href="/welcome">
                 <Button
                   size="lg"
-                  className="bg-white text-primary hover:bg-white/90 text-base px-8 py-6 rounded-2xl shadow-lg hover:shadow-xl transition-all"
+                  className="w-full bg-white text-primary hover:bg-white/90 text-base px-4 sm:px-6 py-6 rounded-2xl shadow-lg hover:shadow-xl transition-all"
                 >
                   Create Your VibeLink
                   <ArrowRight className="ml-2 h-5 w-5" />

@@ -21,7 +21,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6"
+              className="text-3xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6 break-words"
             >
               Break the ice.
               <br />
@@ -43,10 +43,10 @@ export function Hero() {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
             >
-              <Link href="/welcome">
+              <Link href="/welcome" className="w-full sm:w-auto">
                 <Button
                   size="lg"
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground text-base px-8 py-6 rounded-2xl"
+                  className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground text-base px-4 sm:px-6 py-6 rounded-2xl"
                 >
                   Get Started
                   <ArrowRight className="ml-2 h-5 w-5" />
@@ -55,7 +55,7 @@ export function Hero() {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-2 border-foreground/20 hover:border-foreground/40 text-foreground text-base px-8 py-6 rounded-2xl"
+                className="w-full sm:w-auto border-2 border-foreground/20 hover:border-foreground/40 text-foreground text-base px-4 sm:px-6 py-6 rounded-2xl"
               >
                 Learn More
               </Button>
@@ -69,33 +69,33 @@ export function Hero() {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="relative"
           >
-            <div className="relative bg-card rounded-3xl shadow-2xl p-6 sm:p-8 max-w-md mx-auto">
+            <div className="relative bg-card rounded-3xl shadow-2xl p-4 sm:p-6 max-w-md mx-auto">
               {/* Profile Header */}
-              <div className="flex items-start justify-between mb-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                    <User className="w-8 h-8 text-white" />
+              <div className="flex items-start justify-between mb-6 min-w-0">
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0">
+                    <User className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                   </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-foreground">Sarah Johnson</h3>
-                    <p className="text-sm text-foreground/60">Product Designer</p>
+                  <div className="min-w-0">
+                    <h3 className="text-lg sm:text-xl font-bold text-foreground truncate">Sarah Johnson</h3>
+                    <p className="text-xs sm:text-sm text-foreground/60 truncate">Product Designer</p>
                   </div>
                 </div>
-                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                  <QrCode className="w-6 h-6 text-primary" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <QrCode className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                 </div>
               </div>
 
               {/* Bio */}
-              <p className="text-foreground/70 text-sm mb-6">
+              <p className="text-foreground/70 text-xs sm:text-sm mb-6">
                 Passionate about creating beautiful digital experiences. Love connecting with creative minds and building meaningful relationships.
               </p>
 
               {/* Contact Info */}
               <div className="space-y-3 mb-6">
-                <div className="flex items-center gap-3 text-sm text-foreground/70">
-                  <Mail className="w-4 h-4 text-primary" />
-                  <span>sarah@vibelink.com</span>
+                <div className="flex items-center gap-3 text-sm text-foreground/70 min-w-0">
+                  <Mail className="w-4 h-4 text-primary flex-shrink-0" />
+                  <span className="break-all">sarah@vibelink.com</span>
                 </div>
               </div>
 
