@@ -106,6 +106,22 @@ export default function TermsOfServicePage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.65 }}
+            >
+              <h2 className="text-2xl font-bold text-foreground mb-4">Intellectual Property</h2>
+              <div className="space-y-4 text-foreground/70">
+                <p>
+                  You retain ownership and responsibility for the content you submit to VibeLink, including your profile information and photos. By submitting content, you grant VibeLink the permissions reasonably necessary to operate and display the service.
+                </p>
+                <p>
+                  VibeLink platform branding, interface design, software, and original platform materials remain owned by VibeLink or its respective licensors.
+                </p>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.7 }}
             >
               <h2 className="text-2xl font-bold text-foreground mb-4">Connections and Interactions</h2>
@@ -133,8 +149,9 @@ export default function TermsOfServicePage() {
                   Your VibeLink QR code and public profile URL are designed for sharing. By sharing your QR code or profile URL, you understand that:
                 </p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
-                  <li>Your profile is publicly accessible via your username</li>
-                  <li>Non-connected users see limited profile information</li>
+                  <li>Your username and public profile route may be accessible to others</li>
+                  <li>The visibility of your profile fields is subject to your privacy settings</li>
+                  <li>You are responsible for information you choose to make public</li>
                   <li>You are responsible for where and how you share your QR code</li>
                   <li>VibeLink is not responsible for unauthorized use of shared QR codes</li>
                 </ul>
@@ -164,6 +181,22 @@ export default function TermsOfServicePage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.95 }}
+            >
+              <h2 className="text-2xl font-bold text-foreground mb-4">Third-Party Services</h2>
+              <div className="space-y-4 text-foreground/70">
+                <p>
+                  VibeLink depends on third-party infrastructure and service providers, including Supabase for authentication and data services, Vercel for hosting, and transactional email providers. These services have their own terms and conditions.
+                </p>
+                <p>
+                  VibeLink does not endorse or take responsibility for content on external websites linked from user profiles, including social media links.
+                </p>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 1.0 }}
             >
               <h2 className="text-2xl font-bold text-foreground mb-4">Account Termination</h2>
@@ -172,7 +205,7 @@ export default function TermsOfServicePage() {
                   We reserve the right to suspend or terminate your account if you violate these Terms of Service. You may also delete your account at any time through the Settings page.
                 </p>
                 <p>
-                  Upon account deletion, all your data including profile, connections, and notifications will be permanently deleted. This action cannot be undone.
+                  Account deletion is intended to permanently remove your account and associated primary application data, subject to limited technical or security retention where applicable. This action is intended to be permanent.
                 </p>
               </div>
             </motion.div>
@@ -227,7 +260,7 @@ export default function TermsOfServicePage() {
               <h2 className="text-2xl font-bold text-foreground mb-4">Governing Law</h2>
               <div className="space-y-4 text-foreground/70">
                 <p>
-                  These Terms of Service shall be governed by and construed in accordance with applicable laws.
+                  These Terms are governed by the laws of the Federal Republic of Nigeria, subject to any mandatory rights that may apply under other applicable law.
                 </p>
               </div>
             </motion.div>

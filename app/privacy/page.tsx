@@ -55,12 +55,13 @@ export default function PrivacyPolicyPage() {
                   VibeLink collects the following information to provide our services:
                 </p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
-                  <li><strong>Account Information:</strong> Email address, password (encrypted), and authentication session data</li>
-                  <li><strong>Profile Information:</strong> Username, full name, job title, company/school, bio, interests</li>
+                  <li><strong>Account Information:</strong> Email address, user ID, password (encrypted), and authentication session data</li>
+                  <li><strong>Profile Information:</strong> Username, full name, job title, company/school, bio, interests, website, and social media links (LinkedIn, Twitter, GitHub, Instagram)</li>
                   <li><strong>Profile Photo:</strong> Optional profile photo uploaded by you</li>
-                  <li><strong>Social Links:</strong> Optional website, LinkedIn, Twitter, GitHub, and Instagram URLs</li>
+                  <li><strong>Profile Privacy Preferences:</strong> Your settings for which profile fields are visible to others</li>
                   <li><strong>Connection Information:</strong> Your connections and connection request history</li>
-                  <li><strong>Notification Data:</strong> Connection requests, acceptances, and related notifications</li>
+                  <li><strong>Notification Data:</strong> Connection requests, acceptances, declines, and related notifications</li>
+                  <li><strong>Security Data:</strong> Internal rate-limit and security data used to prevent abuse</li>
                 </ul>
               </div>
             </motion.div>
@@ -70,16 +71,18 @@ export default function PrivacyPolicyPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
             >
-              <h2 className="text-2xl font-bold text-foreground mb-4">How We Use Your Information</h2>
+              <h2 className="text-2xl font-bold text-foreground mb-4">Data Storage and Security</h2>
               <div className="space-y-4 text-foreground/70">
-                <p>We use your information to:</p>
+                <p>
+                  We take data security seriously:
+                </p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
-                  <li>Create and maintain your VibeLink profile</li>
-                  <li>Generate and manage your QR code</li>
-                  <li>Facilitate connections between users</li>
-                  <li>Send you notifications about connection requests</li>
-                  <li>Provide and improve our services</li>
-                  <li>Authenticate your account and maintain security</li>
+                  <li><strong>Supabase:</strong> We use Supabase for authentication, database, and storage services</li>
+                  <li><strong>Vercel:</strong> Our application is hosted and deployed on Vercel infrastructure</li>
+                  <li><strong>Encryption:</strong> Passwords are encrypted using industry-standard methods</li>
+                  <li><strong>Row Level Security:</strong> Database policies ensure users can only access their own data</li>
+                  <li><strong>Storage:</strong> Profile photos are stored securely with access controls</li>
+                  <li><strong>Access:</strong> Only authorized personnel can access user data</li>
                 </ul>
               </div>
             </motion.div>
@@ -92,13 +95,14 @@ export default function PrivacyPolicyPage() {
               <h2 className="text-2xl font-bold text-foreground mb-4">Public Profile Information</h2>
               <div className="space-y-4 text-foreground/70">
                 <p>
-                  Your profile is publicly accessible via your username URL (vibelink.name.ng/u/username). However:
+                  Your profile is accessible via your username URL (vibelink.name.ng/u/username). The visibility of your profile information depends on your privacy settings:
                 </p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
-                  <li>Non-connected users see a limited preview (name, job title, bio)</li>
-                  <li>Full profile details are only visible to connected users</li>
-                  <li>Your profile photo is publicly visible</li>
-                  <li>Your email address is never publicly displayed</li>
+                  <li>Your username is public and used to access your profile</li>
+                  <li>Individual profile fields have privacy controls that you can adjust</li>
+                  <li>Some fields default to public visibility and others default to private</li>
+                  <li>Connected users may see more profile information than non-connected users</li>
+                  <li>Your email address is never displayed publicly on your profile</li>
                 </ul>
               </div>
             </motion.div>
@@ -108,17 +112,19 @@ export default function PrivacyPolicyPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.7 }}
             >
-              <h2 className="text-2xl font-bold text-foreground mb-4">Data Storage and Security</h2>
+              <h2 className="text-2xl font-bold text-foreground mb-4">How We Use Your Information</h2>
               <div className="space-y-4 text-foreground/70">
-                <p>
-                  We take data security seriously:
-                </p>
+                <p>We use your information to:</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
-                  <li><strong>Supabase:</strong> We use Supabase for authentication and data storage</li>
-                  <li><strong>Encryption:</strong> Passwords are encrypted using industry-standard methods</li>
-                  <li><strong>Row Level Security:</strong> Database policies ensure users can only access their own data</li>
-                  <li><strong>Storage:</strong> Profile photos are stored securely with access controls</li>
-                  <li><strong>Access:</strong> Only authorized personnel can access user data</li>
+                  <li>Create and maintain your VibeLink account and profile</li>
+                  <li>Generate and manage your QR code for profile sharing</li>
+                  <li>Facilitate connections between users</li>
+                  <li>Send you notifications about connection requests and activity</li>
+                  <li>Apply your privacy preferences to control profile visibility</li>
+                  <li>Authenticate your account and maintain security</li>
+                  <li>Implement rate limiting and abuse prevention measures</li>
+                  <li>Send password recovery emails</li>
+                  <li>Operate and improve our services</li>
                 </ul>
               </div>
             </motion.div>
@@ -136,6 +142,7 @@ export default function PrivacyPolicyPage() {
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li><strong>Supabase:</strong> Authentication, database, and storage services</li>
                   <li><strong>Vercel:</strong> Hosting and deployment infrastructure</li>
+                  <li><strong>Resend:</strong> Transactional authentication emails sent through Supabase Custom SMTP. Resend may process recipient email addresses and authentication email content including reset/verification links.</li>
                 </ul>
                 <p>
                   These services have their own privacy policies and data handling practices. We encourage you to review their policies.
@@ -151,14 +158,17 @@ export default function PrivacyPolicyPage() {
               <h2 className="text-2xl font-bold text-foreground mb-4">Data Retention</h2>
               <div className="space-y-4 text-foreground/70">
                 <p>
-                  We retain your data for as long as your account is active. If you delete your account:
+                  We retain your profile and account data while your account is active. If you delete your account:
                 </p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
-                  <li>Your profile, connections, and notifications are permanently deleted</li>
+                  <li>Your primary profile, connections, connection requests, and notifications are deleted</li>
                   <li>Your profile photo is deleted from storage</li>
                   <li>Your authentication account is deleted</li>
-                  <li>This action cannot be undone</li>
+                  <li>This action is intended to be permanent</li>
                 </ul>
+                <p>
+                  Some technical and security records, as well as infrastructure logs, may be retained for limited operational or security periods. Third-party service providers may retain operational records under their own policies. Our retention practices may be updated as VibeLink matures.
+                </p>
               </div>
             </motion.div>
 
@@ -167,14 +177,14 @@ export default function PrivacyPolicyPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 1.0 }}
             >
-              <h2 className="text-2xl font-bold text-foreground mb-4">Your Rights</h2>
+              <h2 className="text-2xl font-bold text-foreground mb-4">Your Rights and Controls</h2>
               <div className="space-y-4 text-foreground/70">
                 <p>You have the right to:</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
-                  <li>Access and view your personal data</li>
-                  <li>Edit your profile information at any time</li>
-                  <li>Delete your account and all associated data</li>
-                  <li>Request information about how we use your data</li>
+                  <li>View and edit your profile information at any time</li>
+                  <li>Adjust your privacy settings to control profile visibility</li>
+                  <li>Delete your account and associated data</li>
+                  <li>Contact us regarding your personal data or to exercise applicable rights</li>
                 </ul>
               </div>
             </motion.div>

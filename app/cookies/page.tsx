@@ -104,7 +104,10 @@ export default function CookiePolicyPage() {
                   VibeLink uses Supabase for authentication, which may set cookies for authentication purposes. These cookies are managed by Supabase according to their own privacy policy.
                 </p>
                 <p>
-                  We do not use third-party cookies for advertising, analytics, or tracking purposes.
+                  VibeLink currently does not use advertising cookies, behavioural analytics cookies, or marketing cookies.
+                </p>
+                <p>
+                  If non-essential technologies are introduced in the future, this Cookie Policy and any consent controls may be updated accordingly.
                 </p>
               </div>
             </motion.div>

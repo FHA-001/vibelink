@@ -20,6 +20,7 @@ export default function SignUpPage() {
     password: "",
     confirmPassword: "",
   });
+  const [acknowledged, setAcknowledged] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -45,6 +46,10 @@ export default function SignUpPage() {
       newErrors.confirmPassword = "Please confirm your password";
     } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
+    }
+
+    if (!acknowledged) {
+      newErrors.acknowledgement = "You must agree to the Terms of Service and acknowledge the Privacy Policy";
     }
 
     setErrors(newErrors);
@@ -219,6 +224,47 @@ export default function SignUpPage() {
                   {errors.confirmPassword && (
                     <p id="confirm-password-error" className="text-sm text-destructive">
                       {errors.confirmPassword}
+                    </p>
+                  )}
+                </div>
+
+                {/* Acknowledgement Checkbox */}
+                <div className="space-y-2">
+                  <div className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      id="acknowledgement"
+                      checked={acknowledged}
+                      onChange={(e) => {
+                        setAcknowledged(e.target.checked);
+                        if (errors.acknowledgement) {
+                          setErrors((prev) => ({ ...prev, acknowledgement: "" }));
+                        }
+                      }}
+                      disabled={isLoading}
+                      className="mt-1 w-4 h-4 rounded border-border text-primary focus:ring-primary"
+                      aria-invalid={!!errors.acknowledgement}
+                      aria-describedby={errors.acknowledgement ? "acknowledgement-error" : undefined}
+                    />
+                    <label
+                      htmlFor="acknowledgement"
+                      className="text-sm text-foreground/70 leading-relaxed cursor-pointer"
+                    >
+                      I agree to the{" "}
+                      <Link href="/terms" className="text-primary hover:underline">
+                        Terms of Service
+                      </Link>
+                      {" "}
+                      and acknowledge the{" "}
+                      <Link href="/privacy" className="text-primary hover:underline">
+                        Privacy Policy
+                      </Link>
+                      .
+                    </label>
+                  </div>
+                  {errors.acknowledgement && (
+                    <p id="acknowledgement-error" className="text-sm text-destructive">
+                      {errors.acknowledgement}
                     </p>
                   )}
                 </div>
