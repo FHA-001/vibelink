@@ -263,23 +263,27 @@ export async function getProfileByUsername(username: string): Promise<ConnectedP
   const supabase = createClient();
   
   // Use secure RPC for public profile access
-  // This function is used for viewing OTHER users' profiles, not own profile
+  // This function is used for viewing OTHER users' profiles in browser components
   // Own profile is retrieved via getUserProfile() which uses direct SELECT
   const { data, error } = await supabase
     .rpc('get_profile_for_view', { target_username: username });
 
+  // Log only unexpected errors (network, RPC failure, etc.)
+  // Blocked/nonexistent profiles return null data without error - this is expected
   if (error) {
-    console.error('Error fetching profile by username:', error);
+    console.error('Unexpected error fetching profile:', error);
     return null;
   }
 
   if (!data) {
+    // Profile not found, blocked, or unavailable - expected state
     return null;
   }
 
   // Determine the type based on which fields are present
   // Strangers don't get created_at, connected users do
-  const hasCreatedAt = 'created_at' in data && data.created_at !== null;
+  const profileData = data as Record<string, any>;
+  const hasCreatedAt = 'created_at' in profileData && profileData.created_at !== null;
   
   if (hasCreatedAt) {
     // Connected user gets full profile without internal fields
@@ -784,4 +788,87 @@ export function validateProfilePhoto(file: File): { valid: boolean; error?: stri
   }
 
   return { valid: true };
+}
+
+// Block and Report Functions (Phase 5C)
+
+export async function createBlock(targetUserId: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .rpc('create_block', { target_user_id: targetUserId });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function removeBlock(targetUserId: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .rpc('remove_block', { target_user_id: targetUserId });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function getMyBlockState(targetUserId: string): Promise<boolean> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .rpc('get_my_block_state', { target_user_id: targetUserId });
+
+  if (error) {
+    console.error('Error checking block state:', error);
+    return false;
+  }
+
+  return data as boolean;
+}
+
+export interface BlockedUser {
+  blocked_user_id: string;
+  username: string | null;
+  blocked_at: string;
+}
+
+export async function getMyBlockedUsers(): Promise<BlockedUser[]> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .rpc('get_my_blocked_users');
+
+  if (error) {
+    console.error('Error fetching blocked users:', error);
+    return [];
+  }
+
+  return (data || []) as BlockedUser[];
+}
+
+export async function createProfileReport(
+  targetUserId: string,
+  reason: string,
+  details?: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .rpc('create_profile_report', {
+      target_user_id: targetUserId,
+      report_reason: reason,
+      report_details: details || null
+    });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
 }

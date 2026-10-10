@@ -5,6 +5,9 @@ import { motion } from "framer-motion";
 import { Users, UserPlus, Check, X, Loader2, Trash2, Calendar } from "lucide-react";
 import { BottomNav } from "@/components/bottom-nav";
 import { Logo } from "@/components/logo";
+import { SafetyMenu } from "@/components/profile/safety-menu";
+import { BlockDialog } from "@/components/profile/block-dialog";
+import { ReportDialog } from "@/components/profile/report-dialog";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { 
@@ -16,6 +19,7 @@ import {
   deleteConnection,
   ConnectionWithProfile
 } from "@/lib/auth";
+import { toast } from "@/components/ui/use-toast";
 
 export default function ConnectionsPage() {
   const router = useRouter();
@@ -23,6 +27,9 @@ export default function ConnectionsPage() {
   const [pendingRequests, setPendingRequests] = useState<ConnectionRequestWithProfile[]>([]);
   const [connections, setConnections] = useState<ConnectionWithProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [blockDialogOpen, setBlockDialogOpen] = useState(false);
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<{ id: string; username: string } | null>(null);
 
   useEffect(() => {
     checkAuth();
@@ -109,6 +116,79 @@ export default function ConnectionsPage() {
     }
   };
 
+  const handleBlock = async () => {
+    if (!selectedUser) return;
+    
+    try {
+      const { createBlock } = await import('@/lib/auth');
+      const result = await createBlock(selectedUser.id);
+      
+      if (result.success) {
+        toast({
+          title: "User blocked",
+          description: `@${selectedUser.username} has been blocked.`,
+        });
+        setBlockDialogOpen(false);
+        loadPendingRequests();
+        loadConnections();
+      } else {
+        toast({
+          title: "Failed to block user",
+          description: result.error || "Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Failed to block user",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleReport = async (reason: string, details?: string) => {
+    if (!selectedUser) return;
+    
+    try {
+      const { createProfileReport } = await import('@/lib/auth');
+      const result = await createProfileReport(selectedUser.id, reason, details);
+      
+      if (result.success) {
+        toast({
+          title: "Report submitted",
+          description: "Thank you for helping keep VibeLink safe.",
+        });
+        setReportDialogOpen(false);
+      } else {
+        const errorMessage = result.error || "Please try again.";
+        toast({
+          title: "Unable to submit report",
+          description: errorMessage.includes("rate limit") 
+            ? "You've submitted several reports recently. Please try again later."
+            : errorMessage,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Unable to submit report",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const openBlockDialog = (userId: string, username: string) => {
+    setSelectedUser({ id: userId, username });
+    setBlockDialogOpen(true);
+  };
+
+  const openReportDialog = (userId: string, username: string) => {
+    setSelectedUser({ id: userId, username });
+    setReportDialogOpen(true);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -153,39 +233,48 @@ export default function ConnectionsPage() {
                   </div>
                   
                   <div className="space-y-3">
-                    {pendingRequests.map((request) => (
-                      <div
-                        key={request.id}
-                        className="bg-muted/30 rounded-xl p-3 flex items-center justify-between gap-3"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-foreground text-sm">
-                            @{request.sender_profile?.username}
-                          </p>
-                          {request.sender_profile?.bio && (
-                            <p className="text-xs text-foreground/70 truncate">
-                              {request.sender_profile.bio}
+                    {pendingRequests.map((request) => {
+                      const senderUsername = request.sender_profile?.username || '';
+                      return (
+                        <div
+                          key={request.id}
+                          className="bg-muted/30 rounded-xl p-3 flex items-center justify-between gap-3"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-foreground text-sm">
+                              @{senderUsername}
                             </p>
-                          )}
+                            {request.sender_profile?.bio && (
+                              <p className="text-xs text-foreground/70 truncate">
+                                {request.sender_profile.bio}
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleAcceptRequest(request.id)}
+                              className="p-2 bg-green-500/10 hover:bg-green-500/20 text-green-600 rounded-lg transition-colors"
+                              aria-label="Accept request"
+                            >
+                              <Check className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDeclineRequest(request.id)}
+                              className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-600 rounded-lg transition-colors"
+                              aria-label="Decline request"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                            {request.sender_profile && (
+                              <SafetyMenu
+                                onBlock={() => openBlockDialog(request.sender_id, senderUsername)}
+                                onReport={() => openReportDialog(request.sender_id, senderUsername)}
+                              />
+                            )}
+                          </div>
                         </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleAcceptRequest(request.id)}
-                            className="p-2 bg-green-500/10 hover:bg-green-500/20 text-green-600 rounded-lg transition-colors"
-                            aria-label="Accept request"
-                          >
-                            <Check className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDeclineRequest(request.id)}
-                            className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-600 rounded-lg transition-colors"
-                            aria-label="Decline request"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               </motion.div>
@@ -252,16 +341,24 @@ export default function ConnectionsPage() {
                             </div>
                           </div>
                           
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              handleRemoveConnection(connection.id);
-                            }}
-                            className="p-2 text-foreground/50 hover:text-destructive transition-colors"
-                            aria-label="Remove connection"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handleRemoveConnection(connection.id);
+                              }}
+                              className="p-2 text-foreground/50 hover:text-destructive transition-colors"
+                              aria-label="Remove connection"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                            {connection.other_user_profile && (
+                              <SafetyMenu
+                                onBlock={() => openBlockDialog(connection.other_user_profile.id, connection.other_user_profile.username)}
+                                onReport={() => openReportDialog(connection.other_user_profile.id, connection.other_user_profile.username)}
+                              />
+                            )}
+                          </div>
                         </div>
                       </div>
                     </Link>
@@ -275,6 +372,24 @@ export default function ConnectionsPage() {
 
       {/* Bottom Navigation */}
       <BottomNav />
+
+      {/* Dialogs */}
+      {selectedUser && (
+        <>
+          <BlockDialog
+            open={blockDialogOpen}
+            onOpenChange={setBlockDialogOpen}
+            targetUsername={selectedUser.username}
+            onConfirm={handleBlock}
+          />
+          <ReportDialog
+            open={reportDialogOpen}
+            onOpenChange={setReportDialogOpen}
+            targetUsername={selectedUser.username}
+            onConfirm={handleReport}
+          />
+        </>
+      )}
     </div>
   );
 }

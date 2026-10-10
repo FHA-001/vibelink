@@ -8,12 +8,15 @@ import { PublicProfilePreview } from "@/components/profile/public-profile-previe
 import { ProfileCard } from "@/components/profile/profile-card";
 import { Logo } from "@/components/logo";
 import Link from "next/link";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
-export function PublicProfileClient() {
+type Props = {
+  params: Promise<{ username: string }>
+}
+
+export function PublicProfileClient({ params }: Props) {
   const router = useRouter();
-  const params = useParams();
-  const username = params.username as string;
+  const [username, setUsername] = useState<string | null>(null);
   
   const [profile, setProfile] = useState<ConnectedProfile | PublicProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -27,11 +30,24 @@ export function PublicProfileClient() {
     return 'created_at' in profile && profile.created_at !== null;
   };
 
+  // Resolve async params in client component
   useEffect(() => {
-    loadProfile();
+    params.then(({ username: resolvedUsername }) => {
+      setUsername(resolvedUsername);
+    });
+  }, [params]);
+
+  useEffect(() => {
+    if (username) {
+      loadProfile();
+    }
   }, [username]);
 
   const loadProfile = async () => {
+    if (!username) {
+      return;
+    }
+
     try {
       const userProfile = await getProfileByUsername(username);
       if (!userProfile) {

@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Loader2, LogOut, User, Key, Trash2, AlertTriangle } from "lucide-react";
-import { getCurrentUser, signOut, getUserProfile, deleteAccount, Profile } from "@/lib/auth";
+import { Loader2, LogOut, User, Key, Trash2, AlertTriangle, Shield, UserX } from "lucide-react";
+import { getCurrentUser, signOut, getUserProfile, deleteAccount, removeBlock, getMyBlockedUsers, BlockedUser, Profile } from "@/lib/auth";
 import { BottomNav } from "@/components/bottom-nav";
 import { Logo } from "@/components/logo";
 import Link from "next/link";
@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/use-toast";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -22,10 +23,19 @@ export default function SettingsPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
   const [deleteSuccess, setDeleteSuccess] = useState(false);
+  const [blockedUsers, setBlockedUsers] = useState<BlockedUser[]>([]);
+  const [isLoadingBlocked, setIsLoadingBlocked] = useState(true);
+  const [unblockingUserId, setUnblockingUserId] = useState<string | null>(null);
 
   useEffect(() => {
     checkAuth();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      loadBlockedUsers();
+    }
+  }, [user]);
 
   const checkAuth = async () => {
     try {
@@ -43,6 +53,48 @@ export default function SettingsPage() {
       router.push("/signin");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadBlockedUsers = async () => {
+    try {
+      const users = await getMyBlockedUsers();
+      setBlockedUsers(users);
+    } catch (error) {
+      console.error("Error loading blocked users:", error);
+    } finally {
+      setIsLoadingBlocked(false);
+    }
+  };
+
+  const handleUnblock = async (blockedUserId: string) => {
+    setUnblockingUserId(blockedUserId);
+    
+    try {
+      const result = await removeBlock(blockedUserId);
+      
+      if (result.success) {
+        toast({
+          title: "User unblocked",
+          description: "The user has been unblocked successfully.",
+        });
+        // Remove from local state
+        setBlockedUsers(prev => prev.filter(u => u.blocked_user_id !== blockedUserId));
+      } else {
+        toast({
+          title: "Failed to unblock",
+          description: result.error || "Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Failed to unblock",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    } finally {
+      setUnblockingUserId(null);
     }
   };
 
@@ -157,6 +209,60 @@ export default function SettingsPage() {
                   </div>
                 </Link>
               ))}
+            </div>
+
+            {/* Blocked Users Section */}
+            <div className="mt-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Shield className="w-5 h-5 text-primary" />
+                <h2 className="text-lg font-semibold text-foreground">Blocked Users</h2>
+              </div>
+              
+              {isLoadingBlocked ? (
+                <div className="bg-card rounded-2xl p-6 flex items-center justify-center">
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                </div>
+              ) : blockedUsers.length === 0 ? (
+                <div className="bg-card rounded-2xl p-6 text-center">
+                  <UserX className="w-12 h-12 text-foreground/30 mx-auto mb-3" />
+                  <p className="text-foreground/70">No blocked users</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {blockedUsers.map((blockedUser) => (
+                    <div
+                      key={blockedUser.blocked_user_id}
+                      className="bg-card rounded-2xl p-4 flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-destructive/10 rounded-full flex items-center justify-center">
+                          <UserX className="w-5 h-5 text-destructive" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-foreground">
+                            {blockedUser.username ? `@${blockedUser.username}` : 'Unavailable user'}
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleUnblock(blockedUser.blocked_user_id)}
+                        disabled={unblockingUserId === blockedUser.blocked_user_id}
+                      >
+                        {unblockingUserId === blockedUser.blocked_user_id ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Unblocking...
+                          </>
+                        ) : (
+                          'Unblock'
+                        )}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Sign Out */}

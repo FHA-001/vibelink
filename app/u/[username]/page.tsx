@@ -1,11 +1,16 @@
 import { Metadata } from "next";
-import { getProfileByUsername } from "@/lib/auth";
+import { getProfileByUsernameServer } from "@/lib/server-auth";
 import { PublicProfileClient } from "./profile-client";
 
+type Props = {
+  params: Promise<{ username: string }>
+}
+
 export async function generateMetadata(
-  { params }: { params: { username: string } }
+  { params }: Props
 ): Promise<Metadata> {
-  const profile = await getProfileByUsername(params.username);
+  const { username } = await params;
+  const profile = await getProfileByUsernameServer(username);
   
   if (!profile) {
     return {
@@ -14,9 +19,9 @@ export async function generateMetadata(
     };
   }
 
-  // Use generic privacy-safe metadata to avoid exposing hidden profile information
+  // Profile exists - use privacy-safe metadata
   return {
-    title: `@${profile.username}`,
+    title: `@${profile.username} | VibeLink`,
     description: `View ${profile.username}'s VibeLink profile and connect.`,
     openGraph: {
       title: `@${profile.username} | VibeLink`,
@@ -32,6 +37,6 @@ export async function generateMetadata(
   };
 }
 
-export default function PublicProfilePage() {
-  return <PublicProfileClient />;
+export default function PublicProfilePage({ params }: Props) {
+  return <PublicProfileClient params={params} />;
 }
