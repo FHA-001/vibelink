@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Users, UserPlus, Check, X, Loader2, Trash2, Calendar } from "lucide-react";
+import { Users, UserPlus, Check, X, Loader2, Trash2, Calendar, Clock } from "lucide-react";
 import { BottomNav } from "@/components/bottom-nav";
 import { Logo } from "@/components/logo";
 import { SafetyMenu } from "@/components/profile/safety-menu";
@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { 
   getCurrentUser, 
   getPendingRequests, 
+  getSentRequests,
   updateConnectionRequestStatus, 
   ConnectionRequestWithProfile,
   getUserConnections,
@@ -25,6 +26,7 @@ export default function ConnectionsPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [pendingRequests, setPendingRequests] = useState<ConnectionRequestWithProfile[]>([]);
+  const [sentRequests, setSentRequests] = useState<ConnectionRequestWithProfile[]>([]);
   const [connections, setConnections] = useState<ConnectionWithProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [blockDialogOpen, setBlockDialogOpen] = useState(false);
@@ -38,6 +40,7 @@ export default function ConnectionsPage() {
   useEffect(() => {
     if (user) {
       loadPendingRequests();
+      loadSentRequests();
       loadConnections();
     }
   }, [user]);
@@ -64,6 +67,15 @@ export default function ConnectionsPage() {
       setPendingRequests(requests);
     } catch (error) {
       console.error("Error loading pending requests:", error);
+    }
+  };
+
+  const loadSentRequests = async () => {
+    try {
+      const requests = await getSentRequests(user.id);
+      setSentRequests(requests);
+    } catch (error) {
+      console.error("Error loading sent requests:", error);
     }
   };
 
@@ -279,9 +291,60 @@ export default function ConnectionsPage() {
                 </div>
               </motion.div>
             )}
+
+            {/* Sent Requests Section */}
+            {sentRequests.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.25 }}
+                className="mb-6"
+              >
+                <div className="bg-card rounded-2xl shadow-lg p-4 border border-border">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Clock className="w-5 h-5 text-foreground/70" />
+                    <h2 className="text-lg font-semibold text-foreground">
+                      Sent Requests ({sentRequests.length})
+                    </h2>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    {sentRequests.map((request) => {
+                      const receiverUsername = request.sender_profile?.username || '';
+                      return (
+                        <div
+                          key={request.id}
+                          className="bg-muted/30 rounded-xl p-3 flex items-center justify-between gap-3"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-foreground text-sm">
+                              @{receiverUsername}
+                            </p>
+                            {request.sender_profile?.bio && (
+                              <p className="text-xs text-foreground/70 truncate">
+                                {request.sender_profile.bio}
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-foreground/70 font-medium">Pending</span>
+                            {request.sender_profile && (
+                              <SafetyMenu
+                                onBlock={() => openBlockDialog(request.receiver_id, receiverUsername)}
+                                onReport={() => openReportDialog(request.receiver_id, receiverUsername)}
+                              />
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </motion.div>
+            )}
             
             {/* No Connections State */}
-            {pendingRequests.length === 0 && connections.length === 0 && (
+            {pendingRequests.length === 0 && sentRequests.length === 0 && connections.length === 0 && (
               <div className="text-center py-12">
                 <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Users className="w-12 h-12 text-primary" />

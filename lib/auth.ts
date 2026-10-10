@@ -444,6 +444,37 @@ export async function getPendingRequests(userId: string): Promise<ConnectionRequ
   return requestsWithProfiles;
 }
 
+export async function getSentRequests(userId: string): Promise<ConnectionRequestWithProfile[]> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from('connection_requests')
+    .select('*')
+    .eq('sender_id', userId)
+    .eq('status', 'pending')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching sent requests:', error);
+    return [];
+  }
+
+  // Fetch receiver previews using secure RPC
+  const requestsWithProfiles = await Promise.all(
+    (data || []).map(async (request) => {
+      const { data: receiverPreview } = await supabase
+        .rpc('get_pending_request_sender_preview', { request_id: request.id });
+      
+      return {
+        ...request,
+        sender_profile: receiverPreview as SenderPreview | undefined,
+      } as ConnectionRequestWithProfile;
+    })
+  );
+
+  return requestsWithProfiles;
+}
+
 export async function updateConnectionRequestStatus(requestId: string, status: 'accepted' | 'declined'): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient();
 
