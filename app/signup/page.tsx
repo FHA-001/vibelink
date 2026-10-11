@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { motion } from "framer-motion";
 import { Loader2, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,11 +10,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Logo } from "@/components/logo";
 import { signUp, getUserProfile } from "@/lib/auth";
+import { getSafeRedirectWithFallback } from "@/lib/redirect";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
-export default function SignUpPage() {
+function SignUpContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get('redirect');
+  const safeRedirect = getSafeRedirectWithFallback(redirect, '/my-card');
+  
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -67,18 +72,27 @@ export default function SignUpPage() {
     setIsLoading(true);
 
     try {
-      const result = await signUp(formData.email, formData.password);
+      const result = await signUp(formData.email, formData.password, safeRedirect);
 
       if (result.success && result.user) {
-        // Check if user has already completed their profile
-        const profile = await getUserProfile(result.user.id);
+        // Check if user has an active session (email confirmation not required)
+        const supabase = (await import('@/lib/supabse')).createClient();
+        const { data: { session } } = await supabase.auth.getSession();
         
-        if (profile) {
-          // User has completed profile, redirect to My Card
-          router.push("/my-card");
+        if (session) {
+          // User has active session, check profile completion
+          const profile = await getUserProfile(result.user.id);
+          
+          if (profile) {
+            // User has completed profile, redirect to validated destination
+            router.push(safeRedirect);
+          } else {
+            // User needs to complete profile, preserve redirect
+            router.push(`/complete-profile?redirect=${encodeURIComponent(safeRedirect)}`);
+          }
         } else {
-          // User needs to complete profile
-          router.push("/complete-profile");
+          // Email confirmation required - show message
+          setAuthError("Please check your email to confirm your account. You'll be redirected to your intended destination after confirmation.");
         }
       } else {
         setAuthError(result.error || "Sign up failed");
@@ -293,7 +307,10 @@ export default function SignUpPage() {
               {/* Sign In Link */}
               <div className="mt-6 text-center text-sm text-foreground/70">
                 Already have an account?{" "}
-                <Link href="/signin" className="text-primary hover:underline font-medium">
+                <Link 
+                  href={redirect ? `/signin?redirect=${encodeURIComponent(redirect)}` : "/signin"} 
+                  className="text-primary hover:underline font-medium"
+                >
                   Sign in
                 </Link>
               </div>
@@ -309,5 +326,13 @@ export default function SignUpPage() {
         </Link>
       </footer>
     </div>
+  );
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>}>
+      <SignUpContent />
+    </Suspense>
   );
 }

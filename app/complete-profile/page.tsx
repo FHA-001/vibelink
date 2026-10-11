@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { motion } from "framer-motion";
 import { Loader2, CheckCircle2, User, Briefcase, MessageSquare, Link as LinkIcon, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,11 +10,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Logo } from "@/components/logo";
 import { getCurrentUser, signOut, getUserProfile, saveUserProfile, isUsernameAvailable, ProfileVisibility } from "@/lib/auth";
+import { getSafeRedirectWithFallback } from "@/lib/redirect";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
-export default function CompleteProfilePage() {
+function CompleteProfileContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get('redirect');
+  const safeRedirect = getSafeRedirectWithFallback(redirect, '/my-card');
+  
   const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -68,8 +73,8 @@ export default function CompleteProfilePage() {
       // Check if user already has a profile
       const existingProfile = await getUserProfile(currentUser.id);
       if (existingProfile) {
-        // User already completed profile, redirect to My Card
-        router.push("/my-card");
+        // User already completed profile, redirect to validated destination
+        router.push(safeRedirect);
         return;
       }
       
@@ -185,8 +190,8 @@ export default function CompleteProfilePage() {
         return;
       }
 
-      // Redirect to My Card after successful save
-      router.push("/my-card");
+      // Redirect to validated destination after successful save
+      router.push(safeRedirect);
     } catch (error) {
       setAuthError("Failed to save profile");
     } finally {
@@ -554,5 +559,13 @@ export default function CompleteProfilePage() {
         </Link>
       </footer>
     </div>
+  );
+}
+
+export default function CompleteProfilePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>}>
+      <CompleteProfileContent />
+    </Suspense>
   );
 }

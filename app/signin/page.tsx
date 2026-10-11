@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Logo } from "@/components/logo";
 import { signIn, getUserProfile } from "@/lib/auth";
+import { getSafeRedirectWithFallback } from "@/lib/redirect";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -17,6 +18,7 @@ function SignInContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect');
+  const safeRedirect = getSafeRedirectWithFallback(redirect, '/my-card');
   
   const [formData, setFormData] = useState({
     email: "",
@@ -62,11 +64,11 @@ function SignInContent() {
         const profile = await getUserProfile(result.user.id);
         
         if (profile) {
-          // User has completed profile, redirect to redirect URL or My Card
-          router.push(redirect || "/my-card");
+          // User has completed profile, redirect to validated destination
+          router.push(safeRedirect);
         } else {
-          // User needs to complete profile
-          router.push("/complete-profile");
+          // User needs to complete profile, preserve redirect
+          router.push(`/complete-profile?redirect=${encodeURIComponent(safeRedirect)}`);
         }
       } else {
         setAuthError(result.error || "Sign in failed");
@@ -211,7 +213,10 @@ function SignInContent() {
               {/* Sign Up Link */}
               <div className="mt-6 text-center text-sm text-foreground/70">
                 Don't have an account?{" "}
-                <Link href="/signup" className="text-primary hover:underline font-medium">
+                <Link 
+                  href={redirect ? `/signup?redirect=${encodeURIComponent(redirect)}` : "/signup"} 
+                  className="text-primary hover:underline font-medium"
+                >
                   Sign up
                 </Link>
               </div>

@@ -40,3 +40,30 @@ export async function getProfileByUsernameServer(username: string): Promise<Conn
     return data as PublicProfile;
   }
 }
+
+/**
+ * Server-side check for whether the current authenticated user has a completed profile.
+ * Uses cookie-aware server Supabase client.
+ * This file is server-only and should not be imported by client components.
+ */
+export async function hasCompletedProfileServer(): Promise<boolean> {
+  const supabase = await createServerClient();
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return false;
+  }
+  
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('username, full_name, job_title, bio')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (error || !data) {
+    return false;
+  }
+
+  // Check if profile has required fields
+  return !!(data.username && data.full_name && data.job_title && data.bio);
+}

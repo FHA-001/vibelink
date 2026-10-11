@@ -55,12 +55,20 @@ export interface Profile extends ConnectedProfile {
   profile_visibility: ProfileVisibility;
 }
 
-export async function signUp(email: string, password: string): Promise<AuthResult> {
+export async function signUp(email: string, password: string, redirectTo?: string): Promise<AuthResult> {
   const supabase = createClient();
+  
+  // Always provide emailRedirectTo to avoid Supabase defaults
+  // QR signup: redirect to /u/B
+  // Normal signup: redirect to /my-card
+  const destination = redirectTo || '/my-card';
   
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
+    options: {
+      emailRedirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent(destination)}`,
+    },
   });
 
   if (error) {
