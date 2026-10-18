@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Profile, PublicProfile, ConnectedProfile } from "@/lib/auth";
 import { ProfileAvatar } from "./profile-avatar";
 import { ProfileTags } from "./profile-tags";
+import { SocialLinks } from "./social-links";
 import { SafetyMenu } from "./safety-menu";
 import { BlockDialog } from "./block-dialog";
 import { UnblockDialog } from "./unblock-dialog";
@@ -223,60 +224,59 @@ export function PublicProfilePreview({
             src={profile.profile_photo || undefined}
             name={profile.full_name || profile.username}
             size="xl"
-            className="mb-4"
+            className="mb-4 ring-4 ring-background"
           />
           <h1 className="text-2xl font-bold text-foreground text-center">
-            @{profile.username}
+            {profile.full_name || profile.username}
           </h1>
+          <p className="text-foreground/70 text-center text-sm">@{profile.username}</p>
           {profile.job_title && (
-            <p className="text-foreground/70 text-center">{profile.job_title}</p>
+            <p className="text-foreground/60 text-center text-sm mt-1">{profile.job_title}</p>
           )}
         </div>
       </div>
 
       {/* Profile Content */}
       <div className="px-6 pb-6 -mt-8">
-        <div className="bg-card rounded-2xl shadow-lg p-6 space-y-6">
+        <div className="bg-card rounded-2xl shadow-lg p-6 space-y-5">
           {/* Bio */}
           {profile.bio && (
-            <p className="text-foreground/80 text-center leading-relaxed">
-              {profile.bio}
-            </p>
-          )}
-
-          {/* Interests */}
-          {profile.interests && profile.interests.length > 0 && (
             <div>
-              <h3 className="text-sm font-semibold text-foreground mb-3">Interests</h3>
-              <ProfileTags tags={profile.interests} variant="primary" />
+              <p className="text-foreground/80 text-center leading-relaxed text-sm">
+                {profile.bio}
+              </p>
             </div>
           )}
 
           {/* Company/School */}
           {profile.company_school && (
             <div className="text-center">
-              <p className="text-foreground/70">{profile.company_school}</p>
+              <p className="text-foreground/60 text-sm">{profile.company_school}</p>
             </div>
           )}
 
-          {/* Full Name (if visible) */}
-          {profile.full_name && (
-            <div className="text-center">
-              <p className="text-foreground font-medium">{profile.full_name}</p>
+          {/* Interests */}
+          {profile.interests && profile.interests.length > 0 && (
+            <div>
+              <h3 className="text-xs font-semibold text-foreground/70 mb-2 uppercase tracking-wide">Interests</h3>
+              <ProfileTags tags={profile.interests} variant="primary" />
             </div>
           )}
+
+          {/* Social Links */}
+          <SocialLinks profile={profile} />
 
           {/* Know More Button */}
           {!isOwner && (
-            <div className="pt-4">
+            <div className="pt-2 border-t border-border">
               {connectionStatus === 'pending_sent' ? (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
-                  <Alert>
-                    <Clock className="h-4 w-4" />
-                    <AlertDescription>
+                  <Alert className="bg-amber-500/10 border-amber-500/20">
+                    <Clock className="h-4 w-4 text-amber-600" />
+                    <AlertDescription className="text-amber-700">
                       Request pending - waiting for response
                     </AlertDescription>
                   </Alert>
@@ -286,9 +286,9 @@ export function PublicProfilePreview({
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
-                  <Alert>
-                    <Clock className="h-4 w-4" />
-                    <AlertDescription>
+                  <Alert className="bg-blue-500/10 border-blue-500/20">
+                    <Clock className="h-4 w-4 text-blue-600" />
+                    <AlertDescription className="text-blue-700">
                       They sent you a connection request - check your Connections tab
                     </AlertDescription>
                   </Alert>
@@ -310,9 +310,9 @@ export function PublicProfilePreview({
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
-                  <Alert>
-                    <CheckCircle2 className="h-4 w-4" />
-                    <AlertDescription>
+                  <Alert className="bg-green-500/10 border-green-500/20">
+                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    <AlertDescription className="text-green-700">
                       Connection request sent! They'll be notified.
                     </AlertDescription>
                   </Alert>
@@ -331,7 +331,7 @@ export function PublicProfilePreview({
                   onClick={handleKnowMore}
                   disabled={isSending}
                   size="lg"
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 rounded-2xl font-medium transition-colors"
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-4 rounded-xl font-semibold transition-all hover:shadow-lg"
                 >
                   {isSending ? (
                     <>
@@ -339,7 +339,7 @@ export function PublicProfilePreview({
                       Sending...
                     </>
                   ) : (
-                    "Know More"
+                    "Connect"
                   )}
                 </Button>
               )}

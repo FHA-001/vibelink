@@ -1,11 +1,11 @@
 "use client";
 
 import { Globe, Link } from "lucide-react";
-import { ConnectedProfile } from "@/lib/auth";
+import { ConnectedProfile, PublicProfile } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 interface SocialLinksProps {
-  profile: ConnectedProfile;
+  profile: ConnectedProfile | PublicProfile;
   className?: string;
 }
 
