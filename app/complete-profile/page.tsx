@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { motion } from "framer-motion";
-import { Loader2, CheckCircle2, User, Briefcase, MessageSquare, Link as LinkIcon, Building2 } from "lucide-react";
+import { Loader2, CheckCircle2, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,15 +28,6 @@ function CompleteProfileContent() {
   const [formData, setFormData] = useState({
     username: "",
     fullName: "",
-    jobTitle: "",
-    companySchool: "",
-    bio: "",
-    interests: "",
-    website: "",
-    linkedin: "",
-    twitter: "",
-    github: "",
-    instagram: "",
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -102,22 +93,6 @@ function CompleteProfileContent() {
       newErrors.fullName = "Full name is required";
     }
 
-    if (!formData.jobTitle.trim()) {
-      newErrors.jobTitle = "Job title is required";
-    }
-
-    if (!formData.bio.trim()) {
-      newErrors.bio = "Bio is required";
-    } else if (formData.bio.length < 10) {
-      newErrors.bio = "Bio must be at least 10 characters";
-    } else if (formData.bio.length > 500) {
-      newErrors.bio = "Bio must be less than 500 characters";
-    }
-
-    if (formData.website && !/^https?:\/\/.+/.test(formData.website)) {
-      newErrors.website = "Please enter a valid URL (https://example.com)";
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -163,25 +138,10 @@ function CompleteProfileContent() {
     setIsSaving(true);
 
     try {
-      // Parse interests from comma-separated string (handles spaces properly)
-      const interestsArray = formData.interests
-        .split(",")
-        .map((item) => item.trim())
-        .filter((item) => item.length > 0);
-
       // Save the profile data to Supabase
       const result = await saveUserProfile(user.id, {
         username: formData.username,
         full_name: formData.fullName,
-        job_title: formData.jobTitle,
-        company_school: formData.companySchool,
-        bio: formData.bio,
-        interests: interestsArray,
-        website: formData.website,
-        linkedin: formData.linkedin,
-        twitter: formData.twitter,
-        github: formData.github,
-        instagram: formData.instagram,
         profile_visibility: defaultVisibility,
       });
 
@@ -257,7 +217,7 @@ function CompleteProfileContent() {
               </motion.div>
               <CardTitle className="text-2xl sm:text-3xl">Complete Your Profile</CardTitle>
               <CardDescription className="text-base">
-                Tell us a bit about yourself to get started
+                Just your username and full name to get started. Add more details anytime.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -355,177 +315,6 @@ function CompleteProfileContent() {
                   )}
                 </div>
 
-                {/* Job Title Field */}
-                <div className="space-y-2">
-                  <Label htmlFor="jobTitle" className="flex items-center gap-2">
-                    <Briefcase className="w-4 h-4" />
-                    Job Title *
-                  </Label>
-                  <Input
-                    id="jobTitle"
-                    name="jobTitle"
-                    type="text"
-                    placeholder="Product Designer"
-                    value={formData.jobTitle}
-                    onChange={handleChange}
-                    disabled={isSaving}
-                    aria-invalid={!!errors.jobTitle}
-                    aria-describedby={errors.jobTitle ? "jobtitle-error" : undefined}
-                  />
-                  {errors.jobTitle && (
-                    <p id="jobtitle-error" className="text-sm text-destructive">
-                      {errors.jobTitle}
-                    </p>
-                  )}
-                </div>
-
-                {/* Company/School Field */}
-                <div className="space-y-2">
-                  <Label htmlFor="companySchool" className="flex items-center gap-2">
-                    <Building2 className="w-4 h-4" />
-                    Company / School
-                  </Label>
-                  <Input
-                    id="companySchool"
-                    name="companySchool"
-                    type="text"
-                    placeholder="Company Inc. or University"
-                    value={formData.companySchool}
-                    onChange={handleChange}
-                    disabled={isSaving}
-                  />
-                </div>
-
-                {/* Bio Field */}
-                <div className="space-y-2">
-                  <Label htmlFor="bio" className="flex items-center gap-2">
-                    <MessageSquare className="w-4 h-4" />
-                    Bio *
-                  </Label>
-                  <textarea
-                    id="bio"
-                    name="bio"
-                    placeholder="Tell us about yourself..."
-                    value={formData.bio}
-                    onChange={handleChange}
-                    disabled={isSaving}
-                    rows={4}
-                    className="flex w-full rounded-2xl border border-border bg-background px-4 py-3 text-base ring-offset-background placeholder:text-foreground/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
-                    aria-invalid={!!errors.bio}
-                    aria-describedby={errors.bio ? "bio-error" : undefined}
-                  />
-                  <div className="flex justify-between">
-                    {errors.bio && (
-                      <p id="bio-error" className="text-sm text-destructive">
-                        {errors.bio}
-                      </p>
-                    )}
-                    <p className="text-sm text-foreground/50 ml-auto">
-                      {formData.bio.length}/500
-                    </p>
-                  </div>
-                </div>
-
-                {/* Interests Field */}
-                <div className="space-y-2">
-                  <Label htmlFor="interests" className="flex items-center gap-2">
-                    <MessageSquare className="w-4 h-4" />
-                    Interests (comma separated)
-                  </Label>
-                  <Input
-                    id="interests"
-                    name="interests"
-                    type="text"
-                    placeholder="Design, Technology, Music"
-                    value={formData.interests}
-                    onChange={handleChange}
-                    disabled={isSaving}
-                  />
-                  <p className="text-sm text-foreground/50">
-                    Separate multiple interests with commas
-                  </p>
-                </div>
-
-                {/* Website Field */}
-                <div className="space-y-2">
-                  <Label htmlFor="website" className="flex items-center gap-2">
-                    <LinkIcon className="w-4 h-4" />
-                    Website (Optional)
-                  </Label>
-                  <Input
-                    id="website"
-                    name="website"
-                    type="url"
-                    placeholder="https://yourwebsite.com"
-                    value={formData.website}
-                    onChange={handleChange}
-                    disabled={isSaving}
-                    aria-invalid={!!errors.website}
-                    aria-describedby={errors.website ? "website-error" : undefined}
-                  />
-                  {errors.website && (
-                    <p id="website-error" className="text-sm text-destructive">
-                      {errors.website}
-                    </p>
-                  )}
-                </div>
-
-                {/* Social Links */}
-                <div className="space-y-4">
-                  <Label className="text-base font-semibold">Social Links (Optional)</Label>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="linkedin" className="text-sm">LinkedIn</Label>
-                    <Input
-                      id="linkedin"
-                      name="linkedin"
-                      type="url"
-                      placeholder="https://linkedin.com/in/yourprofile"
-                      value={formData.linkedin}
-                      onChange={handleChange}
-                      disabled={isSaving}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="twitter" className="text-sm">Twitter</Label>
-                    <Input
-                      id="twitter"
-                      name="twitter"
-                      type="url"
-                      placeholder="https://twitter.com/yourhandle"
-                      value={formData.twitter}
-                      onChange={handleChange}
-                      disabled={isSaving}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="github" className="text-sm">GitHub</Label>
-                    <Input
-                      id="github"
-                      name="github"
-                      type="url"
-                      placeholder="https://github.com/yourusername"
-                      value={formData.github}
-                      onChange={handleChange}
-                      disabled={isSaving}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="instagram" className="text-sm">Instagram</Label>
-                    <Input
-                      id="instagram"
-                      name="instagram"
-                      type="url"
-                      placeholder="https://instagram.com/yourusername"
-                      value={formData.instagram}
-                      onChange={handleChange}
-                      disabled={isSaving}
-                    />
-                  </div>
-                </div>
 
                 {/* Submit Button */}
                 <Button

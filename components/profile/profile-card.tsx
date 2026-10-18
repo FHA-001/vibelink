@@ -179,14 +179,16 @@ export function ProfileCard({
       <div className="px-6 pb-6 -mt-8">
         <div className="bg-card rounded-2xl shadow-lg p-6 space-y-6">
           {/* Job Title & Company */}
-          <div className="text-center">
-            <p className="text-lg font-semibold text-foreground">
-              {profile.job_title}
-            </p>
-            {profile.company_school && (
-              <p className="text-foreground/70">{profile.company_school}</p>
-            )}
-          </div>
+          {profile.job_title && (
+            <div className="text-center">
+              <p className="text-lg font-semibold text-foreground">
+                {profile.job_title}
+              </p>
+              {profile.company_school && (
+                <p className="text-foreground/70">{profile.company_school}</p>
+              )}
+            </div>
+          )}
 
           {/* Bio */}
           {profile.bio && (

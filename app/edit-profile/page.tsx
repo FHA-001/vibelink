@@ -87,9 +87,9 @@ export default function EditProfilePage() {
       setFormData({
         username: userProfile.username,
         fullName: userProfile.full_name,
-        jobTitle: userProfile.job_title,
+        jobTitle: userProfile.job_title || "",
         companySchool: userProfile.company_school || "",
-        bio: userProfile.bio,
+        bio: userProfile.bio || "",
         interests: userProfile.interests?.join(", ") || "",
         website: userProfile.website || "",
         linkedin: userProfile.linkedin || "",
@@ -135,16 +135,17 @@ export default function EditProfilePage() {
       newErrors.fullName = "Full name is required";
     }
 
-    if (!formData.jobTitle.trim()) {
-      newErrors.jobTitle = "Job title is required";
+    // job_title and bio are now optional
+    if (formData.jobTitle.trim() && formData.jobTitle.length > 100) {
+      newErrors.jobTitle = "Job title must be less than 100 characters";
     }
 
-    if (!formData.bio.trim()) {
-      newErrors.bio = "Bio is required";
-    } else if (formData.bio.length < 10) {
-      newErrors.bio = "Bio must be at least 10 characters";
-    } else if (formData.bio.length > 500) {
-      newErrors.bio = "Bio must be less than 500 characters";
+    if (formData.bio.trim()) {
+      if (formData.bio.length < 10) {
+        newErrors.bio = "Bio must be at least 10 characters";
+      } else if (formData.bio.length > 500) {
+        newErrors.bio = "Bio must be less than 500 characters";
+      }
     }
 
     if (formData.website && !/^https?:\/\/.+/.test(formData.website)) {
@@ -209,12 +210,13 @@ export default function EditProfilePage() {
         .filter((item) => item.length > 0);
 
       // Save the profile data to Supabase
+      // For optional fields: undefined = unchanged, null = cleared, string = new value
       const result = await saveUserProfile(user.id, {
         username: formData.username,
         full_name: formData.fullName,
-        job_title: formData.jobTitle,
+        job_title: formData.jobTitle === "" ? null : formData.jobTitle,
         company_school: formData.companySchool,
-        bio: formData.bio,
+        bio: formData.bio === "" ? null : formData.bio,
         interests: interestsArray,
         website: formData.website,
         linkedin: formData.linkedin,
@@ -606,7 +608,7 @@ export default function EditProfilePage() {
                 <div className="space-y-2">
                   <Label htmlFor="jobTitle" className="flex items-center gap-2">
                     <Briefcase className="w-4 h-4" />
-                    Job Title *
+                    Job Title (Optional)
                   </Label>
                   <Input
                     id="jobTitle"
@@ -647,7 +649,7 @@ export default function EditProfilePage() {
                 <div className="space-y-2">
                   <Label htmlFor="bio" className="flex items-center gap-2">
                     <MessageSquare className="w-4 h-4" />
-                    Bio *
+                    Bio (Optional)
                   </Label>
                   <textarea
                     id="bio"

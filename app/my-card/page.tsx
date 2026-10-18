@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Loader2, Share2, Download, Edit, QrCode } from "lucide-react";
+import { Loader2, Share2, Download, Edit, QrCode, X, Sparkles } from "lucide-react";
 import { getCurrentUser, getUserProfile, signOut, Profile } from "@/lib/auth";
 import { ProfileCard } from "@/components/profile/profile-card";
 import { QRCode } from "@/components/profile/qr-code";
@@ -18,11 +18,19 @@ export default function MyCardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showQR, setShowQR] = useState(false);
   const [downloadError, setDownloadError] = useState("");
+  const [showReminder, setShowReminder] = useState(false);
   const qrRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     checkAuth();
   }, []);
+
+  useEffect(() => {
+    // Show reminder if profile is missing job_title or bio
+    if (profile && (!profile.job_title || !profile.bio)) {
+      setShowReminder(true);
+    }
+  }, [profile]);
 
   const checkAuth = async () => {
     try {
@@ -138,6 +146,47 @@ export default function MyCardPage() {
           Sign Out
         </button>
       </header>
+
+      {/* Profile Completion Reminder */}
+      {showReminder && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mx-4 sm:mx-6 mt-4 bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20 rounded-2xl p-4"
+        >
+          <div className="flex items-start gap-3">
+            <Sparkles className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-foreground mb-1">
+                Complete your profile to stand out
+              </p>
+              <p className="text-xs text-foreground/70 mb-3">
+                Add your job title and bio to help others know more about you
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleEdit}
+                  className="text-xs bg-primary hover:bg-primary/90 text-primary-foreground px-3 py-1.5 rounded-lg font-medium transition-colors"
+                >
+                  Add Details
+                </button>
+                <button
+                  onClick={() => setShowReminder(false)}
+                  className="text-xs text-foreground/60 hover:text-foreground px-3 py-1.5 rounded-lg transition-colors"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowReminder(false)}
+              className="text-foreground/50 hover:text-foreground transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </motion.div>
+      )}
 
       {/* Main Content */}
       <main className="flex-1 px-4 sm:px-6 py-6">

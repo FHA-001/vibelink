@@ -45,12 +45,12 @@ export interface ConnectedProfile extends PublicProfile {
 }
 
 // Owner profile type - what owner gets from direct profile query
-// All fields non-null where appropriate, includes internal fields
+// job_title and bio are now optional for simplified onboarding
 export interface Profile extends ConnectedProfile {
   full_name: string;
-  job_title: string;
+  job_title: string | null;
   company_school: string | null;
-  bio: string;
+  bio: string | null;
   updated_at: string;
   profile_visibility: ProfileVisibility;
 }
@@ -227,8 +227,9 @@ export async function getUserProfile(userId: string): Promise<Profile | null> {
   }
 
   // Check if profile is actually completed (has meaningful data)
+  // Only username and full_name are required for simplified onboarding
   const profile = data as Profile;
-  if (!profile.username || !profile.full_name || !profile.job_title || !profile.bio) {
+  if (!profile.username || !profile.full_name) {
     return null; // Profile exists but is not completed
   }
 
@@ -305,9 +306,9 @@ export async function getProfileByUsername(username: string): Promise<ConnectedP
 export async function saveUserProfile(userId: string, profileData: {
   username: string;
   full_name: string;
-  job_title: string;
+  job_title?: string | null;
   company_school?: string;
-  bio: string;
+  bio?: string | null;
   profile_photo?: string;
   interests?: string[];
   website?: string;
@@ -325,24 +326,50 @@ export async function saveUserProfile(userId: string, profileData: {
   let error;
   if (exists) {
     // Update existing profile
+    // For optional fields: null = explicitly cleared, string = new value (may be same as existing)
+    const updateData: {
+      username: string;
+      full_name: string;
+      company_school: string | null;
+      profile_photo: string | null;
+      interests: string[];
+      website: string | null;
+      linkedin: string | null;
+      twitter: string | null;
+      github: string | null;
+      instagram: string | null;
+      profile_visibility?: ProfileVisibility;
+      updated_at: string;
+      job_title?: string | null;
+      bio?: string | null;
+    } = {
+      username: profileData.username,
+      full_name: profileData.full_name,
+      company_school: profileData.company_school || null,
+      profile_photo: profileData.profile_photo || null,
+      interests: profileData.interests || [],
+      website: profileData.website || null,
+      linkedin: profileData.linkedin || null,
+      twitter: profileData.twitter || null,
+      github: profileData.github || null,
+      instagram: profileData.instagram || null,
+      profile_visibility: profileData.profile_visibility,
+      updated_at: new Date().toISOString(),
+    };
+
+    // Include job_title in update if provided (null to clear, string to set/change)
+    if (profileData.job_title !== undefined) {
+      updateData.job_title = profileData.job_title;
+    }
+
+    // Include bio in update if provided (null to clear, string to set/change)
+    if (profileData.bio !== undefined) {
+      updateData.bio = profileData.bio;
+    }
+
     const result = await supabase
       .from('profiles')
-      .update({
-        username: profileData.username,
-        full_name: profileData.full_name,
-        job_title: profileData.job_title,
-        company_school: profileData.company_school || null,
-        bio: profileData.bio,
-        profile_photo: profileData.profile_photo || null,
-        interests: profileData.interests || [],
-        website: profileData.website || null,
-        linkedin: profileData.linkedin || null,
-        twitter: profileData.twitter || null,
-        github: profileData.github || null,
-        instagram: profileData.instagram || null,
-        profile_visibility: profileData.profile_visibility,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updateData)
       .eq('id', userId);
     error = result.error;
   } else {
@@ -353,9 +380,9 @@ export async function saveUserProfile(userId: string, profileData: {
         id: userId,
         username: profileData.username,
         full_name: profileData.full_name,
-        job_title: profileData.job_title,
+        job_title: profileData.job_title || null,
         company_school: profileData.company_school || null,
-        bio: profileData.bio,
+        bio: profileData.bio || null,
         profile_photo: profileData.profile_photo || null,
         interests: profileData.interests || [],
         website: profileData.website || null,

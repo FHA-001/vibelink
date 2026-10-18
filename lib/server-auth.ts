@@ -56,7 +56,7 @@ export async function hasCompletedProfileServer(): Promise<boolean> {
   
   const { data, error } = await supabase
     .from('profiles')
-    .select('username, full_name, job_title, bio')
+    .select('username, full_name')
     .eq('id', user.id)
     .maybeSingle();
 
@@ -64,6 +64,6 @@ export async function hasCompletedProfileServer(): Promise<boolean> {
     return false;
   }
 
-  // Check if profile has required fields
-  return !!(data.username && data.full_name && data.job_title && data.bio);
+  // Check if profile has required fields (only username and full_name required)
+  return !!(data.username && data.full_name);
 }
