@@ -10,11 +10,12 @@ import { BlockDialog } from "@/components/profile/block-dialog";
 import { ReportDialog } from "@/components/profile/report-dialog";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { 
-  getCurrentUser, 
-  getPendingRequests, 
+import {
+  getCurrentUser,
+  getPendingRequests,
   getSentRequests,
-  updateConnectionRequestStatus, 
+  updateConnectionRequestStatus,
+  cancelConnectionRequest,
   ConnectionRequestWithProfile,
   getUserConnections,
   deleteConnection,
@@ -32,6 +33,7 @@ export default function ConnectionsPage() {
   const [blockDialogOpen, setBlockDialogOpen] = useState(false);
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<{ id: string; username: string } | null>(null);
+  const [cancellingRequestId, setCancellingRequestId] = useState<string | null>(null);
 
   useEffect(() => {
     checkAuth();
@@ -112,6 +114,25 @@ export default function ConnectionsPage() {
       }
     } catch (error) {
       console.error("Error declining request:", error);
+    }
+  };
+
+  const handleCancelRequest = async (requestId: string) => {
+    if (!confirm("Cancel this connection request?")) return;
+
+    setCancellingRequestId(requestId);
+
+    try {
+      const result = await cancelConnectionRequest(requestId);
+      if (result.success) {
+        loadSentRequests();
+      } else {
+        alert(`Failed to cancel request: ${result.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      alert("Failed to cancel request. Please try again.");
+    } finally {
+      setCancellingRequestId(null);
     }
   };
 
@@ -310,7 +331,9 @@ export default function ConnectionsPage() {
                   
                   <div className="space-y-3">
                     {sentRequests.map((request) => {
-                      const receiverUsername = request.sender_profile?.username || '';
+                      const receiverProfile = request.sender_profile;
+                      const receiverUsername = receiverProfile?.username || 'Unknown';
+                      const receiverFullName = receiverProfile?.full_name || '';
                       return (
                         <div
                           key={request.id}
@@ -318,17 +341,29 @@ export default function ConnectionsPage() {
                         >
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-foreground text-sm">
-                              @{receiverUsername}
+                              {receiverFullName ? `${receiverFullName} (@${receiverUsername})` : `@${receiverUsername}`}
                             </p>
-                            {request.sender_profile?.bio && (
+                            {receiverProfile?.bio && (
                               <p className="text-xs text-foreground/70 truncate">
-                                {request.sender_profile.bio}
+                                {receiverProfile.bio}
                               </p>
                             )}
                           </div>
                           <div className="flex items-center gap-2">
                             <span className="text-xs text-foreground/70 font-medium">Pending</span>
-                            {request.sender_profile && (
+                            <button
+                              onClick={() => handleCancelRequest(request.id)}
+                              disabled={cancellingRequestId === request.id}
+                              className="p-2 text-foreground/50 hover:text-destructive transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              aria-label="Cancel request"
+                            >
+                              {cancellingRequestId === request.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <X className="w-4 h-4" />
+                              )}
+                            </button>
+                            {receiverProfile && (
                               <SafetyMenu
                                 onBlock={() => openBlockDialog(request.receiver_id, receiverUsername)}
                                 onReport={() => openReportDialog(request.receiver_id, receiverUsername)}

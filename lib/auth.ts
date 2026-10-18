@@ -416,6 +416,7 @@ export interface ConnectionRequest {
 export interface SenderPreview {
   id: string;
   username: string;
+  full_name: string | null;
   profile_photo: string | null;
   bio: string | null;
 }
@@ -498,8 +499,8 @@ export async function getSentRequests(userId: string): Promise<ConnectionRequest
   const requestsWithProfiles = await Promise.all(
     (data || []).map(async (request) => {
       const { data: receiverPreview } = await supabase
-        .rpc('get_pending_request_sender_preview', { request_id: request.id });
-      
+        .rpc('get_pending_request_receiver_preview', { request_id: request.id });
+
       return {
         ...request,
         sender_profile: receiverPreview as SenderPreview | undefined,
@@ -647,6 +648,25 @@ export async function deleteConnection(connectionId: string): Promise<{ success:
 
   if (error) {
     return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function cancelConnectionRequest(requestId: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+
+  const { error, count } = await supabase
+    .from('connection_requests')
+    .delete({ count: 'exact' })
+    .eq('id', requestId);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  if (count !== 1) {
+    return { success: false, error: 'Request not found or cannot be cancelled' };
   }
 
   return { success: true };
