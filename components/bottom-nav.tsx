@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Home, Scan, Users, Settings, Bell, X, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { getCurrentUser, getUnreadNotificationCount, getUserNotifications, markNotificationAsRead, markAllNotificationsAsRead, Notification } from "@/lib/auth";
 
 interface NavItem {
@@ -23,6 +23,7 @@ const navItems: NavItem[] = [
 
 export function BottomNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -84,13 +85,33 @@ export function BottomNav() {
   const handleMarkAsRead = async (notificationId: string) => {
     try {
       await markNotificationAsRead(notificationId);
-      setNotifications(notifications.map(n => 
+      setNotifications(notifications.map(n =>
         n.id === notificationId ? { ...n, is_read: true } : n
       ));
       loadUnreadCount();
     } catch (error) {
       console.error("Error marking as read:", error);
     }
+  };
+
+  const handleNotificationClick = async (notification: Notification) => {
+    // Mark as read if unread (non-blocking for navigation)
+    if (!notification.is_read) {
+      try {
+        await handleMarkAsRead(notification.id);
+      } catch (error) {
+        console.error("Failed to mark notification as read:", error);
+        // Continue with navigation even if mark-as-read fails
+      }
+    }
+
+    // Close notification panel
+    setShowNotifications(false);
+
+    // Route to connections page for all supported notification types
+    // All three types (connection_request, connection_accepted, connection_declined)
+    // relate to connection requests, so routing to /connections is appropriate
+    router.push('/connections');
   };
 
   return (
@@ -200,7 +221,7 @@ export function BottomNav() {
                     "p-4 border-b border-border hover:bg-muted/50 transition-colors cursor-pointer",
                     !notification.is_read && "bg-primary/5"
                   )}
-                  onClick={() => !notification.is_read && handleMarkAsRead(notification.id)}
+                  onClick={() => handleNotificationClick(notification)}
                 >
                   <div className="flex items-start gap-3">
                     <div className={cn(
