@@ -7,6 +7,7 @@ import { getProfileByUsername, PublicProfile, ConnectedProfile, getCurrentUser, 
 import { PublicProfilePreview } from "@/components/profile/public-profile-preview";
 import { ProfileCard } from "@/components/profile/profile-card";
 import { Logo } from "@/components/logo";
+import { BottomNav } from "@/components/bottom-nav";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -128,10 +129,26 @@ export function PublicProfileClient({ params }: Props) {
     );
   }
 
+  const handleBack = () => {
+    // Always navigate to /connections for consistent behavior
+    // This works for all scenarios:
+    // - From /connections: returns to connections
+    // - From direct URL/QR: goes to connections (safe fallback)
+    // - From external site: goes to connections (avoids confusion)
+    router.push('/connections');
+  };
+
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col pb-20">
       {/* Header */}
       <header className="p-4 sm:p-6 flex items-center justify-between border-b border-border">
+        <button
+          onClick={handleBack}
+          className="text-foreground/70 hover:text-foreground transition-colors"
+          aria-label="Go back"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </button>
         <Link href="/">
           <Logo />
         </Link>
@@ -191,6 +208,9 @@ export function PublicProfileClient({ params }: Props) {
           </motion.div>
         </div>
       </main>
+
+      {/* Bottom Navigation */}
+      <BottomNav />
     </div>
   );
 }
