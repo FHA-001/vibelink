@@ -18,7 +18,7 @@ interface SafetyMenuProps {
 export function SafetyMenu({ onBlock, onReport, isBlocked, onUnblock }: SafetyMenuProps) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="text-foreground/70 hover:text-foreground transition-colors">
+      <DropdownMenuTrigger className="text-foreground/70 hover:text-foreground transition-colors" aria-label="More options">
         <MoreVertical className="w-5 h-5" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

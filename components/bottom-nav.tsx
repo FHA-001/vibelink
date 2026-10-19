@@ -167,6 +167,7 @@ export function BottomNav() {
                   }
                 }
               }}
+              aria-label={showNotifications ? "Close notifications" : `Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
               className={cn(
                 "flex flex-col items-center gap-1 px-1 sm:px-2 py-2 rounded-2xl transition-colors relative flex-1 min-w-0",
                 showNotifications
