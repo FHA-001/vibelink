@@ -1,7 +1,6 @@
 "use client";
 
 import { Logo } from "./logo";
-import { Link, Mail, Heart } from "lucide-react";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -25,11 +24,6 @@ export function Footer() {
     ],
   };
 
-  const socialLinks = [
-    { name: "Website", icon: Link, href: "#" },
-    { name: "Email", icon: Mail, href: "#" },
-    { name: "Contact", icon: Heart, href: "#" },
-  ];
 
   return (
     <footer className="bg-card border-t border-border py-12 px-4 sm:px-6 lg:px-8">
@@ -43,18 +37,6 @@ export function Footer() {
             <p className="text-sm text-foreground/70 mb-4">
               Break the ice. Build real connections.
             </p>
-            <div className="flex gap-4">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.name}
-                  href={social.href}
-                  className="text-foreground/50 hover:text-primary transition-colors"
-                  aria-label={social.name}
-                >
-                  <social.icon className="w-5 h-5" />
-                </a>
-              ))}
-            </div>
           </div>
 
           {/* Product links */}
