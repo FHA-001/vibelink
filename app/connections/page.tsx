@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Users, UserPlus, Check, X, Loader2, Trash2, Calendar, Clock } from "lucide-react";
+import { Users, UserPlus, Check, X, Loader2, Trash2, Calendar, Clock, Search, ArrowUpDown, MessageSquare, Tag, Plus, Edit2, Save } from "lucide-react";
 import { BottomNav } from "@/components/bottom-nav";
 import { Logo } from "@/components/logo";
 import { SafetyMenu } from "@/components/profile/safety-menu";
 import { BlockDialog } from "@/components/profile/block-dialog";
 import { ReportDialog } from "@/components/profile/report-dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -19,7 +21,17 @@ import {
   ConnectionRequestWithProfile,
   getUserConnections,
   deleteConnection,
-  ConnectionWithProfile
+  ConnectionWithProfile,
+  getConnectionNotesAndTags,
+  upsertConnectionNote,
+  deleteConnectionNote,
+  getUserTags,
+  createConnectionTag,
+  deleteConnectionTag,
+  assignTagToConnection,
+  removeTagFromConnection,
+  ConnectionNotesAndTags,
+  ConnectionTag
 } from "@/lib/auth";
 import { toast } from "@/components/ui/use-toast";
 
@@ -34,6 +46,17 @@ export default function ConnectionsPage() {
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<{ id: string; username: string } | null>(null);
   const [cancellingRequestId, setCancellingRequestId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "name_asc" | "name_desc">("newest");
+
+  // Notes and tags state
+  const [connectionNotes, setConnectionNotes] = useState<Record<string, ConnectionNotesAndTags>>({});
+  const [userTags, setUserTags] = useState<ConnectionTag[]>([]);
+  const [editingNoteConnectionId, setEditingNoteConnectionId] = useState<string | null>(null);
+  const [editingNoteText, setEditingNoteText] = useState("");
+  const [showTagDialog, setShowTagDialog] = useState(false);
+  const [newTagName, setNewTagName] = useState("");
+  const [selectedConnectionForTags, setSelectedConnectionForTags] = useState<string | null>(null);
 
   useEffect(() => {
     checkAuth();
@@ -44,6 +67,7 @@ export default function ConnectionsPage() {
       loadPendingRequests();
       loadSentRequests();
       loadConnections();
+      loadUserTags();
     }
   }, [user]);
 
@@ -85,8 +109,32 @@ export default function ConnectionsPage() {
     try {
       const userConnections = await getUserConnections(user.id);
       setConnections(userConnections);
+
+      // Load notes and tags for each connection
+      for (const connection of userConnections) {
+        const result = await getConnectionNotesAndTags(connection.id);
+        if (result.success && result.data) {
+          setConnectionNotes(prev => ({
+            ...prev,
+            [connection.id]: result.data!
+          }));
+        }
+      }
     } catch (error) {
       console.error("Error loading connections:", error);
+    }
+  };
+
+  const loadUserTags = async () => {
+    try {
+      const result = await getUserTags();
+      if (result.success && result.tags) {
+        setUserTags(result.tags);
+      }
+    } catch (error) {
+      console.error("Error loading user tags:", error);
+      // Set empty array as fallback if RPC doesn't exist yet (migration not applied)
+      setUserTags([]);
     }
   };
 
@@ -138,7 +186,7 @@ export default function ConnectionsPage() {
 
   const handleRemoveConnection = async (connectionId: string) => {
     if (!confirm("Are you sure you want to remove this connection?")) return;
-    
+
     try {
       const result = await deleteConnection(connectionId);
       if (result.success) {
@@ -146,6 +194,104 @@ export default function ConnectionsPage() {
       }
     } catch (error) {
       console.error("Error removing connection:", error);
+    }
+  };
+
+  // Notes handlers
+  const handleStartEditNote = (connectionId: string) => {
+    const currentNote = connectionNotes[connectionId]?.note || "";
+    setEditingNoteConnectionId(connectionId);
+    setEditingNoteText(currentNote);
+  };
+
+  const handleSaveNote = async (connectionId: string) => {
+    if (!editingNoteText.trim()) {
+      // Delete note if empty
+      const result = await deleteConnectionNote(connectionId);
+      if (result.success) {
+        setConnectionNotes(prev => ({
+          ...prev,
+          [connectionId]: { note: null, tags: prev[connectionId]?.tags || [] }
+        }));
+        setEditingNoteConnectionId(null);
+        setEditingNoteText("");
+      }
+      return;
+    }
+
+    const result = await upsertConnectionNote(connectionId, editingNoteText);
+    if (result.success) {
+      setConnectionNotes(prev => ({
+        ...prev,
+        [connectionId]: { note: editingNoteText, tags: prev[connectionId]?.tags || [] }
+      }));
+      setEditingNoteConnectionId(null);
+      setEditingNoteText("");
+    } else {
+      alert(`Failed to save note: ${result.error}`);
+    }
+  };
+
+  const handleCancelEditNote = () => {
+    setEditingNoteConnectionId(null);
+    setEditingNoteText("");
+  };
+
+  // Tags handlers
+  const handleCreateTag = async () => {
+    if (!newTagName.trim()) return;
+
+    const result = await createConnectionTag(newTagName.trim());
+    if (result.success) {
+      loadUserTags();
+      setNewTagName("");
+    } else {
+      alert(`Failed to create tag: ${result.error}`);
+    }
+  };
+
+  const handleDeleteTag = async (tagId: string) => {
+    if (!confirm("Delete this tag? It will be removed from all connections.")) return;
+
+    const result = await deleteConnectionTag(tagId);
+    if (result.success) {
+      loadUserTags();
+      // Reload connections to refresh tag assignments
+      loadConnections();
+    } else {
+      alert(`Failed to delete tag: ${result.error}`);
+    }
+  };
+
+  const handleAssignTag = async (connectionId: string, tagId: string) => {
+    const result = await assignTagToConnection(connectionId, tagId);
+    if (result.success) {
+      // Reload this connection's notes and tags
+      const notesResult = await getConnectionNotesAndTags(connectionId);
+      if (notesResult.success && notesResult.data) {
+        setConnectionNotes(prev => ({
+          ...prev,
+          [connectionId]: notesResult.data!
+        }));
+      }
+    } else {
+      alert(`Failed to assign tag: ${result.error}`);
+    }
+  };
+
+  const handleRemoveTag = async (connectionId: string, tagId: string) => {
+    const result = await removeTagFromConnection(connectionId, tagId);
+    if (result.success) {
+      // Reload this connection's notes and tags
+      const notesResult = await getConnectionNotesAndTags(connectionId);
+      if (notesResult.success && notesResult.data) {
+        setConnectionNotes(prev => ({
+          ...prev,
+          [connectionId]: notesResult.data!
+        }));
+      }
+    } else {
+      alert(`Failed to remove tag: ${result.error}`);
     }
   };
 
@@ -221,6 +367,46 @@ export default function ConnectionsPage() {
     setSelectedUser({ id: userId, username });
     setReportDialogOpen(true);
   };
+
+  // Filter and sort connections
+  const filteredAndSortedConnections = connections
+    .filter((connection) => {
+      if (!searchQuery.trim()) return true;
+
+      const profile = connection.other_user_profile;
+      const query = searchQuery.toLowerCase();
+
+      // Search in name, username, job title, company/school
+      const searchableFields = [
+        profile?.full_name || "",
+        profile?.username || "",
+        profile?.job_title || "",
+        profile?.company_school || "",
+      ].join(" ").toLowerCase();
+
+      return searchableFields.includes(query);
+    })
+    .sort((a, b) => {
+      const profileA = a.other_user_profile;
+      const profileB = b.other_user_profile;
+
+      switch (sortBy) {
+        case "newest":
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case "oldest":
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        case "name_asc":
+          const nameA = (profileA?.full_name || profileA?.username || "").toLowerCase();
+          const nameB = (profileB?.full_name || profileB?.username || "").toLowerCase();
+          return nameA.localeCompare(nameB);
+        case "name_desc":
+          const nameADesc = (profileA?.full_name || profileA?.username || "").toLowerCase();
+          const nameBDesc = (profileB?.full_name || profileB?.username || "").toLowerCase();
+          return nameBDesc.localeCompare(nameADesc);
+        default:
+          return 0;
+      }
+    });
 
   if (isLoading) {
     return (
@@ -401,65 +587,197 @@ export default function ConnectionsPage() {
                 transition={{ duration: 0.6, delay: 0.3 }}
                 className="mt-8"
               >
-                <h2 className="text-lg font-semibold text-foreground mb-4">My Connections ({connections.length})</h2>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-foreground">My Connections ({connections.length})</h2>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowTagDialog(true)}
+                    className="flex items-center gap-2"
+                  >
+                    <Tag className="w-4 h-4" />
+                    Manage Tags
+                  </Button>
+                </div>
+
+                {/* Search and Sort Controls */}
+                <div className="space-y-3 mb-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/50" />
+                    <Input
+                      type="text"
+                      placeholder="Search by name, username, job title..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10"
+                      aria-label="Search connections"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <ArrowUpDown className="w-4 h-4 text-foreground/50" />
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value as "newest" | "oldest" | "name_asc" | "name_desc")}
+                      className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      aria-label="Sort connections"
+                    >
+                      <option value="newest">Newest first</option>
+                      <option value="oldest">Oldest first</option>
+                      <option value="name_asc">Name (A-Z)</option>
+                      <option value="name_desc">Name (Z-A)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* No Results State */}
+                {filteredAndSortedConnections.length === 0 && searchQuery.trim() && (
+                  <div className="text-center py-8">
+                    <p className="text-foreground/70">No connections match your search.</p>
+                  </div>
+                )}
                 
                 <div className="space-y-3">
-                  {connections.map((connection) => (
-                    <Link
+                  {filteredAndSortedConnections.map((connection) => (
+                    <div
                       key={connection.id}
-                      href={`/u/${connection.other_user_profile?.username}`}
-                      className="block"
+                      className="bg-card rounded-xl p-4 shadow-sm border border-border hover:border-primary/30 transition-colors"
                     >
-                      <div className="bg-card rounded-xl p-4 shadow-sm border border-border hover:border-primary/30 transition-colors">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
-                            {connection.other_user_profile?.profile_photo ? (
-                              <img 
-                                src={connection.other_user_profile.profile_photo} 
-                                alt={connection.other_user_profile.full_name}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <span className="text-primary font-semibold">
-                                {connection.other_user_profile?.full_name?.charAt(0) || connection.other_user_profile?.username?.charAt(0)}
-                              </span>
-                            )}
-                          </div>
-                          
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-foreground text-sm">
+                      <div className="flex items-center gap-3">
+                        <Link
+                          href={`/u/${connection.other_user_profile?.username}`}
+                          className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0"
+                        >
+                          {connection.other_user_profile?.profile_photo ? (
+                            <img
+                              src={connection.other_user_profile.profile_photo}
+                              alt={connection.other_user_profile.full_name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-primary font-semibold">
+                              {connection.other_user_profile?.full_name?.charAt(0) || connection.other_user_profile?.username?.charAt(0)}
+                            </span>
+                          )}
+                        </Link>
+
+                        <div className="flex-1 min-w-0">
+                          <Link
+                            href={`/u/${connection.other_user_profile?.username}`}
+                            className="block"
+                          >
+                            <p className="font-medium text-foreground text-sm hover:text-primary transition-colors">
                               {connection.other_user_profile?.full_name || connection.other_user_profile?.username}
                             </p>
-                            <p className="text-xs text-foreground/70">
-                              {connection.other_user_profile?.job_title}
-                            </p>
-                            <div className="flex items-center gap-1 text-xs text-foreground/50 mt-1">
-                              <Calendar className="w-3 h-3" />
-                              <span>Connected {new Date(connection.created_at).toLocaleDateString()}</span>
+                          </Link>
+                          <p className="text-xs text-foreground/70">
+                            {connection.other_user_profile?.job_title}
+                          </p>
+                          <div className="flex items-center gap-1 text-xs text-foreground/50 mt-1">
+                            <Calendar className="w-3 h-3" />
+                            <span>Connected {new Date(connection.created_at).toLocaleDateString()}</span>
+                          </div>
+
+                          {/* Tags */}
+                          {connectionNotes[connection.id]?.tags && connectionNotes[connection.id].tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {connectionNotes[connection.id].tags.map((tag) => (
+                                <span
+                                  key={tag.id}
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-full"
+                                >
+                                  {tag.tag_name}
+                                  <button
+                                    onClick={() => handleRemoveTag(connection.id, tag.id)}
+                                    className="hover:text-destructive transition-colors"
+                                    aria-label={`Remove ${tag.tag_name} tag`}
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                </span>
+                              ))}
                             </div>
-                          </div>
-                          
-                          <div className="flex gap-2">
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault();
-                                handleRemoveConnection(connection.id);
-                              }}
-                              className="p-2 text-foreground/50 hover:text-destructive transition-colors"
-                              aria-label="Remove connection"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                            {connection.other_user_profile && (
-                              <SafetyMenu
-                                onBlock={() => openBlockDialog(connection.other_user_profile.id, connection.other_user_profile.username)}
-                                onReport={() => openReportDialog(connection.other_user_profile.id, connection.other_user_profile.username)}
+                          )}
+
+                          {/* Note */}
+                          {editingNoteConnectionId === connection.id ? (
+                            <div className="mt-2 space-y-2">
+                              <textarea
+                                value={editingNoteText}
+                                onChange={(e) => setEditingNoteText(e.target.value)}
+                                placeholder="Add a private note..."
+                                className="w-full px-2 py-1 text-xs border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+                                rows={2}
+                                aria-label="Edit connection note"
                               />
-                            )}
-                          </div>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => handleSaveNote(connection.id)}
+                                  className="text-xs text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
+                                  aria-label="Save note"
+                                >
+                                  <Save className="w-3 h-3" />
+                                  Save
+                                </button>
+                                <button
+                                  onClick={handleCancelEditNote}
+                                  className="text-xs text-foreground/50 hover:text-foreground transition-colors"
+                                  aria-label="Cancel editing note"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          ) : connectionNotes[connection.id]?.note ? (
+                            <div className="mt-2 p-2 bg-muted/30 rounded-md">
+                              <p className="text-xs text-foreground/70 italic">{connectionNotes[connection.id].note}</p>
+                              <button
+                                onClick={() => handleStartEditNote(connection.id)}
+                                className="mt-1 text-xs text-foreground/50 hover:text-primary transition-colors flex items-center gap-1"
+                                aria-label="Edit note"
+                              >
+                                <Edit2 className="w-3 h-3" />
+                                Edit
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => handleStartEditNote(connection.id)}
+                              className="mt-2 text-xs text-foreground/50 hover:text-primary transition-colors flex items-center gap-1"
+                              aria-label="Add note"
+                            >
+                              <MessageSquare className="w-3 h-3" />
+                              Add note
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="flex gap-2 flex-shrink-0">
+                          <button
+                            onClick={() => {
+                              setSelectedConnectionForTags(connection.id);
+                              setShowTagDialog(true);
+                            }}
+                            className="p-2 text-foreground/50 hover:text-primary transition-colors"
+                            aria-label="Add tags"
+                          >
+                            <Tag className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleRemoveConnection(connection.id)}
+                            className="p-2 text-foreground/50 hover:text-destructive transition-colors"
+                            aria-label="Remove connection"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                          {connection.other_user_profile && (
+                            <SafetyMenu
+                              onBlock={() => openBlockDialog(connection.other_user_profile.id, connection.other_user_profile.username)}
+                              onReport={() => openReportDialog(connection.other_user_profile.id, connection.other_user_profile.username)}
+                            />
+                          )}
                         </div>
                       </div>
-                    </Link>
+                    </div>
                   ))}
                 </div>
               </motion.div>
@@ -487,6 +805,106 @@ export default function ConnectionsPage() {
             onConfirm={handleReport}
           />
         </>
+      )}
+
+      {/* Tag Management Dialog */}
+      {showTagDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-card rounded-xl p-6 w-full max-w-md max-h-[80vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold text-foreground mb-4">
+              {selectedConnectionForTags ? 'Add Tags to Connection' : 'Manage Tags'}
+            </h3>
+
+            {/* Create new tag */}
+            <div className="flex gap-2 mb-4">
+              <Input
+                type="text"
+                placeholder="New tag name..."
+                value={newTagName}
+                onChange={(e) => setNewTagName(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleCreateTag();
+                  }
+                }}
+                aria-label="New tag name"
+              />
+              <Button
+                onClick={handleCreateTag}
+                disabled={!newTagName.trim()}
+                size="sm"
+              >
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+
+            {/* Tag list */}
+            <div className="space-y-2">
+              {userTags.length === 0 ? (
+                <p className="text-sm text-foreground/50 text-center py-4">
+                  No tags yet. Create one above.
+                </p>
+              ) : (
+                userTags.map((tag) => {
+                  const isAssigned = selectedConnectionForTags
+                    ? connectionNotes[selectedConnectionForTags]?.tags?.some(t => t.id === tag.id)
+                    : false;
+
+                  return (
+                    <div
+                      key={tag.id}
+                      className="flex items-center justify-between p-2 bg-muted/30 rounded-lg"
+                    >
+                      <span className="text-sm text-foreground">{tag.tag_name}</span>
+                      <div className="flex gap-2">
+                        {selectedConnectionForTags && (
+                          <button
+                            onClick={() => {
+                              if (isAssigned) {
+                                handleRemoveTag(selectedConnectionForTags, tag.id);
+                              } else {
+                                handleAssignTag(selectedConnectionForTags, tag.id);
+                              }
+                            }}
+                            className={`text-xs px-2 py-1 rounded ${
+                              isAssigned
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-background border border-border hover:border-primary/50'
+                            }`}
+                            aria-label={isAssigned ? 'Remove tag' : 'Assign tag'}
+                          >
+                            {isAssigned ? 'Assigned' : 'Assign'}
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDeleteTag(tag.id)}
+                          className="text-xs text-destructive hover:text-destructive/80"
+                          aria-label="Delete tag"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            <div className="flex justify-end mt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowTagDialog(false);
+                  setSelectedConnectionForTags(null);
+                  setNewTagName("");
+                }}
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

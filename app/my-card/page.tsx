@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Loader2, Share2, Download, Edit, QrCode, X, Sparkles } from "lucide-react";
+import { Loader2, Share2, Download, Edit, QrCode, X, Sparkles, User } from "lucide-react";
 import { getCurrentUser, getUserProfile, signOut, Profile } from "@/lib/auth";
 import { ProfileCard } from "@/components/profile/profile-card";
 import { QRCode } from "@/components/profile/qr-code";
@@ -135,13 +135,13 @@ export default function MyCardPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col pb-20">
       {/* Header */}
-      <header className="p-4 sm:p-6 flex items-center justify-between border-b border-border">
+      <header className="p-4 sm:p-6 flex items-center justify-between border-b border-border/50 bg-card/50 backdrop-blur-sm">
         <Link href="/">
           <Logo />
         </Link>
         <button
           onClick={handleSignOut}
-          className="text-foreground/70 hover:text-foreground text-sm font-medium"
+          className="text-foreground/70 hover:text-foreground text-sm font-medium transition-colors"
         >
           Sign Out
         </button>
@@ -166,7 +166,7 @@ export default function MyCardPage() {
               <div className="flex gap-2">
                 <button
                   onClick={handleEdit}
-                  className="text-xs bg-primary hover:bg-primary/90 text-primary-foreground px-3 py-1.5 rounded-lg font-medium transition-colors"
+                  className="text-xs bg-primary hover:bg-primary/90 text-primary-foreground px-3 py-1.5 rounded-lg font-medium transition-colors shadow-sm"
                 >
                   Add Details
                 </button>
@@ -196,7 +196,39 @@ export default function MyCardPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h1 className="text-2xl font-bold text-foreground mb-6">My Card</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">My Card</h1>
+            <p className="text-foreground/70 text-sm mb-6">Your digital identity, ready to share</p>
+
+            {/* Quick Navigation */}
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              <Link
+                href="/connections"
+                className="bg-card border border-border/50 rounded-xl p-3 text-center hover:border-primary/50 transition-colors shadow-sm"
+              >
+                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-2">
+                  <User className="w-4 h-4 text-primary" />
+                </div>
+                <span className="text-xs font-medium text-foreground">Connections</span>
+              </Link>
+              <Link
+                href="/edit-profile"
+                className="bg-card border border-border/50 rounded-xl p-3 text-center hover:border-primary/50 transition-colors shadow-sm"
+              >
+                <div className="w-8 h-8 bg-secondary/10 rounded-lg flex items-center justify-center mx-auto mb-2">
+                  <Edit className="w-4 h-4 text-secondary" />
+                </div>
+                <span className="text-xs font-medium text-foreground">Edit</span>
+              </Link>
+              <Link
+                href="/settings"
+                className="bg-card border border-border/50 rounded-xl p-3 text-center hover:border-primary/50 transition-colors shadow-sm"
+              >
+                <div className="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center mx-auto mb-2">
+                  <QrCode className="w-4 h-4 text-accent" />
+                </div>
+                <span className="text-xs font-medium text-foreground">Settings</span>
+              </Link>
+            </div>
 
             {/* Profile Card */}
             <ProfileCard
@@ -205,6 +237,8 @@ export default function MyCardPage() {
               onEdit={handleEdit}
               onShare={handleShare}
               onDownloadQR={handleDownloadQR}
+              showQR={true}
+              qrUrl={publicProfileUrl}
             />
 
             {/* QR Code Modal */}

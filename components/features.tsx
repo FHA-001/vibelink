@@ -1,13 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { 
-  User, 
-  QrCode, 
-  Share2, 
-  Download, 
-  History, 
-  Smartphone 
+import {
+  User,
+  QrCode,
+  Share2,
+  Download,
+  History,
+  Smartphone,
+  MessageSquare,
+  Tag
 } from "lucide-react";
 
 export function Features() {
@@ -41,6 +43,16 @@ export function Features() {
       icon: Smartphone,
       title: "Mobile Friendly",
       description: "Optimized for mobile devices. Your profile looks great on any screen size.",
+    },
+    {
+      icon: MessageSquare,
+      title: "Private Notes",
+      description: "Add private notes about your connections to remember where you met, context, and follow-ups. Notes are private to you and not shared with others.",
+    },
+    {
+      icon: Tag,
+      title: "Personal Tags",
+      description: "Organize your connections with personal tags like classmates, mentors, or colleagues. Access from your connections list or connected profiles.",
     },
   ];
 

@@ -672,6 +672,18 @@ export async function cancelConnectionRequest(requestId: string): Promise<{ succ
   return { success: true };
 }
 
+export async function getConnectionId(userA: string, userB: string): Promise<string | null> {
+  const supabase = createClient();
+
+  const { data: connection } = await supabase
+    .from('connections')
+    .select('id')
+    .or(`and(user_one_id.eq.${userA},user_two_id.eq.${userB}),and(user_one_id.eq.${userB},user_two_id.eq.${userA})`)
+    .maybeSingle();
+
+  return connection?.id || null;
+}
+
 export async function getConnectionStatus(userA: string, userB: string): Promise<'connected' | 'pending_sent' | 'pending_received' | 'declined' | 'none'> {
   const supabase = createClient();
 
@@ -957,4 +969,195 @@ export async function createProfileReport(
   }
 
   return { success: true };
+}
+
+// ============================================
+// CONNECTION NOTES AND TAGS TYPES
+// ============================================
+
+export interface ConnectionNote {
+  id: string;
+  user_id: string;
+  connection_id: string;
+  note: string;
+  updated_at: string;
+}
+
+export interface ConnectionTag {
+  id: string;
+  user_id: string;
+  tag_name: string;
+}
+
+export interface ConnectionTagAssignment {
+  id: string;
+  user_id: string;
+  connection_id: string;
+  tag_id: string;
+}
+
+export interface ConnectionNotesAndTags {
+  note: string | null;
+  tags: Array<{ id: string; tag_name: string }>;
+}
+
+// ============================================
+// CONNECTION NOTES CRUD
+// ============================================
+
+export async function upsertConnectionNote(
+  connectionId: string,
+  note: string
+): Promise<{ success: boolean; error?: string; noteId?: string }> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .rpc('upsert_connection_note', {
+      p_connection_id: connectionId,
+      p_note: note,
+    });
+
+  if (error) {
+    console.error('Error upserting connection note:', error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true, noteId: data };
+}
+
+export async function deleteConnectionNote(
+  connectionId: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .rpc('delete_connection_note', {
+      p_connection_id: connectionId,
+    });
+
+  if (error) {
+    console.error('Error deleting connection note:', error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+// ============================================
+// CONNECTION TAGS CRUD
+// ============================================
+
+export async function createConnectionTag(
+  tagName: string
+): Promise<{ success: boolean; error?: string; tagId?: string }> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .rpc('create_connection_tag', {
+      p_tag_name: tagName,
+    });
+
+  if (error) {
+    console.error('Error creating connection tag:', error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true, tagId: data };
+}
+
+export async function deleteConnectionTag(
+  tagId: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .rpc('delete_connection_tag', {
+      p_tag_id: tagId,
+    });
+
+  if (error) {
+    console.error('Error deleting connection tag:', error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function getUserTags(): Promise<{ success: boolean; error?: string; tags?: ConnectionTag[] }> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase.rpc('get_user_tags');
+
+  if (error) {
+    // Don't log error - expected when migration not applied yet
+    return { success: false, error: error.message };
+  }
+
+  return { success: true, tags: data as ConnectionTag[] };
+}
+
+// ============================================
+// TAG ASSIGNMENTS CRUD
+// ============================================
+
+export async function assignTagToConnection(
+  connectionId: string,
+  tagId: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .rpc('assign_tag_to_connection', {
+      p_connection_id: connectionId,
+      p_tag_id: tagId,
+    });
+
+  if (error) {
+    console.error('Error assigning tag to connection:', error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function removeTagFromConnection(
+  connectionId: string,
+  tagId: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .rpc('remove_tag_from_connection', {
+      p_connection_id: connectionId,
+      p_tag_id: tagId,
+    });
+
+  if (error) {
+    console.error('Error removing tag from connection:', error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+// ============================================
+// GET NOTES AND TAGS FOR CONNECTION
+// ============================================
+
+export async function getConnectionNotesAndTags(
+  connectionId: string
+): Promise<{ success: boolean; error?: string; data?: ConnectionNotesAndTags }> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .rpc('get_connection_notes_and_tags', {
+      p_connection_id: connectionId,
+    });
+
+  if (error) {
+    console.error('Error getting connection notes and tags:', error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true, data: data as ConnectionNotesAndTags };
 }

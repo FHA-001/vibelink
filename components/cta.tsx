@@ -14,12 +14,12 @@ export function CTA() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="relative bg-gradient-to-br from-primary via-primary/90 to-secondary rounded-3xl p-5 sm:p-8 lg:p-16 shadow-2xl overflow-hidden"
+          className="relative bg-gradient-to-br from-accent to-accent/80 rounded-3xl p-5 sm:p-8 lg:p-16 shadow-2xl overflow-hidden border border-border/50"
         >
           {/* Decorative elements */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-2xl" />
-          
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-secondary/10 rounded-full blur-2xl" />
+
           {/* Content */}
           <div className="relative z-10 text-center">
             <motion.div
@@ -27,9 +27,9 @@ export function CTA() {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-3 sm:px-4 py-2 mb-6"
+              className="inline-flex items-center gap-2 bg-primary/20 backdrop-blur-sm rounded-full px-3 sm:px-4 py-2 mb-6"
             >
-              <Sparkles className="w-4 h-4 text-white flex-shrink-0" />
+              <Sparkles className="w-4 h-4 text-primary flex-shrink-0" />
               <span className="text-white text-xs sm:text-sm font-medium">Start your journey today</span>
             </motion.div>
 
@@ -63,7 +63,7 @@ export function CTA() {
               <Link href="/welcome">
                 <Button
                   size="lg"
-                  className="w-full bg-white text-primary hover:bg-white/90 text-base px-4 sm:px-6 py-6 rounded-2xl shadow-lg hover:shadow-xl transition-all"
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground text-base px-4 sm:px-6 py-6 rounded-2xl shadow-lg shadow-primary/20 hover:shadow-xl transition-all"
                 >
                   Create Your VibeLink
                   <ArrowRight className="ml-2 h-5 w-5" />

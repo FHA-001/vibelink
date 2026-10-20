@@ -11,7 +11,8 @@ import { SafetyMenu } from "./safety-menu";
 import { BlockDialog } from "./block-dialog";
 import { UnblockDialog } from "./unblock-dialog";
 import { ReportDialog } from "./report-dialog";
-import { Calendar, MapPin } from "lucide-react";
+import { QRCode } from "./qr-code";
+import { Calendar, MapPin, Link as LinkIcon } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
 interface ProfileCardProps {
@@ -21,6 +22,8 @@ interface ProfileCardProps {
   onEdit?: () => void;
   onShare?: () => void;
   onDownloadQR?: () => void;
+  showQR?: boolean;
+  qrUrl?: string;
 }
 
 export function ProfileCard({
@@ -30,6 +33,8 @@ export function ProfileCard({
   onEdit,
   onShare,
   onDownloadQR,
+  showQR = false,
+  qrUrl,
 }: ProfileCardProps) {
   const router = useRouter();
   const [blockDialogOpen, setBlockDialogOpen] = useState(false);
@@ -147,10 +152,10 @@ export function ProfileCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="bg-card rounded-3xl shadow-xl overflow-hidden"
+      className="bg-card rounded-3xl shadow-xl overflow-hidden border border-border/50"
     >
       {/* Profile Header */}
-      <div className="relative bg-gradient-to-br from-primary/20 to-secondary/20 pt-8 pb-16 px-6">
+      <div className="relative bg-gradient-to-br from-accent to-accent/80 pt-10 pb-16 px-6">
         {!isOwner && (
           <div className="absolute top-4 right-4">
             <SafetyMenu
@@ -166,18 +171,18 @@ export function ProfileCard({
             src={profile.profile_photo || undefined}
             name={profile.full_name || profile.username}
             size="xl"
-            className="mb-4"
+            className="mb-4 ring-4 ring-white/20"
           />
-          <h1 className="text-2xl font-bold text-foreground text-center">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white text-center">
             {profile.full_name || profile.username}
           </h1>
-          <p className="text-foreground/70 text-center">@{profile.username}</p>
+          <p className="text-white/80 text-center mt-1">@{profile.username}</p>
         </div>
       </div>
 
       {/* Profile Content */}
-      <div className="px-6 pb-6 -mt-8">
-        <div className="bg-card rounded-2xl shadow-lg p-6 space-y-6">
+      <div className="px-6 pb-6">
+        <div className="bg-card rounded-2xl shadow-lg p-6 sm:p-8 space-y-6 border border-border/50 -mt-8">
           {/* Job Title & Company */}
           {profile.job_title && (
             <div className="text-center">
@@ -185,7 +190,7 @@ export function ProfileCard({
                 {profile.job_title}
               </p>
               {profile.company_school && (
-                <p className="text-foreground/70">{profile.company_school}</p>
+                <p className="text-foreground/70 mt-1">{profile.company_school}</p>
               )}
             </div>
           )}
@@ -208,21 +213,43 @@ export function ProfileCard({
           {/* Social Links */}
           <SocialLinks profile={profile} />
 
-          {/* Joined Date */}
-          {profile.created_at && (
-            <div className="flex items-center justify-center gap-2 text-xs text-foreground/50">
-              <Calendar className="w-4 h-4" />
-              <span>Joined {new Date(profile.created_at).toLocaleDateString()}</span>
+          {/* QR Code and Connect Panel */}
+          <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-4 sm:gap-6 pt-6 border-t border-border/50">
+            {/* QR Code */}
+            {showQR && qrUrl && (
+              <div className="flex-shrink-0">
+                <QRCode value={qrUrl} size={128} className="!p-2 !shadow-sm !border !border-border/50" />
+                <p className="text-xs text-foreground/50 text-center mt-2">Scan to connect</p>
+              </div>
+            )}
+
+            {/* Connect Panel */}
+            <div className="flex-shrink-0 text-center sm:text-left">
+              <div className="bg-gradient-to-br from-accent to-accent/80 rounded-2xl p-4 sm:p-5 shadow-md border border-border/50">
+                <h4 className="text-base font-semibold text-white mb-1">Let's connect</h4>
+                <p className="text-xs text-white/80 mb-3">Your next connection starts here.</p>
+                <div className="flex items-center justify-center sm:justify-start gap-2">
+                  <LinkIcon className="w-4 h-4 text-primary" />
+                  <span className="text-xs font-medium text-primary">VibeLink</span>
+                </div>
+              </div>
+              {/* Joined Date */}
+              {profile.created_at && (
+                <div className="flex items-center justify-center sm:justify-start gap-2 text-xs text-foreground/50 mt-3">
+                  <Calendar className="w-4 h-4 flex-shrink-0" />
+                  <span>Joined {new Date(profile.created_at).toLocaleDateString()}</span>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
 
         {/* Action Buttons */}
         {showActions && isOwner && (
-          <div className="mt-4 space-y-3">
+          <div className="mt-6 space-y-3">
             <button
               onClick={onShare}
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 rounded-2xl font-medium transition-colors"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 rounded-2xl font-medium transition-colors shadow-lg shadow-primary/20"
             >
               Share Profile
             </button>

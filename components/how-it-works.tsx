@@ -8,7 +8,7 @@ export function HowItWorks() {
     {
       icon: UserPlus,
       title: "Create Your Card",
-      description: "Design your beautiful digital profile with your photo, bio, and contact information in minutes.",
+      description: "Design your premium digital profile with your photo, bio, and contact information in minutes.",
     },
     {
       icon: QrCode,
@@ -17,8 +17,8 @@ export function HowItWorks() {
     },
     {
       icon: HeartHandshake,
-      title: "Build Real Connections",
-      description: "Let others scan your code to save your info and start meaningful conversations naturally.",
+      title: "Connect & Organize",
+      description: "Save contacts, add private notes, and organize with personal tags for meaningful relationships.",
     },
   ];
 
@@ -50,9 +50,9 @@ export function HowItWorks() {
               transition={{ duration: 0.6, delay: index * 0.1 }}
               className="relative"
             >
-              <div className="bg-card rounded-3xl p-8 shadow-lg hover:shadow-xl transition-shadow h-full">
+              <div className="bg-card rounded-3xl p-8 shadow-lg hover:shadow-xl transition-shadow h-full border border-border/50">
                 {/* Step number */}
-                <div className="absolute -top-4 -left-4 w-12 h-12 bg-primary rounded-2xl flex items-center justify-center text-white font-bold text-lg">
+                <div className="absolute -top-4 -left-4 w-12 h-12 bg-primary rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-primary/20">
                   {index + 1}
                 </div>
 
