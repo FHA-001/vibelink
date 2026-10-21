@@ -135,6 +135,9 @@ export default function TermsOfServicePage() {
                   <li>Not send unsolicited or inappropriate messages</li>
                   <li>Not use the platform for spam or harassment</li>
                 </ul>
+                <p>
+                  You may block other users to prevent interactions. Blocking removes connections and notifications between you and the blocked user.
+                </p>
               </div>
             </motion.div>
 
@@ -175,6 +178,9 @@ export default function TermsOfServicePage() {
                   <li>Collect or harvest user information</li>
                   <li>Reverse engineer or attempt to extract source code</li>
                 </ul>
+                <p>
+                  If you encounter inappropriate profiles or behavior, you may report them through the platform. Reports are processed to maintain platform safety and prevent abuse.
+                </p>
               </div>
             </motion.div>
 

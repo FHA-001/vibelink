@@ -55,13 +55,17 @@ export default function PrivacyPolicyPage() {
                   VibeLink collects the following information to provide our services:
                 </p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
-                  <li><strong>Account Information:</strong> Email address, user ID, password (encrypted), and authentication session data</li>
+                  <li><strong>Account Information:</strong> Email address (used for account creation, verification, authentication, and password recovery), user ID, password credentials securely handled by our authentication provider, and authentication session data. Your email address is never displayed publicly on your profile.</li>
                   <li><strong>Profile Information:</strong> Username, full name, job title, company/school, bio, interests, website, and social media links (LinkedIn, Twitter, GitHub, Instagram)</li>
                   <li><strong>Profile Photo:</strong> Optional profile photo uploaded by you</li>
                   <li><strong>Profile Privacy Preferences:</strong> Your settings for which profile fields are visible to others</li>
                   <li><strong>Connection Information:</strong> Your connections and connection request history</li>
                   <li><strong>Notification Data:</strong> Connection requests, acceptances, declines, and related notifications</li>
                   <li><strong>Security Data:</strong> Internal rate-limit and security data used to prevent abuse</li>
+                  <li><strong>Private Connection Notes:</strong> Personal notes you write about your connections. These notes are visible only to you and are not shared with the tagged connection or any other users.</li>
+                  <li><strong>Personal Tags:</strong> Custom tags you create to organize your connections. These tags are visible only to you and are not shared with tagged connections or any other users.</li>
+                  <li><strong>Blocking Information:</strong> Users you have blocked and users who have blocked you</li>
+                  <li><strong>Report Data:</strong> Reports you submit about inappropriate profiles</li>
                 </ul>
               </div>
             </motion.div>
@@ -99,8 +103,8 @@ export default function PrivacyPolicyPage() {
                 </p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li>Your username is public and used to access your profile</li>
-                  <li>Individual profile fields have privacy controls that you can adjust</li>
-                  <li>Some fields default to public visibility and others default to private</li>
+                  <li>Individual profile fields have privacy controls that you can adjust in Edit Profile</li>
+                  <li>By default, your profile photo, job title, company/school, bio, and interests are public. Your full name, website, and social links default to private.</li>
                   <li>Connected users may see more profile information than non-connected users</li>
                   <li>Your email address is never displayed publicly on your profile</li>
                 </ul>
@@ -124,6 +128,10 @@ export default function PrivacyPolicyPage() {
                   <li>Authenticate your account and maintain security</li>
                   <li>Implement rate limiting and abuse prevention measures</li>
                   <li>Send password recovery emails</li>
+                  <li>Store and display your private notes about connections for your personal reference</li>
+                  <li>Store and apply your personal tags to organize connections</li>
+                  <li>Enforce blocking preferences and remove connections/notifications when users block each other</li>
+                  <li>Process reports to maintain platform safety and prevent abuse</li>
                   <li>Operate and improve our services</li>
                 </ul>
               </div>
@@ -164,6 +172,10 @@ export default function PrivacyPolicyPage() {
                   <li>Your primary profile, connections, connection requests, and notifications are deleted</li>
                   <li>Your profile photo is deleted from storage</li>
                   <li>Your authentication account is deleted</li>
+                  <li>Rate-limit and security data associated with your account is deleted</li>
+                  <li>Blocked user relationships are deleted</li>
+                  <li>Reports submitted by you or about you are deleted</li>
+                  <li>Private connection notes and personal tags are deleted</li>
                   <li>This action is intended to be permanent</li>
                 </ul>
                 <p>
