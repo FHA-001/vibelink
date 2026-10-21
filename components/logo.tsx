@@ -1,47 +1,11 @@
 export function Logo({ className = "" }: { className?: string }) {
   return (
-    <svg
+    <img
+      src="/new-logo.png"
+      alt="VibeLink"
       className={className}
-      width="140"
-      height="40"
-      viewBox="0 0 140 40"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {/* VL - Bold and prominent */}
-      <text
-        x="5"
-        y="32"
-        fontFamily="Sora, sans-serif"
-        fontSize="32"
-        fontWeight="800"
-        fill="#C9A227"
-      >
-        VL
-      </text>
-      
-      {/* VibeLink Text - smaller and lighter */}
-      <text
-        x="45"
-        y="32"
-        fontFamily="Sora, sans-serif"
-        fontSize="18"
-        fontWeight="600"
-        fill="#334155"
-      >
-        Vibe
-      </text>
-      <text
-        x="87"
-        y="32"
-        fontFamily="Sora, sans-serif"
-        fontSize="18"
-        fontWeight="600"
-        fill="#C9A227"
-      >
-        Link
-      </text>
-    </svg>
+      style={{ maxWidth: '70px', height: 'auto' }}
+    />
   );
 }
 
