@@ -26,6 +26,14 @@ export const metadata: Metadata = {
   keywords: ['digital introduction', 'QR code', 'networking', 'connections', 'business cards', 'social networking'],
   authors: [{ name: 'VibeLink' }],
   creator: 'VibeLink',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'VibeLink',
+  },
+  formatDetection: {
+    telephone: false,
+  },
   openGraph: {
     type: 'website',
     locale: 'en_US',
@@ -63,6 +71,15 @@ export const metadata: Metadata = {
     // Add verification codes when available
     // google: 'your-google-verification-code',
     // yandex: 'your-yandex-verification-code',
+  },
+  icons: {
+    icon: [
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
   },
 };
 
