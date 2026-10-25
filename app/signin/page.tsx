@@ -29,6 +29,14 @@ function SignInContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState("");
 
+  // Prefill email from query parameter if present
+  useEffect(() => {
+    const emailParam = searchParams.get('email');
+    if (emailParam) {
+      setFormData(prev => ({ ...prev, email: emailParam }));
+    }
+  }, [searchParams]);
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 

@@ -1,7 +1,7 @@
 import { type EmailOtpType } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { type NextRequest } from 'next/server'
-import { createServerClient } from '@/lib/supabase-server'
+import { createServerClient, createServerClientWithResponse } from '@/lib/supabase-server'
 import { getSafeRedirectWithFallback } from '@/lib/redirect'
 import { hasCompletedProfileServer } from '@/lib/server-auth'
 
@@ -29,11 +29,15 @@ export async function GET(request: NextRequest) {
 
   const supabase = await createServerClient()
   let error = null
+  let userEmail = null
 
   // Handle PKCE code flow (Supabase email confirmation with {{ .ConfirmationURL }})
   if (code) {
     const result = await supabase.auth.exchangeCodeForSession(code)
     error = result.error
+    if (!error && result.data.user) {
+      userEmail = result.data.user.email
+    }
   }
   // Handle token_hash flow (legacy OTP verification)
   else if (token_hash && type) {
@@ -42,25 +46,37 @@ export async function GET(request: NextRequest) {
       token_hash,
     })
     error = result.error
+    if (!error && result.data.user) {
+      userEmail = result.data.user.email
+    }
   }
 
   if (!error) {
-    // For signup confirmation, check if user has completed profile
+    // For signup confirmation, redirect to login with email prefilled
     // Password recovery (type='recovery') should always go to /reset-password
     if (type === 'signup' || (code && !type)) {
-      const hasProfile = await hasCompletedProfileServer();
-      
-      if (!hasProfile) {
-        // User needs to complete profile, preserve the intended destination
-        const completeProfileUrl = new URL('/complete-profile', request.url)
-        if (next) {
-          completeProfileUrl.searchParams.set('redirect', next)
-        }
-        return NextResponse.redirect(completeProfileUrl)
+      // Create response and new client with response binding for signOut
+      const signinUrl = new URL('/signin', request.url)
+      if (userEmail) {
+        signinUrl.searchParams.set('email', userEmail)
       }
+      if (next) {
+        signinUrl.searchParams.set('redirect', safeNext)
+      }
+      const response = NextResponse.redirect(signinUrl)
+
+      // Create new client with response binding to capture cookie changes from signOut
+      const supabaseWithResponse = await createServerClientWithResponse(response)
+
+      // Sign out to require password re-entry
+      // Cookie changes are automatically applied to the response via setAll callback
+      // Use local scope to only clear the current session, not other devices
+      await supabaseWithResponse.auth.signOut({ scope: 'local' })
+
+      return response
     }
-    
-    // Redirect to the validated next URL
+
+    // Password recovery - redirect to reset-password with session intact
     const redirectUrl = new URL(safeNext, request.url)
     return NextResponse.redirect(redirectUrl)
   } else {
