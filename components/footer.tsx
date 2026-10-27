@@ -1,104 +1,69 @@
-"use client";
-
+import Link from "next/link";
 import { Logo } from "./logo";
+
+const footerLinks = {
+  Product: [
+    { name: "Features", href: "/features" },
+    { name: "How it works", href: "/how-it-works" },
+    { name: "Pricing", href: "/pricing" },
+    { name: "FAQ", href: "/faq" },
+  ],
+  Company: [
+    { name: "About", href: "/about" },
+    { name: "Careers", href: "/careers" },
+    { name: "Contact", href: "/contact" },
+  ],
+  Legal: [
+    { name: "Privacy Policy", href: "/privacy" },
+    { name: "Terms of Service", href: "/terms" },
+    { name: "Cookie Policy", href: "/cookies" },
+  ],
+};
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
 
-  const footerLinks = {
-    product: [
-      { name: "Features", href: "/features" },
-      { name: "How It Works", href: "/how-it-works" },
-      { name: "Pricing", href: "/pricing" },
-      { name: "FAQ", href: "/faq" },
-    ],
-    company: [
-      { name: "About", href: "/about" },
-      { name: "Careers", href: "/careers" },
-      { name: "Contact", href: "/contact" },
-    ],
-    legal: [
-      { name: "Privacy Policy", href: "/privacy" },
-      { name: "Terms of Service", href: "/terms" },
-      { name: "Cookie Policy", href: "/cookies" },
-    ],
-  };
-
-
   return (
-    <footer className="bg-card border-t border-border py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
-          {/* Logo and description */}
-          <div className="col-span-2 md:col-span-4 lg:col-span-1">
-            <a href="/" className="inline-block mb-4">
-              <Logo />
-            </a>
-            <p className="text-sm text-foreground/70 mb-4">
+    <footer className="relative overflow-hidden bg-navy text-ivory">
+      <div className="gold-rule" aria-hidden="true" />
+      <div className="mx-auto max-w-7xl px-4 pb-8 pt-16 sm:px-6 lg:px-8">
+        <div className="grid gap-12 lg:grid-cols-[1.4fr_2fr]">
+          <div className="max-w-sm">
+            <Link href="/" aria-label="VibeLink home" className="inline-block rounded-lg">
+              <Logo variant="light" />
+            </Link>
+            <p className="mt-5 text-lg font-heading leading-snug text-ivory">
               Break the ice. Build real connections.
+            </p>
+            <p className="mt-3 text-sm leading-relaxed text-ivory/70">
+              A digital card, a QR code and a private place to remember the people you meet.
             </p>
           </div>
 
-          {/* Product links */}
-          <div>
-            <h3 className="font-semibold text-foreground mb-4">Product</h3>
-            <ul className="space-y-3">
-              {footerLinks.product.map((link) => (
-                <li key={link.name}>
-                  <a
-                    href={link.href}
-                    className="text-sm text-foreground/70 hover:text-primary transition-colors"
-                  >
-                    {link.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Company links */}
-          <div>
-            <h3 className="font-semibold text-foreground mb-4">Company</h3>
-            <ul className="space-y-3">
-              {footerLinks.company.map((link) => (
-                <li key={link.name}>
-                  <a
-                    href={link.href}
-                    className="text-sm text-foreground/70 hover:text-primary transition-colors"
-                  >
-                    {link.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Legal links */}
-          <div>
-            <h3 className="font-semibold text-foreground mb-4">Legal</h3>
-            <ul className="space-y-3">
-              {footerLinks.legal.map((link) => (
-                <li key={link.name}>
-                  <a
-                    href={link.href}
-                    className="text-sm text-foreground/70 hover:text-primary transition-colors"
-                  >
-                    {link.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <nav aria-label="Footer" className="grid grid-cols-2 gap-8 sm:grid-cols-3">
+            {Object.entries(footerLinks).map(([group, links]) => (
+              <div key={group}>
+                <h2 className="font-heading text-sm font-semibold text-ivory">{group}</h2>
+                <ul className="mt-4 space-y-3">
+                  {links.map((link) => (
+                    <li key={link.name}>
+                      <Link
+                        href={link.href}
+                        className="text-sm text-ivory/70 transition-colors hover:text-primary focus-visible:text-primary"
+                      >
+                        {link.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </nav>
         </div>
 
-        {/* Bottom bar */}
-        <div className="pt-8 border-t border-border flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-foreground/50">
-            © {currentYear} VibeLink. All rights reserved.
-          </p>
-          <p className="text-sm text-foreground/50">
-            Made by FHA
-          </p>
+        <div className="mt-14 flex flex-col items-center justify-between gap-3 border-t border-ivory/15 pt-6 text-sm text-ivory/60 sm:flex-row">
+          <p>© {currentYear} VibeLink. All rights reserved.</p>
+          <p>Made by FHA</p>
         </div>
       </div>
     </footer>

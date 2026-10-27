@@ -42,7 +42,7 @@ export default function ContactPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Navigation />
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         {/* Hero Section */}
         <section className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
@@ -50,7 +50,7 @@ export default function ContactPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="text-4xl sm:text-5xl font-bold text-foreground leading-tight mb-6"
+              className="text-4xl sm:text-5xl font-semibold text-foreground leading-tight mb-6"
             >
               Get in touch
             </motion.h1>
@@ -58,7 +58,7 @@ export default function ContactPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-lg text-foreground/70"
+              className="text-lg text-muted-foreground"
             >
               Have questions or feedback? We'd love to hear from you.
             </motion.p>
@@ -132,14 +132,14 @@ export default function ContactPage() {
                     onChange={handleChange}
                     required
                     rows={6}
-                    className="flex w-full rounded-2xl border border-border bg-background px-4 py-3 text-base ring-offset-background placeholder:text-foreground/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[150px]"
+                    className="flex w-full rounded-2xl border border-border bg-background px-4 py-3 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[150px]"
                   />
                 </div>
 
                 <Button
                   type="submit"
                   size="lg"
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground text-base py-6 rounded-2xl"
+                  className="w-full bg-primary hover:bg-[#D4B13F] text-primary-foreground text-base"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
@@ -166,7 +166,7 @@ export default function ContactPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="text-3xl font-bold text-foreground mb-8 text-center"
+              className="text-3xl font-semibold text-foreground mb-8 text-center"
             >
               Other ways to reach us
             </motion.h2>
@@ -179,15 +179,15 @@ export default function ContactPage() {
                 className="bg-card rounded-2xl p-6 border border-border"
               >
                 <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
-                  <Mail className="w-6 h-6 text-primary" />
+                  <Mail className="w-6 h-6 text-gold" />
                 </div>
                 <h3 className="font-semibold text-foreground mb-2">Email</h3>
-                <p className="text-foreground/70 mb-4">
+                <p className="text-muted-foreground mb-4">
                   For general inquiries and support
                 </p>
                 <a
                   href="mailto:hello@vibelink.name.ng"
-                  className="text-primary hover:underline"
+                  className="text-gold hover:underline"
                 >
                   hello@vibelink.name.ng
                 </a>
@@ -200,17 +200,17 @@ export default function ContactPage() {
                 className="bg-card rounded-2xl p-6 border border-border"
               >
                 <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
-                  <MessageSquare className="w-6 h-6 text-primary" />
+                  <MessageSquare className="w-6 h-6 text-gold" />
                 </div>
                 <h3 className="font-semibold text-foreground mb-2">Social Media</h3>
-                <p className="text-foreground/70 mb-4">
+                <p className="text-muted-foreground mb-4">
                   Follow us for updates and announcements
                 </p>
                 <a
                   href="https://twitter.com/vibelink"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-primary hover:underline"
+                  className="text-gold hover:underline"
                 >
                   @vibelink
                 </a>
@@ -227,7 +227,7 @@ export default function ContactPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="text-foreground/70"
+              className="text-muted-foreground"
             >
               We typically respond to all inquiries within 24-48 hours. For urgent matters, please include "URGENT" in your subject line.
             </motion.p>

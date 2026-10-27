@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Loader2, LogOut, User, Key, Trash2, AlertTriangle, Shield, UserX } from "lucide-react";
 import { getCurrentUser, signOut, getUserProfile, deleteAccount, removeBlock, getMyBlockedUsers, BlockedUser, Profile } from "@/lib/auth";
 import { BottomNav } from "@/components/bottom-nav";
-import { Logo } from "@/components/logo";
+import { AppHeader } from "@/components/app-header";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -138,7 +138,7 @@ export default function SettingsPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <Loader2 className="w-8 h-8 animate-spin text-gold" />
       </div>
     );
   }
@@ -159,33 +159,29 @@ export default function SettingsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col pb-20">
+    <div className="page-canvas min-h-screen flex flex-col pb-24 md:pb-28">
       {/* Header */}
-      <header className="p-4 sm:p-6 border-b border-border">
-        <Link href="/">
-          <Logo />
-        </Link>
-      </header>
+      <AppHeader />
 
       {/* Main Content */}
-      <main className="flex-1 px-4 sm:px-6 py-6">
+      <main id="main-content" className="flex-1 px-4 sm:px-6 py-6">
         <div className="max-w-lg mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h1 className="text-2xl font-bold text-foreground mb-6">Settings</h1>
+            <h1 className="text-2xl font-semibold text-foreground mb-6">Settings</h1>
 
             {/* User Info */}
             {profile && (
               <div className="bg-card rounded-2xl p-4 mb-6 flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-white font-bold">
+                <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-navy font-semibold">
                   {profile.full_name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
                 </div>
                 <div>
                   <p className="font-semibold text-foreground">{profile.full_name}</p>
-                  <p className="text-sm text-foreground/70">@{profile.username}</p>
+                  <p className="text-sm text-muted-foreground">@{profile.username}</p>
                 </div>
               </div>
             )}
@@ -200,11 +196,11 @@ export default function SettingsPage() {
                 >
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-                      <item.icon className="w-5 h-5 text-primary" />
+                      <item.icon className="w-5 h-5 text-gold" />
                     </div>
                     <div className="flex-1">
                       <p className="font-medium text-foreground">{item.label}</p>
-                      <p className="text-sm text-foreground/70">{item.description}</p>
+                      <p className="text-sm text-muted-foreground">{item.description}</p>
                     </div>
                   </div>
                 </Link>
@@ -214,18 +210,18 @@ export default function SettingsPage() {
             {/* Blocked Users Section */}
             <div className="mt-6">
               <div className="flex items-center gap-2 mb-4">
-                <Shield className="w-5 h-5 text-primary" />
+                <Shield className="w-5 h-5 text-gold" />
                 <h2 className="text-lg font-semibold text-foreground">Blocked Users</h2>
               </div>
               
               {isLoadingBlocked ? (
                 <div className="bg-card rounded-2xl p-6 flex items-center justify-center">
-                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                  <Loader2 className="w-6 h-6 animate-spin text-gold" />
                 </div>
               ) : blockedUsers.length === 0 ? (
                 <div className="bg-card rounded-2xl p-6 text-center">
                   <UserX className="w-12 h-12 text-foreground/30 mx-auto mb-3" />
-                  <p className="text-foreground/70">No blocked users</p>
+                  <p className="text-muted-foreground">No blocked users</p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -295,14 +291,14 @@ export default function SettingsPage() {
                     <div className="w-12 h-12 bg-destructive/10 rounded-full flex items-center justify-center">
                       <AlertTriangle className="w-6 h-6 text-destructive" />
                     </div>
-                    <h2 className="text-xl font-bold text-foreground">Delete Account</h2>
+                    <h2 className="text-xl font-semibold text-foreground">Delete Account</h2>
                   </div>
 
-                  <p className="text-foreground/70 mb-4">
+                  <p className="text-muted-foreground mb-4">
                     This action is permanent and cannot be undone. All your data including:
                   </p>
 
-                  <ul className="text-sm text-foreground/70 mb-4 space-y-1 list-disc list-inside">
+                  <ul className="text-sm text-muted-foreground mb-4 space-y-1 list-disc list-inside">
                     <li>Profile information</li>
                     <li>Profile photo</li>
                     <li>Connections</li>
@@ -310,8 +306,8 @@ export default function SettingsPage() {
                     <li>Account access</li>
                   </ul>
 
-                  <p className="text-sm text-foreground/70 mb-4">
-                    Type <span className="font-mono font-bold">DELETE</span> to confirm:
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Type <span className="font-mono font-semibold">DELETE</span> to confirm:
                   </p>
 
                   <Input
@@ -371,7 +367,7 @@ export default function SettingsPage() {
                 <p className="text-foreground font-medium mb-2">
                   Account Deleted Successfully
                 </p>
-                <p className="text-sm text-foreground/70">
+                <p className="text-sm text-muted-foreground">
                   Redirecting to home...
                 </p>
               </motion.div>

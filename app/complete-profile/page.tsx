@@ -176,29 +176,29 @@ function CompleteProfileContent() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <Loader2 className="w-8 h-8 animate-spin text-gold" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="page-canvas min-h-screen flex flex-col">
       {/* Navigation */}
-      <nav className="p-4 sm:p-6 flex items-center justify-between">
+      <nav aria-label="Site" className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-5 sm:px-8">
         <Link href="/">
           <Logo />
         </Link>
         <Button
           variant="ghost"
           onClick={handleSignOut}
-          className="text-foreground/70 hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground"
         >
           Sign Out
         </Button>
       </nav>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8">
+      <main id="main-content" className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -213,7 +213,7 @@ function CompleteProfileContent() {
                 transition={{ duration: 0.6, delay: 0.2 }}
                 className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center mx-auto mb-4"
               >
-                <User className="w-8 h-8 text-white" />
+                <User className="w-8 h-8 text-navy" />
               </motion.div>
               <CardTitle className="text-2xl sm:text-3xl">Complete Your Profile</CardTitle>
               <CardDescription className="text-base">
@@ -269,7 +269,7 @@ function CompleteProfileContent() {
                     />
                     {isCheckingUsername && (
                       <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                        <Loader2 className="w-4 h-4 animate-spin text-foreground/50" />
+                        <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
                       </div>
                     )}
                   </div>
@@ -285,7 +285,7 @@ function CompleteProfileContent() {
                       ) : usernameAvailable === false ? (
                         <span className="text-destructive">Username taken</span>
                       ) : (
-                        <span className="text-foreground/50">Checking availability...</span>
+                        <span className="text-muted-foreground">Checking availability...</span>
                       )}
                     </p>
                   )}
@@ -320,7 +320,7 @@ function CompleteProfileContent() {
                 <Button
                   type="submit"
                   size="lg"
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 rounded-2xl"
+                  className="w-full bg-primary hover:bg-[#D4B13F] text-primary-foreground"
                   disabled={isSaving}
                 >
                   {isSaving ? (
@@ -342,8 +342,8 @@ function CompleteProfileContent() {
       </main>
 
       {/* Footer */}
-      <footer className="p-4 sm:p-6 text-center text-sm text-foreground/50">
-        <Link href="/" className="hover:text-primary transition-colors">
+      <footer className="p-4 sm:p-6 text-center text-sm text-muted-foreground">
+        <Link href="/" className="hover:text-gold transition-colors">
           Back to home
         </Link>
       </footer>
@@ -353,7 +353,7 @@ function CompleteProfileContent() {
 
 export default function CompleteProfilePage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>}>
+    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-gold" /></div>}>
       <CompleteProfileContent />
     </Suspense>
   );

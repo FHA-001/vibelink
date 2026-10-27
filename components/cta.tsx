@@ -1,78 +1,28 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { ArrowRight, Sparkles } from "lucide-react";
-import { Button } from "./ui/button";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { buttonVariants } from "./ui/button";
+import { Reveal } from "./motion";
 
 export function CTA() {
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-background">
-      <div className="max-w-4xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="relative bg-gradient-to-br from-accent to-accent/80 rounded-3xl p-5 sm:p-8 lg:p-16 shadow-2xl overflow-hidden border border-border/50"
-        >
-          {/* Decorative elements */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-secondary/10 rounded-full blur-2xl" />
-
-          {/* Content */}
-          <div className="relative z-10 text-center">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="inline-flex items-center gap-2 bg-primary/20 backdrop-blur-sm rounded-full px-3 sm:px-4 py-2 mb-6"
-            >
-              <Sparkles className="w-4 h-4 text-primary flex-shrink-0" />
-              <span className="text-white text-xs sm:text-sm font-medium">Start your journey today</span>
-            </motion.div>
-
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-2xl sm:text-3xl lg:text-5xl font-bold text-white mb-6 break-words"
-            >
-              Ready to make your next introduction unforgettable?
-            </motion.h2>
-
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="text-base sm:text-lg text-white/90 mb-8 max-w-2xl mx-auto"
-            >
-              Join thousands of professionals who are already transforming how they connect with others.
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-              className="w-full max-w-sm mx-auto"
-            >
-              <Link href="/welcome">
-                <Button
-                  size="lg"
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground text-base px-4 sm:px-6 py-6 rounded-2xl shadow-lg shadow-primary/20 hover:shadow-xl transition-all"
-                >
-                  Create Your VibeLink
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-            </motion.div>
-          </div>
-        </motion.div>
-      </div>
+    <section className="bg-card px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
+      <Reveal className="card-surface relative mx-auto max-w-5xl overflow-hidden rounded-3xl px-6 py-16 text-center shadow-2xl sm:px-12 lg:py-20">
+        <div className="gold-rule absolute inset-x-12 top-0" aria-hidden="true" />
+        <h2 className="mx-auto max-w-2xl font-heading text-3xl font-semibold text-ivory sm:text-4xl lg:text-5xl">
+          Make your next introduction easy to remember
+        </h2>
+        <p className="mx-auto mt-5 max-w-xl text-lg text-ivory/75">
+          Set up your card in a few minutes, then share it with a scan.
+        </p>
+        <div className="mt-9 flex justify-center">
+          <Link href="/welcome" className={buttonVariants({ size: "lg", className: "px-8" })}>
+            Create your VibeLink
+            <ArrowRight data-icon="inline-end" />
+          </Link>
+        </div>
+      </Reveal>
     </section>
   );
 }

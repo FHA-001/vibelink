@@ -1,142 +1,209 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { ArrowRight, QrCode, User, Mail, Link as LinkIcon } from "lucide-react";
-import { Button } from "./ui/button";
+import { useRef } from "react";
+import {
+  motion,
+  useMotionValue,
+  useSpring,
+  useTransform,
+  useReducedMotion,
+} from "framer-motion";
+import { ArrowRight, Globe, Link as LinkIcon, Mail } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import Link from "next/link";
+import { buttonVariants } from "./ui/button";
+import { Logo } from "./logo";
+
+const EASE = [0.22, 1, 0.36, 1] as const;
+
+/**
+ * The hero's one memorable moment: an example profile card that settles into place,
+ * then gets scanned once. It tilts gently toward a mouse pointer. The QR code is real
+ * and points at vibelink.name.ng.
+ */
+function ExampleCard() {
+  const reduce = useReducedMotion();
+  const ref = useRef<HTMLDivElement>(null);
+  const px = useMotionValue(0);
+  const py = useMotionValue(0);
+  const rotateY = useSpring(useTransform(px, [-0.5, 0.5], [-7, 7]), { stiffness: 140, damping: 18 });
+  const rotateX = useSpring(useTransform(py, [-0.5, 0.5], [6, -6]), { stiffness: 140, damping: 18 });
+
+  const handleMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (reduce || event.pointerType !== "mouse" || !ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    px.set((event.clientX - rect.left) / rect.width - 0.5);
+    py.set((event.clientY - rect.top) / rect.height - 0.5);
+  };
+  const handleLeave = () => {
+    px.set(0);
+    py.set(0);
+  };
+
+  return (
+    <div
+      ref={ref}
+      onPointerMove={handleMove}
+      onPointerLeave={handleLeave}
+      className="relative mx-auto w-full max-w-[22rem] sm:max-w-[24rem] [perspective:1200px]"
+    >
+      {/* Card stacked behind */}
+      <motion.div
+        aria-hidden="true"
+        initial={reduce ? false : { opacity: 0, rotate: 0, y: 24 }}
+        animate={{ opacity: 1, rotate: -6, y: 0 }}
+        transition={{ duration: 0.9, delay: 0.25, ease: EASE }}
+        className="absolute inset-x-3 -bottom-5 top-6 rounded-[1.75rem] border border-border bg-card shadow-xl"
+      />
+
+      <motion.div
+        initial={reduce ? false : { opacity: 0, y: 36, rotate: 3 }}
+        animate={{ opacity: 1, y: 0, rotate: 0 }}
+        transition={{ duration: 0.9, ease: EASE }}
+        style={reduce ? undefined : { rotateX, rotateY, transformStyle: "preserve-3d" }}
+        className="card-surface relative overflow-hidden rounded-[1.75rem] p-6 text-ivory shadow-2xl ring-1 ring-white/10 sm:p-7"
+      >
+        {/* Sheen, passes across once in a while */}
+        {!reduce && (
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-y-0 left-0 w-1/3 animate-sheen bg-gradient-to-r from-transparent via-white/15 to-transparent"
+          />
+        )}
+
+        <div className="flex items-center justify-between">
+          <Logo variant="light" markOnly className="[&_img]:h-7 [&_img]:w-7" />
+          <span className="rounded-full border border-white/20 px-2.5 py-1 text-[11px] font-medium text-ivory/80">
+            Example profile
+          </span>
+        </div>
+
+        <div className="mt-7 flex items-center gap-4">
+          <div
+            aria-hidden="true"
+            className="flex size-16 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary font-heading text-xl font-semibold text-navy ring-4 ring-white/15"
+          >
+            AE
+          </div>
+          <div className="min-w-0">
+            <p className="truncate font-heading text-xl font-semibold leading-tight text-ivory">
+              Ada Eze
+            </p>
+            <p className="text-sm text-ivory/70">@adaeze</p>
+          </div>
+        </div>
+
+        <div className="gold-rule my-5 opacity-80" aria-hidden="true" />
+
+        <p className="text-sm font-semibold text-ivory">Product Designer</p>
+        <p className="text-sm text-ivory/70">Studio Nine</p>
+        <p className="mt-3 text-sm leading-relaxed text-ivory/80">
+          Designing calm, useful software. Always happy to swap notes over coffee.
+        </p>
+
+        <ul className="mt-4 flex flex-wrap gap-2" aria-label="Interests">
+          {["Design systems", "Mentoring", "Fintech"].map((tag) => (
+            <li
+              key={tag}
+              className="rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium text-[#E9CF72]"
+            >
+              {tag}
+            </li>
+          ))}
+        </ul>
+
+        <div className="mt-6 flex items-end justify-between gap-4">
+          <div className="flex gap-2" aria-hidden="true">
+            {[Globe, LinkIcon, Mail].map((Icon, i) => (
+              <span
+                key={i}
+                className="flex size-9 items-center justify-center rounded-xl bg-white/10 text-ivory/80"
+              >
+                <Icon className="size-4" />
+              </span>
+            ))}
+          </div>
+
+          <div className="relative rounded-xl bg-ivory p-2">
+            <QRCodeSVG
+              value="https://vibelink.name.ng"
+              size={84}
+              level="M"
+              bgColor="#F8F7F3"
+              fgColor="#182D3A"
+              title="Example QR code linking to vibelink.name.ng"
+            />
+            {!reduce && (
+              <motion.span
+                aria-hidden="true"
+                initial={{ y: 0, opacity: 0 }}
+                animate={{ y: [0, 76, 0], opacity: [0, 1, 1, 0] }}
+                transition={{ delay: 1.6, duration: 2.2, ease: "easeInOut", times: [0, 0.5, 0.9, 1] }}
+                className="absolute inset-x-1.5 top-2 h-0.5 rounded-full bg-primary shadow-[0_0_12px_2px_rgb(201_165_43/0.7)]"
+              />
+            )}
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
 
 export function Hero() {
+  const reduce = useReducedMotion();
+  const rise = (delay: number) => ({
+    initial: reduce ? false : { opacity: 0, y: 18 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.7, delay, ease: EASE },
+  });
+
   return (
-    <section className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 bg-background">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Left side - Content */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center lg:text-left"
+    <section className="page-canvas relative overflow-hidden px-4 pb-20 pt-28 sm:px-6 sm:pt-32 lg:px-8 lg:pb-28 lg:pt-36">
+      <div className="mx-auto grid max-w-7xl items-center gap-16 lg:grid-cols-[1.15fr_1fr] lg:gap-10">
+        <div className="text-center lg:text-left">
+          <motion.h1
+            {...rise(0.05)}
+            className="font-heading text-[2.5rem] font-semibold leading-[1.05] tracking-tight text-navy sm:text-6xl lg:text-[4.25rem]"
           >
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-3xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6 break-words"
-            >
-              Your identity.
-              <br />
-              <span className="text-primary">One link.</span>
-              <br />
-              Every connection.
-            </motion.h1>
+            Your identity.
+            <br />
+            One link.
+            <br />
+            Every connection.
+          </motion.h1>
 
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-lg sm:text-xl text-foreground/70 mb-8 max-w-xl mx-auto lg:mx-0"
-            >
-              Create your premium digital card, share your QR code instantly, and build meaningful connections with private notes and personal tags.
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
-            >
-              <Link href="/welcome" className="w-full sm:w-auto">
-                <Button
-                  size="lg"
-                  className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground text-base px-4 sm:px-6 py-6 rounded-2xl shadow-lg shadow-primary/20"
-                >
-                  Get Started
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-              <Button
-                size="lg"
-                variant="outline"
-                className="w-full sm:w-auto border-2 border-border hover:border-primary/50 text-foreground text-base px-4 sm:px-6 py-6 rounded-2xl"
-              >
-                Learn More
-              </Button>
-            </motion.div>
-          </motion.div>
-
-          {/* Right side - Digital Profile Card Mockup */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="relative"
+            {...rise(0.15)}
+            aria-hidden="true"
+            className="gold-rule mx-auto mt-7 w-24 lg:mx-0"
+          />
+
+          <motion.p
+            {...rise(0.22)}
+            className="mx-auto mt-7 max-w-xl text-lg leading-relaxed text-muted-foreground sm:text-xl lg:mx-0"
           >
-            <div className="relative bg-card rounded-3xl shadow-2xl p-4 sm:p-6 max-w-md mx-auto border border-border/50">
-              {/* Profile Header */}
-              <div className="bg-accent rounded-2xl p-6 mb-6 -mx-4 sm:-mx-6 -mt-4 sm:-mt-6 pt-8 pb-16">
-                <div className="flex items-center justify-center mb-4">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/20 ring-4 ring-white/30 flex items-center justify-center">
-                    <User className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
-                  </div>
-                </div>
-                <h3 className="text-xl sm:text-2xl font-bold text-white text-center">Sarah Johnson</h3>
-                <p className="text-white/80 text-center text-sm">@sarahjohnson</p>
-              </div>
+            Build a digital card people can open with one scan. Then keep private notes and
+            tags about the people you meet, visible only to you.
+          </motion.p>
 
-              {/* Profile Content */}
-              <div className="px-2 sm:px-0 -mt-12">
-                <div className="bg-card rounded-2xl shadow-lg p-4 sm:p-6 border border-border/50">
-                  <p className="text-sm font-semibold text-foreground text-center mb-1">Product Designer</p>
-                  <p className="text-foreground/70 text-xs sm:text-sm text-center mb-4 leading-relaxed">
-                    Passionate about creating beautiful digital experiences.
-                  </p>
-
-                  {/* Contact Info */}
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center gap-2 text-xs sm:text-sm text-foreground/70">
-                      <Mail className="w-4 h-4 text-primary flex-shrink-0" />
-                      <span className="break-all">sarah@vibelink.com</span>
-                    </div>
-                  </div>
-
-                  {/* Social Links */}
-                  <div className="flex gap-2 justify-center">
-                    <a
-                      href="#"
-                      className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-primary/10 hover:bg-primary/20 flex items-center justify-center transition-colors"
-                    >
-                      <LinkIcon className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-                    </a>
-                    <a
-                      href="#"
-                      className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-secondary/10 hover:bg-secondary/20 flex items-center justify-center transition-colors"
-                    >
-                      <LinkIcon className="w-4 h-4 sm:w-5 sm:h-5 text-secondary" />
-                    </a>
-                  </div>
-                </div>
-              </div>
-
-              {/* Decorative elements */}
-              <div className="absolute -top-4 -right-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl" />
-              <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-secondary/10 rounded-full blur-2xl" />
-            </div>
-
-            {/* Floating elements */}
-            <motion.div
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -top-8 -right-8 bg-white rounded-2xl shadow-lg p-4 hidden sm:block border border-border/50"
+          <motion.div
+            {...rise(0.3)}
+            className="mt-9 flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start"
+          >
+            <Link href="/welcome" className={buttonVariants({ size: "lg", className: "sm:w-auto" })}>
+              Create your card
+              <ArrowRight data-icon="inline-end" />
+            </Link>
+            <Link
+              href="/how-it-works"
+              className={buttonVariants({ variant: "outline", size: "lg", className: "sm:w-auto" })}
             >
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                  <QrCode className="w-4 h-4 text-white" />
-                </div>
-                <span className="text-sm font-medium text-foreground">Scan to connect</span>
-              </div>
-            </motion.div>
+              See how it works
+            </Link>
           </motion.div>
         </div>
+
+        <ExampleCard />
       </div>
     </section>
   );

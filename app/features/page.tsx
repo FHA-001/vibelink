@@ -54,7 +54,7 @@ export default function FeaturesPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Navigation />
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         {/* Hero Section */}
         <section className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
@@ -62,7 +62,7 @@ export default function FeaturesPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="text-4xl sm:text-5xl font-bold text-foreground leading-tight mb-6"
+              className="text-4xl sm:text-5xl font-semibold text-foreground leading-tight mb-6"
             >
               Features designed for meaningful connections
             </motion.h1>
@@ -70,7 +70,7 @@ export default function FeaturesPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-lg text-foreground/70"
+              className="text-lg text-muted-foreground"
             >
               Everything you need to break the ice and build real-world relationships.
             </motion.p>
@@ -90,10 +90,10 @@ export default function FeaturesPage() {
                   className="bg-card rounded-2xl p-6 border border-border hover:border-primary/30 transition-colors"
                 >
                   <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
-                    <feature.icon className="w-6 h-6 text-primary" />
+                    <feature.icon className="w-6 h-6 text-gold" />
                   </div>
                   <h3 className="font-semibold text-foreground mb-2">{feature.title}</h3>
-                  <p className="text-foreground/70 text-sm">{feature.description}</p>
+                  <p className="text-muted-foreground text-sm">{feature.description}</p>
                 </motion.div>
               ))}
             </div>
@@ -108,7 +108,7 @@ export default function FeaturesPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="text-3xl font-bold text-foreground mb-12 text-center"
+              className="text-3xl font-semibold text-foreground mb-12 text-center"
             >
               Built for real-world connections
             </motion.h2>
@@ -124,11 +124,11 @@ export default function FeaturesPage() {
                 <div className="bg-card rounded-2xl p-6 border border-border">
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <QrCode className="w-5 h-5 text-primary" />
+                      <QrCode className="w-5 h-5 text-gold" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-foreground mb-2">Instant QR Code Generation</h3>
-                      <p className="text-foreground/70 text-sm">
+                      <p className="text-muted-foreground text-sm">
                         Your unique QR code is generated automatically when you create your profile. Download it, print it, or share it digitally.
                       </p>
                     </div>
@@ -138,11 +138,11 @@ export default function FeaturesPage() {
                 <div className="bg-card rounded-2xl p-6 border border-border">
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Shield className="w-5 h-5 text-primary" />
+                      <Shield className="w-5 h-5 text-gold" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-foreground mb-2">Privacy Controls</h3>
-                      <p className="text-foreground/70 text-sm">
+                      <p className="text-muted-foreground text-sm">
                         Your profile is public by username, but only connected users see your full details. Control your privacy with connection-based access.
                       </p>
                     </div>
@@ -152,11 +152,11 @@ export default function FeaturesPage() {
                 <div className="bg-card rounded-2xl p-6 border border-border">
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Bell className="w-5 h-5 text-primary" />
+                      <Bell className="w-5 h-5 text-gold" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-foreground mb-2">Smart Notifications</h3>
-                      <p className="text-foreground/70 text-sm">
+                      <p className="text-muted-foreground text-sm">
                         Stay informed with real-time notifications for connection requests, acceptances, and updates.
                       </p>
                     </div>
@@ -174,11 +174,11 @@ export default function FeaturesPage() {
                 <div className="bg-card rounded-2xl p-6 border border-border">
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Users className="w-5 h-5 text-primary" />
+                      <Users className="w-5 h-5 text-gold" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-foreground mb-2">Connection Management</h3>
-                      <p className="text-foreground/70 text-sm">
+                      <p className="text-muted-foreground text-sm">
                         Easily manage your connections. Accept requests, decline unwanted ones, and remove connections when needed.
                       </p>
                     </div>
@@ -188,11 +188,11 @@ export default function FeaturesPage() {
                 <div className="bg-card rounded-2xl p-6 border border-border">
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Smartphone className="w-5 h-5 text-primary" />
+                      <Smartphone className="w-5 h-5 text-gold" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-foreground mb-2">Mobile Optimized</h3>
-                      <p className="text-foreground/70 text-sm">
+                      <p className="text-muted-foreground text-sm">
                         Built for mobile devices. Scan QR codes with your phone camera and manage connections on the go.
                       </p>
                     </div>
@@ -202,11 +202,11 @@ export default function FeaturesPage() {
                 <div className="bg-card rounded-2xl p-6 border border-border">
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Zap className="w-5 h-5 text-primary" />
+                      <Zap className="w-5 h-5 text-gold" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-foreground mb-2">Quick Setup</h3>
-                      <p className="text-foreground/70 text-sm">
+                      <p className="text-muted-foreground text-sm">
                         Get started in minutes. Create your profile, generate your QR code, and start connecting right away.
                       </p>
                     </div>
@@ -225,7 +225,7 @@ export default function FeaturesPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="text-3xl sm:text-4xl font-bold text-foreground mb-6"
+              className="text-3xl sm:text-4xl font-semibold text-foreground mb-6"
             >
               Ready to start connecting?
             </motion.h2>
@@ -234,14 +234,14 @@ export default function FeaturesPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-lg text-foreground/70 mb-8"
+              className="text-lg text-muted-foreground mb-8"
             >
               Create your free VibeLink profile today and experience the future of digital introductions.
             </motion.p>
             <Link href="/welcome">
               <Button
                 size="lg"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground text-base px-8 py-6 rounded-2xl"
+                className="bg-primary hover:bg-[#D4B13F] text-primary-foreground text-base px-8 py-6 rounded-2xl"
               >
                 Get Started Free
               </Button>

@@ -120,14 +120,14 @@ function ResetPasswordContent() {
 
   if (isCheckingSession) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <nav className="p-4 sm:p-6">
+      <div className="page-canvas min-h-screen flex flex-col">
+        <nav aria-label="Site" className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-5 sm:px-8">
           <Link href="/">
             <Logo />
           </Link>
         </nav>
-        <main className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <main id="main-content" className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8">
+          <Loader2 className="w-8 h-8 animate-spin text-gold" />
         </main>
       </div>
     );
@@ -135,13 +135,13 @@ function ResetPasswordContent() {
 
   if (!hasValidSession) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <nav className="p-4 sm:p-6">
+      <div className="page-canvas min-h-screen flex flex-col">
+        <nav aria-label="Site" className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-5 sm:px-8">
           <Link href="/">
             <Logo />
           </Link>
         </nav>
-        <main className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8">
+        <main id="main-content" className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -161,21 +161,21 @@ function ResetPasswordContent() {
                   <p className="text-foreground font-medium mb-2">
                     Link Expired or Invalid
                   </p>
-                  <p className="text-sm text-foreground/70">
+                  <p className="text-sm text-muted-foreground">
                     {authError || "Please request a new password reset link"}
                   </p>
                 </div>
 
                 <Link
                   href="/forgot-password"
-                  className="block w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 rounded-2xl font-medium text-center transition-colors"
+                  className="block w-full bg-primary hover:bg-[#D4B13F] text-primary-foreground font-medium text-center transition-colors"
                 >
                   Request New Reset Link
                 </Link>
 
                 <Link
                   href="/signin"
-                  className="block w-full text-center text-sm text-foreground/70 hover:text-foreground transition-colors"
+                  className="block w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Back to Sign In
                 </Link>
@@ -188,16 +188,16 @@ function ResetPasswordContent() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="page-canvas min-h-screen flex flex-col">
       {/* Navigation */}
-      <nav className="p-4 sm:p-6">
+      <nav aria-label="Site" className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-5 sm:px-8">
         <Link href="/">
           <Logo />
         </Link>
       </nav>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8">
+      <main id="main-content" className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -248,13 +248,13 @@ function ResetPasswordContent() {
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/50 hover:text-foreground"
+                        className="absolute right-1.5 top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-navy"
                         aria-label={showPassword ? "Hide password" : "Show password"}
                       >
                         {showPassword ? (
-                          <EyeOff className="w-5 h-5" />
+                          <EyeOff className="size-5" />
                         ) : (
-                          <Eye className="w-5 h-5" />
+                          <Eye className="size-5" />
                         )}
                       </button>
                     </div>
@@ -283,13 +283,13 @@ function ResetPasswordContent() {
                       <button
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/50 hover:text-foreground"
+                        className="absolute right-1.5 top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-navy"
                         aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                       >
                         {showConfirmPassword ? (
-                          <EyeOff className="w-5 h-5" />
+                          <EyeOff className="size-5" />
                         ) : (
-                          <Eye className="w-5 h-5" />
+                          <Eye className="size-5" />
                         )}
                       </button>
                     </div>
@@ -304,7 +304,7 @@ function ResetPasswordContent() {
                   <Button
                     type="submit"
                     size="lg"
-                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 rounded-2xl"
+                    className="w-full bg-primary hover:bg-[#D4B13F] text-primary-foreground"
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -321,11 +321,11 @@ function ResetPasswordContent() {
                 <div className="space-y-6">
                   {/* Success Message */}
                   <div className="bg-primary/10 rounded-2xl p-6 text-center">
-                    <CheckCircle2 className="w-12 h-12 text-primary mx-auto mb-3" />
+                    <CheckCircle2 className="w-12 h-12 text-gold mx-auto mb-3" />
                     <p className="text-foreground font-medium mb-2">
                       Password Updated Successfully
                     </p>
-                    <p className="text-sm text-foreground/70">
+                    <p className="text-sm text-muted-foreground">
                       You can now sign in with your new password
                     </p>
                   </div>
@@ -333,7 +333,7 @@ function ResetPasswordContent() {
                   {/* Back to Sign In */}
                   <Link
                     href="/signin"
-                    className="block w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 rounded-2xl font-medium text-center transition-colors"
+                    className="block w-full bg-primary hover:bg-[#D4B13F] text-primary-foreground font-medium text-center transition-colors"
                   >
                     <ArrowLeft className="inline mr-2 h-5 w-5" />
                     Back to Sign In
@@ -346,8 +346,8 @@ function ResetPasswordContent() {
       </main>
 
       {/* Footer */}
-      <footer className="p-4 sm:p-6 text-center text-sm text-foreground/50">
-        <Link href="/" className="hover:text-primary transition-colors">
+      <footer className="p-4 sm:p-6 text-center text-sm text-muted-foreground">
+        <Link href="/" className="hover:text-gold transition-colors">
           Back to home
         </Link>
       </footer>
@@ -357,7 +357,7 @@ function ResetPasswordContent() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>}>
+    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-gold" /></div>}>
       <ResetPasswordContent />
     </Suspense>
   );

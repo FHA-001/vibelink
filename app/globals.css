@@ -46,28 +46,73 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  --color-gold: var(--gold-ink);
+  --color-teal-ink: var(--teal-ink);
+  --color-navy: var(--navy);
+  --color-ivory: var(--ivory);
+  --color-success: var(--success);
+}
+
+/* Navy-tinted, softer elevation scale. Replaces Tailwind's neutral grey shadows app-wide. */
+@theme static {
+  --shadow-xs: 0 1px 2px rgb(24 45 58 / 0.05);
+  --shadow-sm: 0 1px 2px rgb(24 45 58 / 0.05), 0 1px 3px rgb(24 45 58 / 0.06);
+  --shadow-md: 0 2px 4px rgb(24 45 58 / 0.04), 0 6px 14px -4px rgb(24 45 58 / 0.08);
+  --shadow-lg: 0 2px 6px rgb(24 45 58 / 0.04), 0 14px 28px -8px rgb(24 45 58 / 0.12);
+  --shadow-xl: 0 4px 10px rgb(24 45 58 / 0.05), 0 24px 44px -12px rgb(24 45 58 / 0.18);
+  --shadow-2xl: 0 8px 16px rgb(24 45 58 / 0.06), 0 40px 72px -20px rgb(24 45 58 / 0.28);
+  --shadow-card: 0 1px 0 rgb(255 255 255 / 0.8) inset, 0 1px 2px rgb(24 45 58 / 0.04), 0 12px 32px -12px rgb(24 45 58 / 0.14);
+  --shadow-gold: 0 1px 0 rgb(255 255 255 / 0.35) inset, 0 6px 16px -6px rgb(201 165 43 / 0.55);
+  --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-shimmer: shimmer 1.6s ease-in-out infinite;
+  --animate-sheen: sheen 5.5s ease-in-out infinite;
+  --animate-scan: scan 2.4s ease-in-out infinite;
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  @keyframes sheen {
+    0%, 55% { transform: translateX(-120%) skewX(-18deg); opacity: 0; }
+    62% { opacity: 1; }
+    100% { transform: translateX(220%) skewX(-18deg); opacity: 0; }
+  }
+  @keyframes scan {
+    0%, 100% { transform: translateY(0); opacity: 0.0; }
+    10% { opacity: 1; }
+    50% { transform: translateY(var(--scan-distance, 120px)); opacity: 1; }
+    90% { opacity: 0; }
+  }
 }
 
 :root {
   /* Signature Premium Brand Colors */
+  --navy: #182D3A;
+  --ivory: #F8F7F3;
+  /* Deeper tones of the brand gold and teal for text on light surfaces (WCAG AA). */
+  --gold-ink: #7A5F08;
+  --teal-ink: #1E7A63;
+  --success: #1E7A63;
+
   --primary: #C9A52B;
-  --primary-foreground: #FFFFFF;
+  /* Navy on gold is 6:1. White on gold is 2.4:1 and fails AA. */
+  --primary-foreground: #182D3A;
   --secondary: #39A98D;
-  --secondary-foreground: #FFFFFF;
+  --secondary-foreground: #182D3A;
   --accent: #182D3A;
-  --accent-foreground: #FFFFFF;
+  --accent-foreground: #F8F7F3;
   --background: #F8F7F3;
-  --foreground: #475569;
+  --foreground: #2B3D4A;
   --card: #FFFFFF;
-  --card-foreground: #475569;
+  --card-foreground: #2B3D4A;
   --popover: #FFFFFF;
-  --popover-foreground: #475569;
-  --muted: #F1F5F9;
-  --muted-foreground: #64748B;
-  --destructive: #EF4444;
+  --popover-foreground: #2B3D4A;
+  --muted: #F0EEE6;
+  --muted-foreground: #566673;
+  --destructive: #B42318;
   --destructive-foreground: #FFFFFF;
-  --border: #E2E8F0;
-  --input: #E2E8F0;
+  --border: #E6E2D6;
+  --input: #D9D5C7;
   --ring: #C9A52B;
   --radius: 1rem;
 
@@ -90,6 +135,9 @@
 }
 
 .dark {
+  --gold-ink: #E0BC45;
+  --teal-ink: #5CCBAE;
+  --success: #5CCBAE;
   --background: #182D3A;
   --foreground: #F8F7F3;
   --card: #1E3A47;
@@ -97,9 +145,9 @@
   --popover: #1E3A47;
   --popover-foreground: #F8F7F3;
   --primary: #C9A52B;
-  --primary-foreground: #FFFFFF;
+  --primary-foreground: #182D3A;
   --secondary: #39A98D;
-  --secondary-foreground: #FFFFFF;
+  --secondary-foreground: #182D3A;
   --muted: #2A4A5A;
   --muted-foreground: #94A3B8;
   --accent: #C9A52B;
@@ -128,10 +176,108 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 5rem;
+  }
   body {
     @apply bg-background text-foreground font-sans;
+    font-feature-settings: "cv11", "ss01";
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-heading;
+    @apply font-heading text-navy dark:text-ivory;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
   }
+  p, li {
+    text-wrap: pretty;
+  }
+  ::selection {
+    background: rgb(201 165 43 / 0.28);
+    color: var(--navy);
+  }
+  :focus-visible {
+    outline: 2px solid var(--gold-ink);
+    outline-offset: 3px;
+  }
+  .dark :focus-visible {
+    outline-color: var(--primary);
+  }
+  button, [role="button"], a { -webkit-tap-highlight-color: transparent; }
+  button:not(:disabled), [role="button"] { cursor: pointer; }
+}
+
+@layer components {
+  /* Page canvas: ivory with a faint, off-centre warmth. Used by auth and utility screens. */
+  .page-canvas {
+    background-color: var(--background);
+    background-image:
+      radial-gradient(60rem 30rem at 85% -10%, rgb(201 165 43 / 0.10), transparent 60%),
+      radial-gradient(48rem 28rem at -10% 110%, rgb(57 169 141 / 0.09), transparent 60%);
+  }
+  .dark .page-canvas {
+    background-image:
+      radial-gradient(60rem 30rem at 85% -10%, rgb(201 165 43 / 0.10), transparent 60%),
+      radial-gradient(48rem 28rem at -10% 110%, rgb(57 169 141 / 0.12), transparent 60%);
+  }
+
+  /* Hairline gold rule used as a quiet structural device. */
+  .gold-rule {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgb(201 165 43 / 0.7) 20%, rgb(201 165 43 / 0.7) 80%, transparent);
+  }
+
+  /* Skeleton loading shimmer. */
+  .skeleton {
+    background: linear-gradient(90deg, var(--muted) 25%, rgb(255 255 255 / 0.65) 50%, var(--muted) 75%);
+    background-size: 200% 100%;
+    animation: var(--animate-shimmer);
+    border-radius: 0.75rem;
+  }
+
+  /* Subtle paper grain for the navy card surface. */
+  .card-surface {
+    background-color: var(--navy);
+    background-image:
+      radial-gradient(120% 90% at 100% 0%, rgb(57 169 141 / 0.22), transparent 55%),
+      radial-gradient(90% 70% at 0% 100%, rgb(201 165 43 / 0.18), transparent 60%);
+  }
+
+  .skip-link {
+    position: fixed;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 100;
+    transform: translateY(-200%);
+    background: var(--navy);
+    color: var(--ivory);
+    padding: 0.625rem 1rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: transform 0.2s var(--ease-out-expo);
+  }
+  .skip-link:focus { transform: translateY(0); }
+
+  /* Interactive card: lifts on hover, presses on active. Only apply to things that are clickable. */
+  .lift {
+    transition: transform 0.25s var(--ease-out-expo), box-shadow 0.25s var(--ease-out-expo), border-color 0.2s;
+  }
+  .lift:hover { transform: translateY(-2px); box-shadow: var(--shadow-xl); border-color: rgb(201 165 43 / 0.45); }
+  .lift:active { transform: translateY(0) scale(0.995); }
+}
+
+/* Respect reduced-motion everywhere, including CSS-only animation and smooth scrolling. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .lift:hover { transform: none; }
 }

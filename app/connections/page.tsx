@@ -4,12 +4,16 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Users, UserPlus, Check, X, Loader2, Trash2, Calendar, Clock, Search, ArrowUpDown, MessageSquare, Tag, Plus, Edit2, Save } from "lucide-react";
 import { BottomNav } from "@/components/bottom-nav";
-import { Logo } from "@/components/logo";
+import { AppHeader } from "@/components/app-header";
+import { ConfirmDialog } from "@/components/confirm-dialog";
+import { EmptyState } from "@/components/empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SafetyMenu } from "@/components/profile/safety-menu";
 import { BlockDialog } from "@/components/profile/block-dialog";
 import { ReportDialog } from "@/components/profile/report-dialog";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -46,6 +50,12 @@ export default function ConnectionsPage() {
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<{ id: string; username: string } | null>(null);
   const [cancellingRequestId, setCancellingRequestId] = useState<string | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{
+    title: string;
+    description: string;
+    confirmLabel: string;
+    run: () => void | Promise<void>;
+  } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"newest" | "oldest" | "name_asc" | "name_desc">("newest");
 
@@ -144,13 +154,22 @@ export default function ConnectionsPage() {
       if (result.success) {
         loadPendingRequests();
         loadConnections();
+        toast({ title: "Connection accepted", description: "You can now see their full profile." });
       } else {
         console.error("Accept request failed:", result.error);
-        alert(`Failed to accept request: ${result.error || 'Unknown error'}`);
+        toast({
+          title: "Could not accept the request",
+          description: result.error || "Please try again.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Error accepting request:", error);
-      alert("Failed to accept request. Please try again.");
+      toast({
+        title: "Could not accept the request",
+        description: "Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -159,41 +178,88 @@ export default function ConnectionsPage() {
       const result = await updateConnectionRequestStatus(requestId, 'declined');
       if (result.success) {
         loadPendingRequests();
+        toast({ title: "Request declined" });
+      } else {
+        toast({
+          title: "Could not decline the request",
+          description: result.error || "Please try again.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Error declining request:", error);
+      toast({
+        title: "Could not decline the request",
+        description: "Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
-  const handleCancelRequest = async (requestId: string) => {
-    if (!confirm("Cancel this connection request?")) return;
+  const handleCancelRequest = (requestId: string) => {
+    setConfirmAction({
+      title: "Cancel this request?",
+      description: "The other person will no longer see your connection request.",
+      confirmLabel: "Cancel request",
+      run: () => performCancelRequest(requestId),
+    });
+  };
 
+  const performCancelRequest = async (requestId: string) => {
     setCancellingRequestId(requestId);
 
     try {
       const result = await cancelConnectionRequest(requestId);
       if (result.success) {
         loadSentRequests();
+        toast({ title: "Request cancelled" });
       } else {
-        alert(`Failed to cancel request: ${result.error || 'Unknown error'}`);
+        toast({
+          title: "Could not cancel the request",
+          description: result.error || "Please try again.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
-      alert("Failed to cancel request. Please try again.");
+      toast({
+        title: "Could not cancel the request",
+        description: "Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setCancellingRequestId(null);
     }
   };
 
-  const handleRemoveConnection = async (connectionId: string) => {
-    if (!confirm("Are you sure you want to remove this connection?")) return;
+  const handleRemoveConnection = (connectionId: string) => {
+    setConfirmAction({
+      title: "Remove this connection?",
+      description: "You will no longer see each other's full profiles. Your private note and tags for this person will go with it.",
+      confirmLabel: "Remove connection",
+      run: () => performRemoveConnection(connectionId),
+    });
+  };
 
+  const performRemoveConnection = async (connectionId: string) => {
     try {
       const result = await deleteConnection(connectionId);
       if (result.success) {
         loadConnections();
+        toast({ title: "Connection removed" });
+      } else {
+        toast({
+          title: "Could not remove the connection",
+          description: result.error || "Please try again.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Error removing connection:", error);
+      toast({
+        title: "Could not remove the connection",
+        description: "Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -227,8 +293,9 @@ export default function ConnectionsPage() {
       }));
       setEditingNoteConnectionId(null);
       setEditingNoteText("");
+      toast({ title: "Note saved" });
     } else {
-      alert(`Failed to save note: ${result.error}`);
+      toast({ title: "Could not save the note", description: result.error || "Please try again.", variant: "destructive" });
     }
   };
 
@@ -246,20 +313,28 @@ export default function ConnectionsPage() {
       loadUserTags();
       setNewTagName("");
     } else {
-      alert(`Failed to create tag: ${result.error}`);
+      toast({ title: "Could not create the tag", description: result.error || "Please try again.", variant: "destructive" });
     }
   };
 
-  const handleDeleteTag = async (tagId: string) => {
-    if (!confirm("Delete this tag? It will be removed from all connections.")) return;
+  const handleDeleteTag = (tagId: string) => {
+    setConfirmAction({
+      title: "Delete this tag?",
+      description: "It will be removed from every connection it is assigned to.",
+      confirmLabel: "Delete tag",
+      run: () => performDeleteTag(tagId),
+    });
+  };
 
+  const performDeleteTag = async (tagId: string) => {
     const result = await deleteConnectionTag(tagId);
     if (result.success) {
       loadUserTags();
       // Reload connections to refresh tag assignments
       loadConnections();
+      toast({ title: "Tag deleted" });
     } else {
-      alert(`Failed to delete tag: ${result.error}`);
+      toast({ title: "Could not delete the tag", description: result.error || "Please try again.", variant: "destructive" });
     }
   };
 
@@ -275,7 +350,7 @@ export default function ConnectionsPage() {
         }));
       }
     } else {
-      alert(`Failed to assign tag: ${result.error}`);
+      toast({ title: "Could not assign the tag", description: result.error || "Please try again.", variant: "destructive" });
     }
   };
 
@@ -291,7 +366,7 @@ export default function ConnectionsPage() {
         }));
       }
     } else {
-      alert(`Failed to remove tag: ${result.error}`);
+      toast({ title: "Could not remove the tag", description: result.error || "Please try again.", variant: "destructive" });
     }
   };
 
@@ -410,30 +485,38 @@ export default function ConnectionsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="page-canvas flex min-h-screen flex-col pb-24" aria-busy="true">
+        <AppHeader />
+        <main id="main-content" className="flex-1 px-4 py-8 sm:px-6">
+          <span className="sr-only" role="status">Loading your connections</span>
+          <div className="mx-auto max-w-2xl space-y-4">
+            <Skeleton className="h-9 w-48" />
+            <Skeleton className="h-24 w-full rounded-2xl" />
+            <Skeleton className="h-24 w-full rounded-2xl" />
+            <Skeleton className="h-24 w-full rounded-2xl" />
+          </div>
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col pb-20">
+    <div className="page-canvas min-h-screen flex flex-col pb-24 md:pb-28">
       {/* Header */}
-      <header className="p-4 sm:p-6 border-b border-border">
-        <Link href="/">
-          <Logo />
-        </Link>
-      </header>
+      <AppHeader />
 
       {/* Main Content */}
-      <main className="flex-1 px-4 sm:px-6 py-6">
-        <div className="max-w-lg mx-auto">
+      <main id="main-content" className="flex-1 px-4 py-8 sm:px-6">
+        <div className="mx-auto max-w-2xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h1 className="text-2xl font-bold text-foreground mb-6">Connections</h1>
+            <h1 className="font-heading text-3xl font-semibold">Connections</h1>
+            <p className="mb-8 mt-1 text-muted-foreground">
+              The people you have met, with notes and tags only you can see.
+            </p>
 
             {/* Pending Requests Section */}
             {pendingRequests.length > 0 && (
@@ -443,11 +526,11 @@ export default function ConnectionsPage() {
                 transition={{ duration: 0.6, delay: 0.2 }}
                 className="mb-6"
               >
-                <div className="bg-card rounded-2xl shadow-lg p-4 border-2 border-primary/20">
+                <div className="bg-card rounded-2xl shadow-lg p-5 border border-primary/40">
                   <div className="flex items-center gap-2 mb-4">
-                    <UserPlus className="w-5 h-5 text-primary" />
-                    <h2 className="text-lg font-semibold text-foreground">
-                      Pending Requests ({pendingRequests.length})
+                    <UserPlus className="w-5 h-5 text-gold" />
+                    <h2 className="font-heading text-lg font-semibold">
+                      Pending requests ({pendingRequests.length})
                     </h2>
                   </div>
                   
@@ -464,7 +547,7 @@ export default function ConnectionsPage() {
                               @{senderUsername}
                             </p>
                             {request.sender_profile?.bio && (
-                              <p className="text-xs text-foreground/70 truncate">
+                              <p className="text-xs text-muted-foreground truncate">
                                 {request.sender_profile.bio}
                               </p>
                             )}
@@ -472,14 +555,14 @@ export default function ConnectionsPage() {
                           <div className="flex gap-2">
                             <button
                               onClick={() => handleAcceptRequest(request.id)}
-                              className="p-2 bg-green-500/10 hover:bg-green-500/20 text-green-600 rounded-lg transition-colors"
+                              className="flex size-10 items-center justify-center rounded-xl bg-secondary/15 text-teal-ink transition-colors hover:bg-secondary/25 active:scale-95"
                               aria-label="Accept request"
                             >
                               <Check className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => handleDeclineRequest(request.id)}
-                              className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-600 rounded-lg transition-colors"
+                              className="flex size-10 items-center justify-center rounded-xl bg-destructive/10 text-destructive transition-colors hover:bg-destructive/15 active:scale-95"
                               aria-label="Decline request"
                             >
                               <X className="w-4 h-4" />
@@ -507,11 +590,11 @@ export default function ConnectionsPage() {
                 transition={{ duration: 0.6, delay: 0.25 }}
                 className="mb-6"
               >
-                <div className="bg-card rounded-2xl shadow-lg p-4 border border-border">
+                <div className="bg-card rounded-2xl shadow-md p-5 border border-border">
                   <div className="flex items-center gap-2 mb-4">
-                    <Clock className="w-5 h-5 text-foreground/70" />
-                    <h2 className="text-lg font-semibold text-foreground">
-                      Sent Requests ({sentRequests.length})
+                    <Clock className="w-5 h-5 text-muted-foreground" />
+                    <h2 className="font-heading text-lg font-semibold">
+                      Sent requests ({sentRequests.length})
                     </h2>
                   </div>
                   
@@ -530,17 +613,17 @@ export default function ConnectionsPage() {
                               {receiverFullName ? `${receiverFullName} (@${receiverUsername})` : `@${receiverUsername}`}
                             </p>
                             {receiverProfile?.bio && (
-                              <p className="text-xs text-foreground/70 truncate">
+                              <p className="text-xs text-muted-foreground truncate">
                                 {receiverProfile.bio}
                               </p>
                             )}
                           </div>
                           <div className="flex items-center gap-2">
-                            <span className="text-xs text-foreground/70 font-medium">Pending</span>
+                            <span className="text-xs text-muted-foreground font-medium">Pending</span>
                             <button
                               onClick={() => handleCancelRequest(request.id)}
                               disabled={cancellingRequestId === request.id}
-                              className="p-2 text-foreground/50 hover:text-destructive transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="flex size-10 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:cursor-not-allowed disabled:opacity-50"
                               aria-label="Cancel request"
                             >
                               {cancellingRequestId === request.id ? (
@@ -566,17 +649,16 @@ export default function ConnectionsPage() {
             
             {/* No Connections State */}
             {pendingRequests.length === 0 && sentRequests.length === 0 && connections.length === 0 && (
-              <div className="text-center py-12">
-                <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Users className="w-12 h-12 text-primary" />
-                </div>
-                <h2 className="text-xl font-semibold text-foreground mb-2">
-                  No connections yet
-                </h2>
-                <p className="text-foreground/70 mb-6">
-                  Share your QR code to receive connection requests.
-                </p>
-              </div>
+              <EmptyState
+                icon={<Users />}
+                title="No connections yet"
+                description="Share your QR code or profile link. When someone sends a request, it will appear here."
+                action={
+                  <Link href="/my-card" className={buttonVariants({ size: "lg" })}>
+                    Show my QR code
+                  </Link>
+                }
+              />
             )}
 
             {/* My Connections Section */}
@@ -588,7 +670,7 @@ export default function ConnectionsPage() {
                 className="mt-8"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-foreground">My Connections ({connections.length})</h2>
+                  <h2 className="font-heading text-xl font-semibold">My connections ({connections.length})</h2>
                   <Button
                     variant="outline"
                     size="sm"
@@ -596,14 +678,14 @@ export default function ConnectionsPage() {
                     className="flex items-center gap-2"
                   >
                     <Tag className="w-4 h-4" />
-                    Manage Tags
+                    Manage tags
                   </Button>
                 </div>
 
                 {/* Search and Sort Controls */}
                 <div className="space-y-3 mb-4">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/50" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                       type="text"
                       placeholder="Search by name, username, job title..."
@@ -614,11 +696,11 @@ export default function ConnectionsPage() {
                     />
                   </div>
                   <div className="flex items-center gap-2">
-                    <ArrowUpDown className="w-4 h-4 text-foreground/50" />
+                    <ArrowUpDown className="w-4 h-4 text-muted-foreground" />
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value as "newest" | "oldest" | "name_asc" | "name_desc")}
-                      className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="flex-1 h-11 bg-card border border-input rounded-xl px-3 text-sm text-foreground focus:outline-none focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/25"
                       aria-label="Sort connections"
                     >
                       <option value="newest">Newest first</option>
@@ -632,7 +714,7 @@ export default function ConnectionsPage() {
                 {/* No Results State */}
                 {filteredAndSortedConnections.length === 0 && searchQuery.trim() && (
                   <div className="text-center py-8">
-                    <p className="text-foreground/70">No connections match your search.</p>
+                    <p className="text-muted-foreground">No connections match your search.</p>
                   </div>
                 )}
                 
@@ -640,7 +722,7 @@ export default function ConnectionsPage() {
                   {filteredAndSortedConnections.map((connection) => (
                     <div
                       key={connection.id}
-                      className="bg-card rounded-xl p-4 shadow-sm border border-border hover:border-primary/30 transition-colors"
+                      className="bg-card rounded-2xl p-4 shadow-sm border border-border hover:border-primary/40 hover:shadow-md transition-[border-color,box-shadow]"
                     >
                       <div className="flex items-center gap-3">
                         <Link
@@ -654,7 +736,7 @@ export default function ConnectionsPage() {
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <span className="text-primary font-semibold">
+                            <span className="text-gold font-semibold">
                               {connection.other_user_profile?.full_name?.charAt(0) || connection.other_user_profile?.username?.charAt(0)}
                             </span>
                           )}
@@ -665,14 +747,14 @@ export default function ConnectionsPage() {
                             href={`/u/${connection.other_user_profile?.username}`}
                             className="block"
                           >
-                            <p className="font-medium text-foreground text-sm hover:text-primary transition-colors">
+                            <p className="font-medium text-foreground text-sm hover:text-gold transition-colors">
                               {connection.other_user_profile?.full_name || connection.other_user_profile?.username}
                             </p>
                           </Link>
-                          <p className="text-xs text-foreground/70">
+                          <p className="text-xs text-muted-foreground">
                             {connection.other_user_profile?.job_title}
                           </p>
-                          <div className="flex items-center gap-1 text-xs text-foreground/50 mt-1">
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
                             <Calendar className="w-3 h-3" />
                             <span>Connected {new Date(connection.created_at).toLocaleDateString()}</span>
                           </div>
@@ -683,7 +765,7 @@ export default function ConnectionsPage() {
                               {connectionNotes[connection.id].tags.map((tag) => (
                                 <span
                                   key={tag.id}
-                                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-full"
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/10 text-gold text-xs rounded-full"
                                 >
                                   {tag.tag_name}
                                   <button
@@ -705,14 +787,14 @@ export default function ConnectionsPage() {
                                 value={editingNoteText}
                                 onChange={(e) => setEditingNoteText(e.target.value)}
                                 placeholder="Add a private note..."
-                                className="w-full px-2 py-1 text-xs border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+                                className="w-full px-3 py-2 text-sm bg-card border border-input rounded-xl focus:outline-none focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/25 resize-none"
                                 rows={2}
                                 aria-label="Edit connection note"
                               />
                               <div className="flex gap-2">
                                 <button
                                   onClick={() => handleSaveNote(connection.id)}
-                                  className="text-xs text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
+                                  className="text-xs text-gold hover:text-gold/80 transition-colors flex items-center gap-1"
                                   aria-label="Save note"
                                 >
                                   <Save className="w-3 h-3" />
@@ -720,7 +802,7 @@ export default function ConnectionsPage() {
                                 </button>
                                 <button
                                   onClick={handleCancelEditNote}
-                                  className="text-xs text-foreground/50 hover:text-foreground transition-colors"
+                                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                                   aria-label="Cancel editing note"
                                 >
                                   Cancel
@@ -729,10 +811,10 @@ export default function ConnectionsPage() {
                             </div>
                           ) : connectionNotes[connection.id]?.note ? (
                             <div className="mt-2 p-2 bg-muted/30 rounded-md">
-                              <p className="text-xs text-foreground/70 italic">{connectionNotes[connection.id].note}</p>
+                              <p className="text-xs text-muted-foreground italic">{connectionNotes[connection.id].note}</p>
                               <button
                                 onClick={() => handleStartEditNote(connection.id)}
-                                className="mt-1 text-xs text-foreground/50 hover:text-primary transition-colors flex items-center gap-1"
+                                className="mt-1 text-xs text-muted-foreground hover:text-gold transition-colors flex items-center gap-1"
                                 aria-label="Edit note"
                               >
                                 <Edit2 className="w-3 h-3" />
@@ -742,7 +824,7 @@ export default function ConnectionsPage() {
                           ) : (
                             <button
                               onClick={() => handleStartEditNote(connection.id)}
-                              className="mt-2 text-xs text-foreground/50 hover:text-primary transition-colors flex items-center gap-1"
+                              className="mt-2 text-xs text-muted-foreground hover:text-gold transition-colors flex items-center gap-1"
                               aria-label="Add note"
                             >
                               <MessageSquare className="w-3 h-3" />
@@ -757,14 +839,14 @@ export default function ConnectionsPage() {
                               setSelectedConnectionForTags(connection.id);
                               setShowTagDialog(true);
                             }}
-                            className="p-2 text-foreground/50 hover:text-primary transition-colors"
+                            className="flex size-10 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-primary/12 hover:text-gold"
                             aria-label="Add tags"
                           >
                             <Tag className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleRemoveConnection(connection.id)}
-                            className="p-2 text-foreground/50 hover:text-destructive transition-colors"
+                            className="flex size-10 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
                             aria-label="Remove connection"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -808,12 +890,24 @@ export default function ConnectionsPage() {
       )}
 
       {/* Tag Management Dialog */}
-      {showTagDialog && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-card rounded-xl p-6 w-full max-w-md max-h-[80vh] overflow-y-auto">
-            <h3 className="text-lg font-semibold text-foreground mb-4">
-              {selectedConnectionForTags ? 'Add Tags to Connection' : 'Manage Tags'}
-            </h3>
+      <Dialog
+        open={showTagDialog}
+        onOpenChange={(open) => {
+          if (!open) {
+            setShowTagDialog(false);
+            setSelectedConnectionForTags(null);
+            setNewTagName("");
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {selectedConnectionForTags ? 'Add tags to this connection' : 'Manage tags'}
+            </DialogTitle>
+            <DialogDescription>Tags are private to you. Other people never see them.</DialogDescription>
+          </DialogHeader>
+          <div>
 
             {/* Create new tag */}
             <div className="flex gap-2 mb-4">
@@ -842,7 +936,7 @@ export default function ConnectionsPage() {
             {/* Tag list */}
             <div className="space-y-2">
               {userTags.length === 0 ? (
-                <p className="text-sm text-foreground/50 text-center py-4">
+                <p className="text-sm text-muted-foreground text-center py-4">
                   No tags yet. Create one above.
                 </p>
               ) : (
@@ -904,8 +998,22 @@ export default function ConnectionsPage() {
               </Button>
             </div>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
+
+      <ConfirmDialog
+        open={confirmAction !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmAction(null);
+        }}
+        title={confirmAction?.title ?? ""}
+        description={confirmAction?.description}
+        confirmLabel={confirmAction?.confirmLabel}
+        destructive
+        onConfirm={async () => {
+          await confirmAction?.run();
+        }}
+      />
     </div>
   );
 }

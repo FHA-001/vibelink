@@ -59,16 +59,16 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="page-canvas min-h-screen flex flex-col">
       {/* Navigation */}
-      <nav className="p-4 sm:p-6">
+      <nav aria-label="Site" className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-5 sm:px-8">
         <Link href="/">
           <Logo />
         </Link>
       </nav>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8">
+      <main id="main-content" className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -116,7 +116,7 @@ export default function ForgotPasswordPage() {
                   <Button
                     type="submit"
                     size="lg"
-                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 rounded-2xl"
+                    className="w-full bg-primary hover:bg-[#D4B13F] text-primary-foreground"
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -136,11 +136,11 @@ export default function ForgotPasswordPage() {
                 <div className="space-y-6">
                   {/* Success Message */}
                   <div className="bg-primary/10 rounded-2xl p-6 text-center">
-                    <Mail className="w-12 h-12 text-primary mx-auto mb-3" />
+                    <Mail className="w-12 h-12 text-gold mx-auto mb-3" />
                     <p className="text-foreground font-medium mb-2">
                       Check your inbox
                     </p>
-                    <p className="text-sm text-foreground/70">
+                    <p className="text-sm text-muted-foreground">
                       We've sent a password reset link to{" "}
                       <span className="font-medium">{email}</span>
                     </p>
@@ -149,7 +149,7 @@ export default function ForgotPasswordPage() {
                   {/* Back to Sign In */}
                   <Link
                     href="/signin"
-                    className="block w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 rounded-2xl font-medium text-center transition-colors"
+                    className="block w-full bg-primary hover:bg-[#D4B13F] text-primary-foreground font-medium text-center transition-colors"
                   >
                     <ArrowLeft className="inline mr-2 h-5 w-5" />
                     Back to Sign In
@@ -159,9 +159,9 @@ export default function ForgotPasswordPage() {
 
               {/* Sign In Link */}
               {!success && (
-                <div className="mt-6 text-center text-sm text-foreground/70">
+                <div className="mt-6 text-center text-sm text-muted-foreground">
                   Remember your password?{" "}
-                  <Link href="/signin" className="text-primary hover:underline font-medium">
+                  <Link href="/signin" className="text-gold hover:underline font-medium">
                     Sign in
                   </Link>
                 </div>
@@ -172,8 +172,8 @@ export default function ForgotPasswordPage() {
       </main>
 
       {/* Footer */}
-      <footer className="p-4 sm:p-6 text-center text-sm text-foreground/50">
-        <Link href="/" className="hover:text-primary transition-colors">
+      <footer className="p-4 sm:p-6 text-center text-sm text-muted-foreground">
+        <Link href="/" className="hover:text-gold transition-colors">
           Back to home
         </Link>
       </footer>

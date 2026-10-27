@@ -12,7 +12,8 @@ import { BlockDialog } from "./block-dialog";
 import { UnblockDialog } from "./unblock-dialog";
 import { ReportDialog } from "./report-dialog";
 import { QRCode } from "./qr-code";
-import { Calendar, MapPin, Link as LinkIcon } from "lucide-react";
+import { Calendar, Link as LinkIcon, Share2, QrCode as QrIcon, Edit as Pencil } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 
 interface ProfileCardProps {
@@ -148,17 +149,19 @@ export function ProfileCard({
     }
   };
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
+    <motion.article
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className="bg-card rounded-3xl shadow-xl overflow-hidden border border-border/50"
+      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+      className="overflow-hidden rounded-3xl border border-border bg-card shadow-xl"
     >
       {/* Profile Header */}
-      <div className="relative bg-gradient-to-br from-accent to-accent/80 pt-10 pb-16 px-6">
+      <div className="card-surface relative px-6 pb-16 pt-10">
+        <div className="gold-rule absolute inset-x-8 top-0" aria-hidden="true" />
         {!isOwner && (
-          <div className="absolute top-4 right-4">
+          <div className="absolute right-3 top-3">
             <SafetyMenu
+              onDark
               isBlocked={isBlocked}
               onBlock={() => setBlockDialogOpen(true)}
               onUnblock={() => setUnblockDialogOpen(true)}
@@ -173,39 +176,35 @@ export function ProfileCard({
             size="xl"
             className="mb-4 ring-4 ring-white/20"
           />
-          <h1 className="text-2xl sm:text-3xl font-bold text-white text-center">
+          <h1 className="text-center font-heading text-2xl font-semibold text-ivory sm:text-3xl">
             {profile.full_name || profile.username}
           </h1>
-          <p className="text-white/80 text-center mt-1">@{profile.username}</p>
+          <p className="mt-1 text-center text-ivory/75">@{profile.username}</p>
         </div>
       </div>
 
       {/* Profile Content */}
-      <div className="px-6 pb-6">
-        <div className="bg-card rounded-2xl shadow-lg p-6 sm:p-8 space-y-6 border border-border/50 -mt-8">
+      <div className="px-4 pb-6 sm:px-6">
+        <div className="-mt-8 space-y-6 rounded-2xl border border-border bg-card p-6 shadow-lg sm:p-8">
           {/* Job Title & Company */}
           {profile.job_title && (
             <div className="text-center">
-              <p className="text-lg font-semibold text-foreground">
-                {profile.job_title}
-              </p>
+              <p className="font-heading text-lg font-semibold text-navy">{profile.job_title}</p>
               {profile.company_school && (
-                <p className="text-foreground/70 mt-1">{profile.company_school}</p>
+                <p className="mt-1 text-muted-foreground">{profile.company_school}</p>
               )}
             </div>
           )}
 
           {/* Bio */}
           {profile.bio && (
-            <p className="text-foreground/80 text-center leading-relaxed">
-              {profile.bio}
-            </p>
+            <p className="text-center leading-relaxed text-foreground">{profile.bio}</p>
           )}
 
           {/* Interests */}
           {profile.interests && profile.interests.length > 0 && (
             <div>
-              <h3 className="text-sm font-semibold text-foreground mb-3">Interests</h3>
+              <h2 className="mb-3 text-sm font-semibold text-navy">Interests</h2>
               <ProfileTags tags={profile.interests} variant="primary" />
             </div>
           )}
@@ -214,29 +213,29 @@ export function ProfileCard({
           <SocialLinks profile={profile} />
 
           {/* QR Code and Connect Panel */}
-          <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-4 sm:gap-6 pt-6 border-t border-border/50">
+          <div className="flex flex-col items-center justify-between gap-5 border-t border-border pt-6 sm:flex-row sm:items-start sm:gap-6">
             {/* QR Code */}
             {showQR && qrUrl && (
-              <div className="flex-shrink-0">
-                <QRCode value={qrUrl} size={128} className="!p-2 !shadow-sm !border !border-border/50" />
-                <p className="text-xs text-foreground/50 text-center mt-2">Scan to connect</p>
+              <div className="shrink-0">
+                <QRCode value={qrUrl} size={128} className="!p-2 !shadow-sm" />
+                <p className="mt-2 text-center text-xs text-muted-foreground">Scan to connect</p>
               </div>
             )}
 
             {/* Connect Panel */}
-            <div className="flex-shrink-0 text-center sm:text-left">
-              <div className="bg-gradient-to-br from-accent to-accent/80 rounded-2xl p-4 sm:p-5 shadow-md border border-border/50">
-                <h4 className="text-base font-semibold text-white mb-1">Let's connect</h4>
-                <p className="text-xs text-white/80 mb-3">Your next connection starts here.</p>
-                <div className="flex items-center justify-center sm:justify-start gap-2">
-                  <LinkIcon className="w-4 h-4 text-primary" />
-                  <span className="text-xs font-medium text-primary">VibeLink</span>
+            <div className="shrink-0 text-center sm:text-left">
+              <div className="card-surface rounded-2xl p-4 shadow-md sm:p-5">
+                <h2 className="mb-1 font-heading text-base font-semibold text-ivory">Let&apos;s connect</h2>
+                <p className="mb-3 text-xs text-ivory/75">Your next connection starts here.</p>
+                <div className="flex items-center justify-center gap-2 sm:justify-start">
+                  <LinkIcon className="size-4 text-primary" aria-hidden="true" />
+                  <span className="text-xs font-semibold text-primary">VibeLink</span>
                 </div>
               </div>
               {/* Joined Date */}
               {profile.created_at && (
-                <div className="flex items-center justify-center sm:justify-start gap-2 text-xs text-foreground/50 mt-3">
-                  <Calendar className="w-4 h-4 flex-shrink-0" />
+                <div className="mt-3 flex items-center justify-center gap-2 text-xs text-muted-foreground sm:justify-start">
+                  <Calendar className="size-4 shrink-0" aria-hidden="true" />
                   <span>Joined {new Date(profile.created_at).toLocaleDateString()}</span>
                 </div>
               )}
@@ -247,25 +246,19 @@ export function ProfileCard({
         {/* Action Buttons */}
         {showActions && isOwner && (
           <div className="mt-6 space-y-3">
-            <button
-              onClick={onShare}
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 rounded-2xl font-medium transition-colors shadow-lg shadow-primary/20"
-            >
-              Share Profile
-            </button>
-            <div className="flex gap-3">
-              <button
-                onClick={onDownloadQR}
-                className="flex-1 border-2 border-border hover:border-primary/50 text-foreground py-3 rounded-2xl font-medium transition-colors"
-              >
-                Download QR
-              </button>
-              <button
-                onClick={onEdit}
-                className="flex-1 border-2 border-border hover:border-primary/50 text-foreground py-3 rounded-2xl font-medium transition-colors"
-              >
-                Edit Profile
-              </button>
+            <Button size="lg" onClick={onShare} className="w-full">
+              <Share2 aria-hidden="true" />
+              Share profile
+            </Button>
+            <div className="grid grid-cols-2 gap-3">
+              <Button size="lg" variant="outline" onClick={onDownloadQR}>
+                <QrIcon aria-hidden="true" />
+                Show QR
+              </Button>
+              <Button size="lg" variant="outline" onClick={onEdit}>
+                <Pencil aria-hidden="true" />
+                Edit profile
+              </Button>
             </div>
           </div>
         )}
@@ -290,6 +283,6 @@ export function ProfileCard({
         targetUsername={profile.username}
         onConfirm={handleReport}
       />
-    </motion.div>
+    </motion.article>
   );
 }

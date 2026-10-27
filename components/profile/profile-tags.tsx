@@ -9,23 +9,23 @@ interface ProfileTagsProps {
 
 export function ProfileTags({ tags, variant = "primary" }: ProfileTagsProps) {
   const variantClasses = {
-    primary: "bg-primary/10 text-primary border-primary/20",
-    secondary: "bg-secondary/10 text-secondary border-secondary/20",
+    primary: "bg-primary/12 text-gold border-primary/30",
+    secondary: "bg-secondary/12 text-teal-ink border-secondary/30",
   };
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <ul className="flex flex-wrap gap-2">
       {tags.map((tag, index) => (
-        <span
+        <li
           key={index}
           className={cn(
-            "px-3 py-1.5 rounded-full text-sm font-medium border",
+            "rounded-full border px-3 py-1.5 text-sm font-medium",
             variantClasses[variant]
           )}
         >
           {tag}
-        </span>
+        </li>
       ))}
-    </div>
+    </ul>
   );
 }

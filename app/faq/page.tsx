@@ -153,7 +153,7 @@ export default function FAQPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Navigation />
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         {/* Hero Section */}
         <section className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
@@ -161,7 +161,7 @@ export default function FAQPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="text-4xl sm:text-5xl font-bold text-foreground leading-tight mb-6"
+              className="text-4xl sm:text-5xl font-semibold text-foreground leading-tight mb-6"
             >
               Frequently Asked Questions
             </motion.h1>
@@ -169,7 +169,7 @@ export default function FAQPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-lg text-foreground/70"
+              className="text-lg text-muted-foreground"
             >
               Everything you need to know about VibeLink
             </motion.p>
@@ -194,9 +194,9 @@ export default function FAQPage() {
                   <div className="flex items-center justify-between">
                     <h2 className="text-xl font-semibold text-foreground">{category.category}</h2>
                     {openCategory === category.category ? (
-                      <ChevronUp className="w-5 h-5 text-foreground/70" />
+                      <ChevronUp className="w-5 h-5 text-muted-foreground" />
                     ) : (
-                      <ChevronDown className="w-5 h-5 text-foreground/70" />
+                      <ChevronDown className="w-5 h-5 text-muted-foreground" />
                     )}
                   </div>
                 </button>
@@ -221,9 +221,9 @@ export default function FAQPage() {
                           >
                             <span className="font-medium text-foreground">{faq.q}</span>
                             {openQuestion === questionId ? (
-                              <ChevronUp className="w-4 h-4 text-foreground/70 flex-shrink-0 ml-4" />
+                              <ChevronUp className="w-4 h-4 text-muted-foreground flex-shrink-0 ml-4" />
                             ) : (
-                              <ChevronDown className="w-4 h-4 text-foreground/70 flex-shrink-0 ml-4" />
+                              <ChevronDown className="w-4 h-4 text-muted-foreground flex-shrink-0 ml-4" />
                             )}
                           </button>
                           {openQuestion === questionId && (
@@ -233,7 +233,7 @@ export default function FAQPage() {
                               exit={{ opacity: 0, height: 0 }}
                               className="px-4 pb-4 pt-0"
                             >
-                              <p className="text-foreground/70">{faq.a}</p>
+                              <p className="text-muted-foreground">{faq.a}</p>
                             </motion.div>
                           )}
                         </div>
@@ -254,7 +254,7 @@ export default function FAQPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="text-3xl font-bold text-foreground mb-4"
+              className="text-3xl font-semibold text-foreground mb-4"
             >
               Still have questions?
             </motion.h2>
@@ -263,7 +263,7 @@ export default function FAQPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-lg text-foreground/70 mb-8"
+              className="text-lg text-muted-foreground mb-8"
             >
               Can't find the answer you're looking for? Please reach out to our team.
             </motion.p>
@@ -276,7 +276,7 @@ export default function FAQPage() {
               <Link href="/contact">
                 <Button
                   size="lg"
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground text-base px-8 py-6 rounded-2xl"
+                  className="bg-primary hover:bg-[#D4B13F] text-primary-foreground text-base px-8 py-6 rounded-2xl"
                 >
                   Contact Us
                 </Button>

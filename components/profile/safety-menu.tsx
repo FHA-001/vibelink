@@ -13,13 +13,22 @@ interface SafetyMenuProps {
   onReport: () => void;
   isBlocked?: boolean;
   onUnblock?: () => void;
+  /** Use light icon colours when the menu sits on a navy surface. */
+  onDark?: boolean;
 }
 
-export function SafetyMenu({ onBlock, onReport, isBlocked, onUnblock }: SafetyMenuProps) {
+export function SafetyMenu({ onBlock, onReport, isBlocked, onUnblock, onDark = false }: SafetyMenuProps) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="text-foreground/70 hover:text-foreground transition-colors" aria-label="More options">
-        <MoreVertical className="w-5 h-5" />
+      <DropdownMenuTrigger
+        className={
+          onDark
+            ? "flex size-9 items-center justify-center rounded-lg text-ivory/80 transition-colors hover:bg-white/10 hover:text-ivory"
+            : "flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-navy"
+        }
+        aria-label="More options"
+      >
+        <MoreVertical className="size-5" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {isBlocked ? (

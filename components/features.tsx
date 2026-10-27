@@ -1,106 +1,119 @@
 "use client";
 
-import { motion } from "framer-motion";
 import {
   User,
   QrCode,
   Share2,
-  Download,
+  Users,
   History,
   Smartphone,
   MessageSquare,
-  Tag
+  Tag,
 } from "lucide-react";
+import { Reveal, Stagger, StaggerItem } from "./motion";
+
+const small = [
+  {
+    icon: Share2,
+    title: "Share by QR or link",
+    description: "Anyone with a phone camera can open your profile link, at events or in a message.",
+  },
+  {
+    icon: Users,
+    title: "Save connections",
+    description: "Accept requests and keep the people you have met in one organised list.",
+  },
+  {
+    icon: History,
+    title: "Connection history",
+    description: "See who you connected with and when, so context is never lost.",
+  },
+  {
+    icon: Smartphone,
+    title: "Made for phones",
+    description: "Your card and your connections list are designed for small screens first.",
+  },
+];
 
 export function Features() {
-  const features = [
-    {
-      icon: User,
-      title: "Digital Profile",
-      description: "Create a stunning digital profile with your photo, bio, social links, and contact information.",
-    },
-    {
-      icon: QrCode,
-      title: "Personalized QR",
-      description: "Get a unique QR code that links directly to your profile. Customizable and always up-to-date.",
-    },
-    {
-      icon: Share2,
-      title: "Instant Sharing",
-      description: "Share your profile instantly via QR code, link, or direct message. No apps required for scanners.",
-    },
-    {
-      icon: Download,
-      title: "Save Connections",
-      description: "Save contacts directly to your phone with one tap. Never lose a connection again.",
-    },
-    {
-      icon: History,
-      title: "Connection History",
-      description: "Track who you've connected with and when. Keep your network organized and accessible.",
-    },
-    {
-      icon: Smartphone,
-      title: "Mobile Friendly",
-      description: "Optimized for mobile devices. Your profile looks great on any screen size.",
-    },
-    {
-      icon: MessageSquare,
-      title: "Private Notes",
-      description: "Add private notes about your connections to remember where you met, context, and follow-ups. Notes are private to you and not shared with others.",
-    },
-    {
-      icon: Tag,
-      title: "Personal Tags",
-      description: "Organize your connections with personal tags like classmates, mentors, or colleagues. Access from your connections list or connected profiles.",
-    },
-  ];
-
   return (
-    <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-background">
-      <div className="max-w-7xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">
-            Powerful Features
+    <section id="features" className="bg-background px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        <Reveal className="max-w-2xl">
+          <h2 className="font-heading text-3xl font-semibold sm:text-4xl lg:text-5xl">
+            Everything you need to be remembered
           </h2>
-          <p className="text-lg text-foreground/70 max-w-2xl mx-auto">
-            Everything you need to make meaningful connections
+          <p className="mt-4 text-lg text-muted-foreground">
+            A polished introduction on the way in, and a private memory on the way out.
           </p>
-        </motion.div>
+        </Reveal>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {features.map((feature, index) => (
-            <motion.div
+        <Stagger className="mt-14 grid gap-5 lg:grid-cols-6">
+          {/* Lead features */}
+          <StaggerItem className="card-surface relative overflow-hidden rounded-2xl p-8 text-ivory shadow-xl sm:p-10 lg:col-span-3">
+            <span className="flex size-12 items-center justify-center rounded-2xl bg-white/10 text-primary">
+              <User className="size-6" />
+            </span>
+            <h3 className="mt-8 font-heading text-2xl font-semibold text-ivory">Digital profile</h3>
+            <p className="mt-3 max-w-md leading-relaxed text-ivory/75">
+              Your photo, role, bio, interests and links on one clean card. You decide what
+              people can see before and after they connect.
+            </p>
+          </StaggerItem>
+
+          <StaggerItem className="relative overflow-hidden rounded-2xl border border-border bg-card p-8 shadow-card sm:p-10 lg:col-span-3">
+            <span className="flex size-12 items-center justify-center rounded-2xl bg-primary/15 text-gold">
+              <QrCode className="size-6" />
+            </span>
+            <h3 className="mt-8 font-heading text-2xl font-semibold">Personal QR code</h3>
+            <p className="mt-3 max-w-md leading-relaxed text-muted-foreground">
+              A unique code that always points to your current profile. Download it as an image
+              for slides, badges and posters.
+            </p>
+          </StaggerItem>
+
+          {/* Private memory */}
+          <StaggerItem className="rounded-2xl border border-primary/30 bg-primary/[0.08] p-8 lg:col-span-3">
+            <span className="flex size-11 items-center justify-center rounded-xl bg-card text-gold shadow-sm">
+              <MessageSquare className="size-5" />
+            </span>
+            <h3 className="mt-6 font-heading text-xl font-semibold">Private notes</h3>
+            <p className="mt-2 leading-relaxed text-muted-foreground">
+              Write where you met and what to follow up on. Notes are private to you and are
+              never shared with the other person.
+            </p>
+          </StaggerItem>
+
+          <StaggerItem className="rounded-2xl border border-secondary/40 bg-secondary/[0.09] p-8 lg:col-span-3">
+            <span className="flex size-11 items-center justify-center rounded-xl bg-card text-teal-ink shadow-sm">
+              <Tag className="size-5" />
+            </span>
+            <h3 className="mt-6 font-heading text-xl font-semibold">Personal tags</h3>
+            <p className="mt-2 leading-relaxed text-muted-foreground">
+              Group people your way, such as classmates, mentors or clients. Tags are yours alone
+              and show up in your connections list.
+            </p>
+          </StaggerItem>
+
+          {small.map((feature) => (
+            <StaggerItem
               key={feature.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="group"
+              className="rounded-2xl border border-border bg-card p-6 lg:col-span-3 xl:col-span-3"
             >
-              <div className="bg-card rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 h-full border border-border/50 hover:border-primary/30">
-                {/* Icon */}
-                <div className="w-14 h-14 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <feature.icon className="w-7 h-7 text-primary" />
+              <div className="flex items-start gap-4">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-gold">
+                  <feature.icon className="size-5" />
+                </span>
+                <div>
+                  <h3 className="font-heading text-lg font-semibold">{feature.title}</h3>
+                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                    {feature.description}
+                  </p>
                 </div>
-
-                {/* Content */}
-                <h3 className="text-xl font-bold text-foreground mb-3">
-                  {feature.title}
-                </h3>
-                <p className="text-foreground/70 leading-relaxed">
-                  {feature.description}
-                </p>
               </div>
-            </motion.div>
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
       </div>
     </section>
   );

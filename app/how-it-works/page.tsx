@@ -38,7 +38,7 @@ export default function HowItWorksPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Navigation />
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         {/* Hero Section */}
         <section className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
@@ -46,7 +46,7 @@ export default function HowItWorksPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="text-4xl sm:text-5xl font-bold text-foreground leading-tight mb-6"
+              className="text-4xl sm:text-5xl font-semibold text-foreground leading-tight mb-6"
             >
               How VibeLink works
             </motion.h1>
@@ -54,7 +54,7 @@ export default function HowItWorksPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-lg text-foreground/70"
+              className="text-lg text-muted-foreground"
             >
               Four simple steps to meaningful connections
             </motion.p>
@@ -77,19 +77,19 @@ export default function HowItWorksPage() {
                     <div className="flex items-start gap-6">
                       <div className="flex-shrink-0">
                         <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-4">
-                          <step.icon className="w-8 h-8 text-primary" />
+                          <step.icon className="w-8 h-8 text-gold" />
                         </div>
-                        <span className="text-4xl font-bold text-primary/20">{step.number}</span>
+                        <span className="text-4xl font-semibold text-gold/20">{step.number}</span>
                       </div>
                       <div className="flex-1">
                         <h3 className="text-xl font-semibold text-foreground mb-3">{step.title}</h3>
-                        <p className="text-foreground/70">{step.description}</p>
+                        <p className="text-muted-foreground">{step.description}</p>
                       </div>
                     </div>
                   </div>
                   {index < steps.length - 1 && (
                     <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
-                      <ArrowRight className="w-8 h-8 text-primary/30" />
+                      <ArrowRight className="w-8 h-8 text-gold/30" />
                     </div>
                   )}
                 </motion.div>
@@ -106,7 +106,7 @@ export default function HowItWorksPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="text-3xl font-bold text-foreground mb-12 text-center"
+              className="text-3xl font-semibold text-foreground mb-12 text-center"
             >
               The VibeLink experience
             </motion.h2>
@@ -120,10 +120,10 @@ export default function HowItWorksPage() {
                 className="bg-card rounded-2xl p-8 border border-border"
               >
                 <h3 className="text-xl font-semibold text-foreground mb-4">Your Digital Profile Card</h3>
-                <p className="text-foreground/70 mb-4">
-                  Your VibeLink profile is more than just a bio—it's your digital introduction card. Include your name, job title, company, bio, interests, and social links. Add a profile photo to make it personal.
+                <p className="text-muted-foreground mb-4">
+                  Your VibeLink profile is more than just a bio, it's your digital introduction card. Include your name, job title, company, bio, interests, and social links. Add a profile photo to make it personal.
                 </p>
-                <p className="text-foreground/70">
+                <p className="text-muted-foreground">
                   Your profile is publicly accessible via your unique username URL (vibelink.name.ng/u/username), making it easy to share anywhere.
                 </p>
               </motion.div>
@@ -136,10 +136,10 @@ export default function HowItWorksPage() {
                 className="bg-card rounded-2xl p-8 border border-border"
               >
                 <h3 className="text-xl font-semibold text-foreground mb-4">QR Code Magic</h3>
-                <p className="text-foreground/70 mb-4">
+                <p className="text-muted-foreground mb-4">
                   Every VibeLink profile comes with a unique QR code. When someone scans it with their phone camera, they're instantly directed to your public profile.
                 </p>
-                <p className="text-foreground/70">
+                <p className="text-muted-foreground">
                   Download your QR code as an image, print it on business cards, add it to conference badges, or share it digitally. It's the fastest way to connect.
                 </p>
               </motion.div>
@@ -152,10 +152,10 @@ export default function HowItWorksPage() {
                 className="bg-card rounded-2xl p-8 border border-border"
               >
                 <h3 className="text-xl font-semibold text-foreground mb-4">Privacy-First Connections</h3>
-                <p className="text-foreground/70 mb-4">
+                <p className="text-muted-foreground mb-4">
                   Not everyone needs to see everything. Non-connected users only see a preview of your profile (name, job title, bio). Full details are visible only to people you've connected with.
                 </p>
-                <p className="text-foreground/70">
+                <p className="text-muted-foreground">
                   You control who sees what. Accept connection requests from people you want to connect with, and decline the rest.
                 </p>
               </motion.div>
@@ -168,10 +168,10 @@ export default function HowItWorksPage() {
                 className="bg-card rounded-2xl p-8 border border-border"
               >
                 <h3 className="text-xl font-semibold text-foreground mb-4">Build Your Network</h3>
-                <p className="text-foreground/70 mb-4">
+                <p className="text-muted-foreground mb-4">
                   Manage your connections from the Connections page. See who's sent you requests, accept or decline them, and view your growing network.
                 </p>
-                <p className="text-foreground/70">
+                <p className="text-muted-foreground">
                   Get notified when someone sends you a request or accepts yours. Stay connected and never miss an opportunity.
                 </p>
               </motion.div>
@@ -187,7 +187,7 @@ export default function HowItWorksPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="text-3xl font-bold text-foreground mb-12 text-center"
+              className="text-3xl font-semibold text-foreground mb-12 text-center"
             >
               Perfect for any situation
             </motion.h2>
@@ -201,7 +201,7 @@ export default function HowItWorksPage() {
                 className="bg-card rounded-2xl p-6 border border-border text-center"
               >
                 <h3 className="font-semibold text-foreground mb-2">Conferences & Events</h3>
-                <p className="text-foreground/70 text-sm">
+                <p className="text-muted-foreground text-sm">
                   Add your QR code to your badge and let people connect without exchanging business cards.
                 </p>
               </motion.div>
@@ -213,7 +213,7 @@ export default function HowItWorksPage() {
                 className="bg-card rounded-2xl p-6 border border-border text-center"
               >
                 <h3 className="font-semibold text-foreground mb-2">Networking Events</h3>
-                <p className="text-foreground/70 text-sm">
+                <p className="text-muted-foreground text-sm">
                   Make meaningful connections at meetups and networking sessions with a simple scan.
                 </p>
               </motion.div>
@@ -225,7 +225,7 @@ export default function HowItWorksPage() {
                 className="bg-card rounded-2xl p-6 border border-border text-center"
               >
                 <h3 className="font-semibold text-foreground mb-2">Social Gatherings</h3>
-                <p className="text-foreground/70 text-sm">
+                <p className="text-muted-foreground text-sm">
                   Break the ice at parties and social events by sharing your VibeLink profile.
                 </p>
               </motion.div>
@@ -241,7 +241,7 @@ export default function HowItWorksPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="text-3xl sm:text-4xl font-bold text-foreground mb-6"
+              className="text-3xl sm:text-4xl font-semibold text-foreground mb-6"
             >
               Ready to start connecting?
             </motion.h2>
@@ -250,14 +250,14 @@ export default function HowItWorksPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-lg text-foreground/70 mb-8"
+              className="text-lg text-muted-foreground mb-8"
             >
               Join VibeLink today and transform how you make connections.
             </motion.p>
             <Link href="/welcome">
               <Button
                 size="lg"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground text-base px-8 py-6 rounded-2xl"
+                className="bg-primary hover:bg-[#D4B13F] text-primary-foreground text-base px-8 py-6 rounded-2xl"
               >
                 Get Started Free
                 <ArrowRight className="ml-2 h-5 w-5" />

@@ -99,16 +99,16 @@ function SignInContent() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="page-canvas min-h-screen flex flex-col">
       {/* Navigation */}
-      <nav className="p-4 sm:p-6">
+      <nav aria-label="Site" className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-5 sm:px-8">
         <Link href="/">
           <Logo />
         </Link>
       </nav>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8">
+      <main id="main-content" className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -117,9 +117,9 @@ function SignInContent() {
         >
           <Card>
             <CardHeader className="text-center">
-              <CardTitle className="text-2xl sm:text-3xl">Welcome Back</CardTitle>
+              <CardTitle className="text-2xl sm:text-3xl">Welcome back</CardTitle>
               <CardDescription className="text-base">
-                Sign in to your VibeLink account
+                Sign in to pick up where you left off.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -143,6 +143,7 @@ function SignInContent() {
                     id="email"
                     name="email"
                     type="email"
+                    autoComplete="email"
                     placeholder="you@example.com"
                     value={formData.email}
                     onChange={handleChange}
@@ -163,7 +164,7 @@ function SignInContent() {
                     <Label htmlFor="password">Password</Label>
                     <Link
                       href="/forgot-password"
-                      className="text-sm text-primary hover:underline"
+                      className="text-sm text-gold hover:underline"
                     >
                       Forgot password?
                     </Link>
@@ -173,6 +174,7 @@ function SignInContent() {
                       id="password"
                       name="password"
                       type={showPassword ? "text" : "password"}
+                      autoComplete="current-password"
                       placeholder="••••••••"
                       value={formData.password}
                       onChange={handleChange}
@@ -183,13 +185,13 @@ function SignInContent() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/50 hover:text-foreground"
+                      className="absolute right-1.5 top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-navy"
                       aria-label={showPassword ? "Hide password" : "Show password"}
                     >
                       {showPassword ? (
-                        <EyeOff className="w-5 h-5" />
+                        <EyeOff className="size-5" />
                       ) : (
-                        <Eye className="w-5 h-5" />
+                        <Eye className="size-5" />
                       )}
                     </button>
                   </div>
@@ -204,28 +206,28 @@ function SignInContent() {
                 <Button
                   type="submit"
                   size="lg"
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 rounded-2xl"
+                  className="w-full bg-primary hover:bg-[#D4B13F] text-primary-foreground"
                   disabled={isLoading}
                 >
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Signing in...
+                      Signing in
                     </>
                   ) : (
-                    "Sign In"
+                    "Sign in"
                   )}
                 </Button>
               </form>
 
               {/* Sign Up Link */}
-              <div className="mt-6 text-center text-sm text-foreground/70">
-                Don't have an account?{" "}
+              <div className="mt-6 text-center text-sm text-muted-foreground">
+                New to VibeLink?{" "}
                 <Link 
                   href={redirect ? `/signup?redirect=${encodeURIComponent(redirect)}` : "/signup"} 
-                  className="text-primary hover:underline font-medium"
+                  className="text-gold hover:underline font-medium"
                 >
-                  Sign up
+                  Create an account
                 </Link>
               </div>
             </CardContent>
@@ -234,8 +236,8 @@ function SignInContent() {
       </main>
 
       {/* Footer */}
-      <footer className="p-4 sm:p-6 text-center text-sm text-foreground/50">
-        <Link href="/" className="hover:text-primary transition-colors">
+      <footer className="p-4 sm:p-6 text-center text-sm text-muted-foreground">
+        <Link href="/" className="hover:text-gold transition-colors">
           Back to home
         </Link>
       </footer>
@@ -245,7 +247,7 @@ function SignInContent() {
 
 export default function SignInPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>}>
+    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-gold" /></div>}>
       <SignInContent />
     </Suspense>
   );

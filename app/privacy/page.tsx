@@ -10,7 +10,7 @@ export default function PrivacyPolicyPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Navigation />
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         {/* Hero Section */}
         <section className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto">
@@ -18,7 +18,7 @@ export default function PrivacyPolicyPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="text-4xl sm:text-5xl font-bold text-foreground leading-tight mb-6"
+              className="text-4xl sm:text-5xl font-semibold text-foreground leading-tight mb-6"
             >
               Privacy Policy
             </motion.h1>
@@ -26,7 +26,7 @@ export default function PrivacyPolicyPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-lg text-foreground/70 mb-4"
+              className="text-lg text-muted-foreground mb-4"
             >
               Last updated: {currentYear}
             </motion.p>
@@ -34,7 +34,7 @@ export default function PrivacyPolicyPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-foreground/70"
+              className="text-muted-foreground"
             >
               This Privacy Policy describes how VibeLink collects, uses, and protects your information.
             </motion.p>
@@ -49,8 +49,8 @@ export default function PrivacyPolicyPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
-              <h2 className="text-2xl font-bold text-foreground mb-4">Information We Collect</h2>
-              <div className="space-y-4 text-foreground/70">
+              <h2 className="text-2xl font-semibold text-foreground mb-4">Information We Collect</h2>
+              <div className="space-y-4 text-muted-foreground">
                 <p>
                   VibeLink collects the following information to provide our services:
                 </p>
@@ -75,8 +75,8 @@ export default function PrivacyPolicyPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
             >
-              <h2 className="text-2xl font-bold text-foreground mb-4">Data Storage and Security</h2>
-              <div className="space-y-4 text-foreground/70">
+              <h2 className="text-2xl font-semibold text-foreground mb-4">Data Storage and Security</h2>
+              <div className="space-y-4 text-muted-foreground">
                 <p>
                   We take data security seriously:
                 </p>
@@ -96,8 +96,8 @@ export default function PrivacyPolicyPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
             >
-              <h2 className="text-2xl font-bold text-foreground mb-4">Public Profile Information</h2>
-              <div className="space-y-4 text-foreground/70">
+              <h2 className="text-2xl font-semibold text-foreground mb-4">Public Profile Information</h2>
+              <div className="space-y-4 text-muted-foreground">
                 <p>
                   Your profile is accessible via your username URL (vibelink.name.ng/u/username). The visibility of your profile information depends on your privacy settings:
                 </p>
@@ -116,8 +116,8 @@ export default function PrivacyPolicyPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.7 }}
             >
-              <h2 className="text-2xl font-bold text-foreground mb-4">How We Use Your Information</h2>
-              <div className="space-y-4 text-foreground/70">
+              <h2 className="text-2xl font-semibold text-foreground mb-4">How We Use Your Information</h2>
+              <div className="space-y-4 text-muted-foreground">
                 <p>We use your information to:</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li>Create and maintain your VibeLink account and profile</li>
@@ -142,8 +142,8 @@ export default function PrivacyPolicyPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.8 }}
             >
-              <h2 className="text-2xl font-bold text-foreground mb-4">Third-Party Services</h2>
-              <div className="space-y-4 text-foreground/70">
+              <h2 className="text-2xl font-semibold text-foreground mb-4">Third-Party Services</h2>
+              <div className="space-y-4 text-muted-foreground">
                 <p>
                   VibeLink uses the following third-party services:
                 </p>
@@ -163,8 +163,8 @@ export default function PrivacyPolicyPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.9 }}
             >
-              <h2 className="text-2xl font-bold text-foreground mb-4">Data Retention</h2>
-              <div className="space-y-4 text-foreground/70">
+              <h2 className="text-2xl font-semibold text-foreground mb-4">Data Retention</h2>
+              <div className="space-y-4 text-muted-foreground">
                 <p>
                   We retain your profile and account data while your account is active. If you delete your account:
                 </p>
@@ -189,8 +189,8 @@ export default function PrivacyPolicyPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 1.0 }}
             >
-              <h2 className="text-2xl font-bold text-foreground mb-4">Your Rights and Controls</h2>
-              <div className="space-y-4 text-foreground/70">
+              <h2 className="text-2xl font-semibold text-foreground mb-4">Your Rights and Controls</h2>
+              <div className="space-y-4 text-muted-foreground">
                 <p>You have the right to:</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li>View and edit your profile information at any time</li>
@@ -206,8 +206,8 @@ export default function PrivacyPolicyPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 1.1 }}
             >
-              <h2 className="text-2xl font-bold text-foreground mb-4">Children's Privacy</h2>
-              <div className="space-y-4 text-foreground/70">
+              <h2 className="text-2xl font-semibold text-foreground mb-4">Children's Privacy</h2>
+              <div className="space-y-4 text-muted-foreground">
                 <p>
                   VibeLink is not intended for children under 13 years of age. We do not knowingly collect personal information from children under 13. If we become aware that we have collected such information, we will take steps to delete it.
                 </p>
@@ -219,8 +219,8 @@ export default function PrivacyPolicyPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 1.2 }}
             >
-              <h2 className="text-2xl font-bold text-foreground mb-4">Changes to This Policy</h2>
-              <div className="space-y-4 text-foreground/70">
+              <h2 className="text-2xl font-semibold text-foreground mb-4">Changes to This Policy</h2>
+              <div className="space-y-4 text-muted-foreground">
                 <p>
                   We may update this Privacy Policy from time to time. We will notify users of significant changes by posting the new policy on this page and updating the "Last updated" date.
                 </p>
@@ -232,13 +232,13 @@ export default function PrivacyPolicyPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 1.3 }}
             >
-              <h2 className="text-2xl font-bold text-foreground mb-4">Contact Us</h2>
-              <div className="space-y-4 text-foreground/70">
+              <h2 className="text-2xl font-semibold text-foreground mb-4">Contact Us</h2>
+              <div className="space-y-4 text-muted-foreground">
                 <p>
                   If you have questions about this Privacy Policy or how we handle your data, please contact us at:
                 </p>
                 <p>
-                  <a href="mailto:hello@vibelink.name.ng" className="text-primary hover:underline">
+                  <a href="mailto:hello@vibelink.name.ng" className="text-gold hover:underline">
                     hello@vibelink.name.ng
                   </a>
                 </p>

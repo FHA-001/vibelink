@@ -10,7 +10,7 @@ export default function CookiePolicyPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Navigation />
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         {/* Hero Section */}
         <section className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto">
@@ -18,7 +18,7 @@ export default function CookiePolicyPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="text-4xl sm:text-5xl font-bold text-foreground leading-tight mb-6"
+              className="text-4xl sm:text-5xl font-semibold text-foreground leading-tight mb-6"
             >
               Cookie Policy
             </motion.h1>
@@ -26,7 +26,7 @@ export default function CookiePolicyPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-lg text-foreground/70 mb-4"
+              className="text-lg text-muted-foreground mb-4"
             >
               Last updated: {currentYear}
             </motion.p>
@@ -34,7 +34,7 @@ export default function CookiePolicyPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-foreground/70"
+              className="text-muted-foreground"
             >
               This Cookie Policy explains how VibeLink uses cookies and similar technologies.
             </motion.p>
@@ -49,8 +49,8 @@ export default function CookiePolicyPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
-              <h2 className="text-2xl font-bold text-foreground mb-4">What Are Cookies?</h2>
-              <div className="space-y-4 text-foreground/70">
+              <h2 className="text-2xl font-semibold text-foreground mb-4">What Are Cookies?</h2>
+              <div className="space-y-4 text-muted-foreground">
                 <p>
                   Cookies are small text files that are stored on your device when you visit a website. They are widely used to make websites work more efficiently and to provide information to website owners.
                 </p>
@@ -62,8 +62,8 @@ export default function CookiePolicyPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
             >
-              <h2 className="text-2xl font-bold text-foreground mb-4">How VibeLink Uses Cookies</h2>
-              <div className="space-y-4 text-foreground/70">
+              <h2 className="text-2xl font-semibold text-foreground mb-4">How VibeLink Uses Cookies</h2>
+              <div className="space-y-4 text-muted-foreground">
                 <p>
                   VibeLink uses cookies primarily for authentication and session management through our authentication provider, Supabase. These cookies are essential for the service to function properly.
                 </p>
@@ -80,8 +80,8 @@ export default function CookiePolicyPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
             >
-              <h2 className="text-2xl font-bold text-foreground mb-4">Essential Cookies</h2>
-              <div className="space-y-4 text-foreground/70">
+              <h2 className="text-2xl font-semibold text-foreground mb-4">Essential Cookies</h2>
+              <div className="space-y-4 text-muted-foreground">
                 <p>
                   Essential cookies are necessary for the website to function properly. These cookies cannot be disabled because they are required for core functionality such as:
                 </p>
@@ -98,8 +98,8 @@ export default function CookiePolicyPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.7 }}
             >
-              <h2 className="text-2xl font-bold text-foreground mb-4">Third-Party Cookies</h2>
-              <div className="space-y-4 text-foreground/70">
+              <h2 className="text-2xl font-semibold text-foreground mb-4">Third-Party Cookies</h2>
+              <div className="space-y-4 text-muted-foreground">
                 <p>
                   VibeLink uses Supabase for authentication, which may set cookies for authentication purposes. These cookies are managed by Supabase according to their own privacy policy.
                 </p>
@@ -117,8 +117,8 @@ export default function CookiePolicyPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.8 }}
             >
-              <h2 className="text-2xl font-bold text-foreground mb-4">Managing Cookies</h2>
-              <div className="space-y-4 text-foreground/70">
+              <h2 className="text-2xl font-semibold text-foreground mb-4">Managing Cookies</h2>
+              <div className="space-y-4 text-muted-foreground">
                 <p>
                   Most web browsers allow you to control cookies through their settings. You can:
                 </p>
@@ -139,8 +139,8 @@ export default function CookiePolicyPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.9 }}
             >
-              <h2 className="text-2xl font-bold text-foreground mb-4">Cookie Duration</h2>
-              <div className="space-y-4 text-foreground/70">
+              <h2 className="text-2xl font-semibold text-foreground mb-4">Cookie Duration</h2>
+              <div className="space-y-4 text-muted-foreground">
                 <p>
                   Authentication and session cookies are typically set to expire after a period of inactivity or when you sign out. This helps maintain security by requiring re-authentication after extended periods.
                 </p>
@@ -152,8 +152,8 @@ export default function CookiePolicyPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 1.0 }}
             >
-              <h2 className="text-2xl font-bold text-foreground mb-4">Updates to This Policy</h2>
-              <div className="space-y-4 text-foreground/70">
+              <h2 className="text-2xl font-semibold text-foreground mb-4">Updates to This Policy</h2>
+              <div className="space-y-4 text-muted-foreground">
                 <p>
                   We may update this Cookie Policy from time to time to reflect changes in our practices or for other operational, legal, or regulatory reasons. We will notify users of significant changes by posting the new policy on this page and updating the "Last updated" date.
                 </p>
@@ -165,13 +165,13 @@ export default function CookiePolicyPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 1.1 }}
             >
-              <h2 className="text-2xl font-bold text-foreground mb-4">Contact Us</h2>
-              <div className="space-y-4 text-foreground/70">
+              <h2 className="text-2xl font-semibold text-foreground mb-4">Contact Us</h2>
+              <div className="space-y-4 text-muted-foreground">
                 <p>
                   If you have questions about this Cookie Policy or how we use cookies, please contact us at:
                 </p>
                 <p>
-                  <a href="mailto:hello@vibelink.name.ng" className="text-primary hover:underline">
+                  <a href="mailto:hello@vibelink.name.ng" className="text-gold hover:underline">
                     hello@vibelink.name.ng
                   </a>
                 </p>

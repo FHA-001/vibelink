@@ -2,12 +2,17 @@
 
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Loader2, Share2, Download, Edit, QrCode, X, Sparkles, User } from "lucide-react";
+import { Download, Edit, Settings, Users, Sparkles, X, Copy } from "lucide-react";
 import { getCurrentUser, getUserProfile, signOut, Profile } from "@/lib/auth";
 import { ProfileCard } from "@/components/profile/profile-card";
 import { QRCode } from "@/components/profile/qr-code";
 import { BottomNav } from "@/components/bottom-nav";
-import { Logo } from "@/components/logo";
+import { AppHeader } from "@/components/app-header";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { toast } from "@/components/ui/use-toast";
+import { PageIn } from "@/components/motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -56,9 +61,23 @@ export default function MyCardPage() {
     }
   };
 
+  const copyLink = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      toast({ title: "Link copied", description: "Your profile link is on your clipboard." });
+    } catch (error) {
+      console.error("Copy failed:", error);
+      toast({
+        title: "Could not copy the link",
+        description: "Copy it from the address shown below the QR code.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleShare = async () => {
     const shareUrl = `${window.location.origin}/u/${profile?.username}`;
-    
+
     if (navigator.share) {
       try {
         await navigator.share({
@@ -67,12 +86,12 @@ export default function MyCardPage() {
           url: shareUrl,
         });
       } catch (error) {
+        // The person closing the share sheet is not an error worth surfacing.
         console.log("Share failed:", error);
       }
     } else {
       // Fallback: copy to clipboard
-      navigator.clipboard.writeText(shareUrl);
-      alert("Profile link copied to clipboard!");
+      await copyLink(shareUrl);
     }
   };
 
@@ -82,7 +101,7 @@ export default function MyCardPage() {
 
   const handleDownloadQRImage = () => {
     setDownloadError("");
-    
+
     if (!qrRef.current) {
       setDownloadError("Failed to access QR code. Please try again.");
       return;
@@ -90,19 +109,20 @@ export default function MyCardPage() {
 
     try {
       const canvas = qrRef.current;
-      
+
       // Convert canvas to data URL (PNG)
       const dataUrl = canvas.toDataURL('image/png');
-      
+
       // Create download link
       const link = document.createElement('a');
       link.href = dataUrl;
       link.download = `vibelink-qr-${profile?.username || 'code'}.png`;
-      
+
       // Trigger download
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      toast({ title: "QR code downloaded", description: "Saved as a PNG image." });
     } catch (error) {
       console.error("Error downloading QR:", error);
       setDownloadError("Failed to download QR code. Please try again.");
@@ -120,8 +140,16 @@ export default function MyCardPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="page-canvas flex min-h-screen flex-col pb-24" aria-busy="true">
+        <AppHeader />
+        <main id="main-content" className="flex-1 px-4 py-8 sm:px-6">
+          <span className="sr-only" role="status">Loading your card</span>
+          <div className="mx-auto max-w-lg space-y-4">
+            <Skeleton className="h-9 w-40" />
+            <Skeleton className="h-5 w-64" />
+            <Skeleton className="mt-6 h-[34rem] w-full rounded-3xl" />
+          </div>
+        </main>
       </div>
     );
   }
@@ -132,103 +160,72 @@ export default function MyCardPage() {
 
   const publicProfileUrl = `${window.location.origin}/u/${profile.username}`;
 
+  const quickLinks = [
+    { href: "/connections", label: "Connections", icon: Users },
+    { href: "/edit-profile", label: "Edit profile", icon: Edit },
+    { href: "/settings", label: "Settings", icon: Settings },
+  ];
+
   return (
-    <div className="min-h-screen bg-background flex flex-col pb-20">
-      {/* Header */}
-      <header className="p-4 sm:p-6 flex items-center justify-between border-b border-border/50 bg-card/50 backdrop-blur-sm">
-        <Link href="/">
-          <Logo />
-        </Link>
-        <button
-          onClick={handleSignOut}
-          className="text-foreground/70 hover:text-foreground text-sm font-medium transition-colors"
-        >
-          Sign Out
-        </button>
-      </header>
+    <div className="page-canvas flex min-h-screen flex-col pb-24 md:pb-28">
+      <AppHeader
+        right={
+          <Button variant="ghost" size="sm" onClick={handleSignOut}>
+            Sign out
+          </Button>
+        }
+      />
 
-      {/* Profile Completion Reminder */}
-      {showReminder && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mx-4 sm:mx-6 mt-4 bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20 rounded-2xl p-4"
-        >
-          <div className="flex items-start gap-3">
-            <Sparkles className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-            <div className="flex-1">
-              <p className="text-sm font-medium text-foreground mb-1">
-                Complete your profile to stand out
-              </p>
-              <p className="text-xs text-foreground/70 mb-3">
-                Add your job title and bio to help others know more about you
-              </p>
-              <div className="flex gap-2">
+      <main id="main-content" className="flex-1 px-4 py-8 sm:px-6">
+        <div className="mx-auto max-w-lg">
+          <PageIn>
+            <h1 className="font-heading text-3xl font-semibold">My Card</h1>
+            <p className="mt-1 text-muted-foreground">Your digital identity, ready to share.</p>
+
+            {/* Profile Completion Reminder */}
+            {showReminder && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                role="status"
+                className="mt-6 flex items-start gap-3 rounded-2xl border border-primary/30 bg-primary/[0.08] p-4"
+              >
+                <Sparkles className="mt-0.5 size-5 shrink-0 text-gold" aria-hidden="true" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-navy">Finish your card to stand out</p>
+                  <p className="mt-0.5 text-sm text-muted-foreground">
+                    Add a job title and a short bio so people know who they are meeting.
+                  </p>
+                  <Button size="sm" className="mt-3" onClick={handleEdit}>
+                    Add details
+                  </Button>
+                </div>
                 <button
-                  onClick={handleEdit}
-                  className="text-xs bg-primary hover:bg-primary/90 text-primary-foreground px-3 py-1.5 rounded-lg font-medium transition-colors shadow-sm"
-                >
-                  Add Details
-                </button>
-                <button
+                  type="button"
                   onClick={() => setShowReminder(false)}
-                  className="text-xs text-foreground/60 hover:text-foreground px-3 py-1.5 rounded-lg transition-colors"
+                  className="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-card hover:text-navy"
+                  aria-label="Dismiss reminder"
                 >
-                  Dismiss
+                  <X className="size-4" />
                 </button>
-              </div>
-            </div>
-            <button
-              onClick={() => setShowReminder(false)}
-              className="text-foreground/50 hover:text-foreground transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        </motion.div>
-      )}
+              </motion.div>
+            )}
 
-      {/* Main Content */}
-      <main className="flex-1 px-4 sm:px-6 py-6">
-        <div className="max-w-lg mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">My Card</h1>
-            <p className="text-foreground/70 text-sm mb-6">Your digital identity, ready to share</p>
-
-            {/* Quick Navigation */}
-            <div className="grid grid-cols-3 gap-3 mb-6">
-              <Link
-                href="/connections"
-                className="bg-card border border-border/50 rounded-xl p-3 text-center hover:border-primary/50 transition-colors shadow-sm"
-              >
-                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-2">
-                  <User className="w-4 h-4 text-primary" />
-                </div>
-                <span className="text-xs font-medium text-foreground">Connections</span>
-              </Link>
-              <Link
-                href="/edit-profile"
-                className="bg-card border border-border/50 rounded-xl p-3 text-center hover:border-primary/50 transition-colors shadow-sm"
-              >
-                <div className="w-8 h-8 bg-secondary/10 rounded-lg flex items-center justify-center mx-auto mb-2">
-                  <Edit className="w-4 h-4 text-secondary" />
-                </div>
-                <span className="text-xs font-medium text-foreground">Edit</span>
-              </Link>
-              <Link
-                href="/settings"
-                className="bg-card border border-border/50 rounded-xl p-3 text-center hover:border-primary/50 transition-colors shadow-sm"
-              >
-                <div className="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center mx-auto mb-2">
-                  <QrCode className="w-4 h-4 text-accent" />
-                </div>
-                <span className="text-xs font-medium text-foreground">Settings</span>
-              </Link>
-            </div>
+            {/* Quick navigation */}
+            <nav aria-label="Shortcuts" className="mb-6 mt-6 grid grid-cols-3 gap-3">
+              {quickLinks.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="lift flex flex-col items-center gap-2 rounded-2xl border border-border bg-card px-2 py-4 text-center shadow-sm"
+                >
+                  <span className="flex size-9 items-center justify-center rounded-xl bg-primary/12 text-gold">
+                    <item.icon className="size-4" aria-hidden="true" />
+                  </span>
+                  <span className="text-xs font-semibold text-navy">{item.label}</span>
+                </Link>
+              ))}
+            </nav>
 
             {/* Profile Card */}
             <ProfileCard
@@ -240,66 +237,42 @@ export default function MyCardPage() {
               showQR={true}
               qrUrl={publicProfileUrl}
             />
-
-            {/* QR Code Modal */}
-            {showQR && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-                onClick={() => setShowQR(false)}
-              >
-                <motion.div
-                  initial={{ scale: 0.9 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0.9 }}
-                  className="bg-card rounded-3xl p-6 max-w-sm w-full"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="text-center mb-4">
-                    <h2 className="text-xl font-bold text-foreground mb-2">Your QR Code</h2>
-                    <p className="text-sm text-foreground/70">
-                      Scan to view your public profile
-                    </p>
-                  </div>
-                  
-                  <div className="flex justify-center mb-4">
-                    <QRCode ref={qrRef} value={publicProfileUrl} size={200} />
-                  </div>
-
-                  <p className="text-xs text-foreground/50 text-center mb-4">
-                    {publicProfileUrl}
-                  </p>
-
-                  {/* Download Error */}
-                  {downloadError && (
-                    <p className="text-sm text-destructive text-center mb-4">
-                      {downloadError}
-                    </p>
-                  )}
-
-                  <div className="flex gap-3">
-                    <button
-                      onClick={handleDownloadQRImage}
-                      className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground py-3 rounded-2xl font-medium transition-colors flex items-center justify-center gap-2"
-                    >
-                      <Download className="w-4 h-4" />
-                      Download
-                    </button>
-                    <button
-                      onClick={() => setShowQR(false)}
-                      className="flex-1 border-2 border-border hover:border-primary/50 text-foreground py-3 rounded-2xl font-medium transition-colors"
-                    >
-                      Close
-                    </button>
-                  </div>
-                </motion.div>
-              </motion.div>
-            )}
-          </motion.div>
+          </PageIn>
         </div>
       </main>
+
+      {/* QR Code dialog */}
+      <Dialog open={showQR} onOpenChange={setShowQR}>
+        <DialogContent>
+          <DialogHeader className="text-center">
+            <DialogTitle>Your QR code</DialogTitle>
+            <DialogDescription>Anyone who scans this opens your public profile.</DialogDescription>
+          </DialogHeader>
+
+          <div className="flex justify-center">
+            <QRCode ref={qrRef} value={publicProfileUrl} size={220} />
+          </div>
+
+          <p className="break-all text-center text-xs text-muted-foreground">{publicProfileUrl}</p>
+
+          {downloadError && (
+            <p role="alert" className="text-center text-sm text-destructive">
+              {downloadError}
+            </p>
+          )}
+
+          <div className="grid grid-cols-2 gap-3">
+            <Button size="lg" onClick={handleDownloadQRImage}>
+              <Download aria-hidden="true" />
+              Download
+            </Button>
+            <Button size="lg" variant="outline" onClick={() => copyLink(publicProfileUrl)}>
+              <Copy aria-hidden="true" />
+              Copy link
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Bottom Navigation */}
       <BottomNav />

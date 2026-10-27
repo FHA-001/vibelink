@@ -114,16 +114,16 @@ function SignUpContent() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="page-canvas min-h-screen flex flex-col">
       {/* Navigation */}
-      <nav className="p-4 sm:p-6">
+      <nav aria-label="Site" className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-5 sm:px-8">
         <Link href="/">
           <Logo />
         </Link>
       </nav>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8">
+      <main id="main-content" className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -132,9 +132,9 @@ function SignUpContent() {
         >
           <Card>
             <CardHeader className="text-center">
-              <CardTitle className="text-2xl sm:text-3xl">Create Account</CardTitle>
+              <CardTitle className="text-2xl sm:text-3xl">Create your account</CardTitle>
               <CardDescription className="text-base">
-                Join VibeLink and start building connections
+                Join VibeLink and start building connections you will remember.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -158,6 +158,7 @@ function SignUpContent() {
                     id="email"
                     name="email"
                     type="email"
+                    autoComplete="email"
                     placeholder="you@example.com"
                     value={formData.email}
                     onChange={handleChange}
@@ -180,6 +181,7 @@ function SignUpContent() {
                       id="password"
                       name="password"
                       type={showPassword ? "text" : "password"}
+                      autoComplete="new-password"
                       placeholder="••••••••"
                       value={formData.password}
                       onChange={handleChange}
@@ -190,13 +192,13 @@ function SignUpContent() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/50 hover:text-foreground"
+                      className="absolute right-1.5 top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-navy"
                       aria-label={showPassword ? "Hide password" : "Show password"}
                     >
                       {showPassword ? (
-                        <EyeOff className="w-5 h-5" />
+                        <EyeOff className="size-5" />
                       ) : (
-                        <Eye className="w-5 h-5" />
+                        <Eye className="size-5" />
                       )}
                     </button>
                   </div>
@@ -215,6 +217,7 @@ function SignUpContent() {
                       id="confirmPassword"
                       name="confirmPassword"
                       type={showConfirmPassword ? "text" : "password"}
+                      autoComplete="new-password"
                       placeholder="••••••••"
                       value={formData.confirmPassword}
                       onChange={handleChange}
@@ -225,13 +228,13 @@ function SignUpContent() {
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/50 hover:text-foreground"
+                      className="absolute right-1.5 top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-navy"
                       aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                     >
                       {showConfirmPassword ? (
-                        <EyeOff className="w-5 h-5" />
+                        <EyeOff className="size-5" />
                       ) : (
-                        <Eye className="w-5 h-5" />
+                        <Eye className="size-5" />
                       )}
                     </button>
                   </div>
@@ -256,21 +259,21 @@ function SignUpContent() {
                         }
                       }}
                       disabled={isLoading}
-                      className="mt-1 w-4 h-4 rounded border-border text-primary focus:ring-primary"
+                      className="mt-1 w-4 h-4 rounded border-border text-gold focus:ring-primary"
                       aria-invalid={!!errors.acknowledgement}
                       aria-describedby={errors.acknowledgement ? "acknowledgement-error" : undefined}
                     />
                     <label
                       htmlFor="acknowledgement"
-                      className="text-sm text-foreground/70 leading-relaxed cursor-pointer"
+                      className="text-sm text-muted-foreground leading-relaxed cursor-pointer"
                     >
                       I agree to the{" "}
-                      <Link href="/terms" className="text-primary hover:underline">
+                      <Link href="/terms" className="text-gold hover:underline">
                         Terms of Service
                       </Link>
                       {" "}
                       and acknowledge the{" "}
-                      <Link href="/privacy" className="text-primary hover:underline">
+                      <Link href="/privacy" className="text-gold hover:underline">
                         Privacy Policy
                       </Link>
                       .
@@ -287,7 +290,7 @@ function SignUpContent() {
                 <Button
                   type="submit"
                   size="lg"
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 rounded-2xl"
+                  className="w-full bg-primary hover:bg-[#D4B13F] text-primary-foreground"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -305,11 +308,11 @@ function SignUpContent() {
               </form>
 
               {/* Sign In Link */}
-              <div className="mt-6 text-center text-sm text-foreground/70">
+              <div className="mt-6 text-center text-sm text-muted-foreground">
                 Already have an account?{" "}
                 <Link 
                   href={redirect ? `/signin?redirect=${encodeURIComponent(redirect)}` : "/signin"} 
-                  className="text-primary hover:underline font-medium"
+                  className="text-gold hover:underline font-medium"
                 >
                   Sign in
                 </Link>
@@ -320,8 +323,8 @@ function SignUpContent() {
       </main>
 
       {/* Footer */}
-      <footer className="p-4 sm:p-6 text-center text-sm text-foreground/50">
-        <Link href="/" className="hover:text-primary transition-colors">
+      <footer className="p-4 sm:p-6 text-center text-sm text-muted-foreground">
+        <Link href="/" className="hover:text-gold transition-colors">
           Back to home
         </Link>
       </footer>
@@ -331,7 +334,7 @@ function SignUpContent() {
 
 export default function SignUpPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>}>
+    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-gold" /></div>}>
       <SignUpContent />
     </Suspense>
   );

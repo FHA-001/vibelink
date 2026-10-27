@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Sora, Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toast";
+import { Providers } from "@/components/providers";
 
 const sora = Sora({
   variable: "--font-heading",
@@ -14,6 +15,11 @@ const inter = Inter({
   subsets: ["latin"],
   display: "swap",
 });
+
+export const viewport: Viewport = {
+  themeColor: "#F8F7F3",
+  colorScheme: "light",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://vibelink.name.ng'),
@@ -94,7 +100,10 @@ export default function RootLayout({
       className={`${sora.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        {children}
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
+        <Providers>{children}</Providers>
         <Toaster />
       </body>
     </html>

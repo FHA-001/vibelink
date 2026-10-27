@@ -226,12 +226,12 @@ export function PublicProfilePreview({
             size="xl"
             className="mb-4 ring-4 ring-background"
           />
-          <h1 className="text-2xl font-bold text-foreground text-center">
+          <h1 className="text-2xl font-semibold text-foreground text-center">
             {profile.full_name || profile.username}
           </h1>
-          <p className="text-foreground/70 text-center text-sm">@{profile.username}</p>
+          <p className="text-muted-foreground text-center text-sm">@{profile.username}</p>
           {profile.job_title && (
-            <p className="text-foreground/60 text-center text-sm mt-1">{profile.job_title}</p>
+            <p className="text-muted-foreground text-center text-sm mt-1">{profile.job_title}</p>
           )}
         </div>
       </div>
@@ -242,7 +242,7 @@ export function PublicProfilePreview({
           {/* Bio */}
           {profile.bio && (
             <div>
-              <p className="text-foreground/80 text-center leading-relaxed text-sm">
+              <p className="text-foreground text-center leading-relaxed text-sm">
                 {profile.bio}
               </p>
             </div>
@@ -251,14 +251,14 @@ export function PublicProfilePreview({
           {/* Company/School */}
           {profile.company_school && (
             <div className="text-center">
-              <p className="text-foreground/60 text-sm">{profile.company_school}</p>
+              <p className="text-muted-foreground text-sm">{profile.company_school}</p>
             </div>
           )}
 
           {/* Interests */}
           {profile.interests && profile.interests.length > 0 && (
             <div>
-              <h3 className="text-xs font-semibold text-foreground/70 mb-2 uppercase tracking-wide">Interests</h3>
+              <h3 className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Interests</h3>
               <ProfileTags tags={profile.interests} variant="primary" />
             </div>
           )}
@@ -331,7 +331,7 @@ export function PublicProfilePreview({
                   onClick={handleKnowMore}
                   disabled={isSending}
                   size="lg"
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-4 rounded-xl font-semibold transition-all hover:shadow-lg"
+                  className="w-full bg-primary hover:bg-[#D4B13F] text-primary-foreground py-4 rounded-xl font-semibold transition-all hover:shadow-lg"
                 >
                   {isSending ? (
                     <>

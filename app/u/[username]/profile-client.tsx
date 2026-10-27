@@ -2,11 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Loader2, ArrowLeft, Share2, MessageSquare, Edit2, Save, Tag, X, Plus } from "lucide-react";
+import { ArrowLeft, Share2, MessageSquare, Edit2, Save, Tag, X, Plus, CircleCheckIcon } from "lucide-react";
 import { getProfileByUsername, PublicProfile, ConnectedProfile, getCurrentUser, getConnectionStatus, getConnectionId, getConnectionNotesAndTags, upsertConnectionNote, deleteConnectionNote, getUserTags, assignTagToConnection, removeTagFromConnection, createConnectionTag, ConnectionNotesAndTags, ConnectionTag } from "@/lib/auth";
 import { PublicProfilePreview } from "@/components/profile/public-profile-preview";
 import { ProfileCard } from "@/components/profile/profile-card";
 import { Logo } from "@/components/logo";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { toast } from "@/components/ui/use-toast";
 import { BottomNav } from "@/components/bottom-nav";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -119,6 +125,9 @@ export function PublicProfileClient({ params }: Props) {
     if (result.success) {
       await loadConnectionNotesAndTags(connectionId);
       setIsEditingNote(false);
+      toast({ title: "Note saved" });
+    } else {
+      toast({ title: "Could not save the note", description: result.error || "Please try again.", variant: "destructive" });
     }
   };
 
@@ -133,6 +142,9 @@ export function PublicProfileClient({ params }: Props) {
     const result = await deleteConnectionNote(connectionId);
     if (result.success) {
       await loadConnectionNotesAndTags(connectionId);
+      toast({ title: "Note deleted" });
+    } else {
+      toast({ title: "Could not delete the note", description: result.error || "Please try again.", variant: "destructive" });
     }
   };
 
@@ -143,6 +155,8 @@ export function PublicProfileClient({ params }: Props) {
     if (result.success) {
       await loadUserTags();
       setNewTagName('');
+    } else {
+      toast({ title: "Could not create the tag", description: result.error || "Please try again.", variant: "destructive" });
     }
   };
 
@@ -185,38 +199,53 @@ export function PublicProfileClient({ params }: Props) {
         console.log("Share failed:", error);
       }
     } else {
-      navigator.clipboard.writeText(shareUrl);
-      alert("Profile link copied to clipboard!");
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        toast({ title: "Link copied", description: "The profile link is on your clipboard." });
+      } catch (error) {
+        console.error("Copy failed:", error);
+        toast({
+          title: "Could not copy the link",
+          description: "Copy it from your browser address bar instead.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="page-canvas flex min-h-screen flex-col" aria-busy="true">
+        <header className="mx-auto flex h-16 w-full max-w-5xl items-center px-4 sm:px-6">
+          <Logo />
+        </header>
+        <main id="main-content" className="flex-1 px-4 py-8 sm:px-6">
+          <span className="sr-only" role="status">Loading profile</span>
+          <div className="mx-auto max-w-lg space-y-4">
+            <Skeleton className="h-64 w-full rounded-3xl" />
+            <Skeleton className="h-40 w-full rounded-2xl" />
+          </div>
+        </main>
       </div>
     );
   }
 
   if (error || !profile) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <header className="p-4 sm:p-6">
-          <Link href="/">
+      <div className="page-canvas flex min-h-screen flex-col">
+        <header className="mx-auto flex h-16 w-full max-w-5xl items-center px-4 sm:px-6">
+          <Link href="/" aria-label="VibeLink home" className="rounded-lg">
             <Logo />
           </Link>
         </header>
-        <main className="flex-1 flex items-center justify-center px-4 sm:px-6">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-foreground mb-2">Profile Not Found</h1>
-            <p className="text-foreground/70 mb-6">
-              The profile you're looking for doesn't exist or has been removed.
+        <main id="main-content" className="flex flex-1 items-center justify-center px-4 sm:px-6">
+          <div className="max-w-sm text-center">
+            <h1 className="font-heading text-3xl font-semibold">Profile not found</h1>
+            <p className="mt-3 text-muted-foreground">
+              This profile does not exist, has been removed, or is not available to you.
             </p>
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
-            >
-              <ArrowLeft className="w-4 h-4" />
+            <Link href="/" className={buttonVariants({ variant: "outline", size: "lg", className: "mt-8" })}>
+              <ArrowLeft aria-hidden="true" />
               Back to home
             </Link>
           </div>
@@ -235,31 +264,35 @@ export function PublicProfileClient({ params }: Props) {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col pb-20">
+    <div className="page-canvas min-h-screen flex flex-col pb-24 md:pb-28">
       {/* Header */}
-      <header className="p-4 sm:p-6 flex items-center justify-between border-b border-border">
-        <button
-          onClick={handleBack}
-          className="text-foreground/70 hover:text-foreground transition-colors"
-          aria-label="Go back"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <Link href="/">
-          <Logo />
-        </Link>
-        <button
-          onClick={handleShare}
-          className="text-foreground/70 hover:text-foreground"
-          aria-label="Share profile"
-        >
-          <Share2 className="w-5 h-5" />
-        </button>
+      <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-md">
+        <div className="mx-auto flex h-16 w-full max-w-5xl items-center justify-between px-4 sm:px-6">
+          <button
+            type="button"
+            onClick={handleBack}
+            className="flex size-10 items-center justify-center rounded-xl text-navy transition-colors hover:bg-muted"
+            aria-label="Back to connections"
+          >
+            <ArrowLeft className="size-5" />
+          </button>
+          <Link href="/" aria-label="VibeLink home" className="rounded-lg">
+            <Logo />
+          </Link>
+          <button
+            type="button"
+            onClick={handleShare}
+            className="flex size-10 items-center justify-center rounded-xl text-navy transition-colors hover:bg-muted"
+            aria-label="Share profile"
+          >
+            <Share2 className="size-5" />
+          </button>
+        </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 px-4 sm:px-6 py-6">
-        <div className="max-w-lg mx-auto">
+      <main id="main-content" className="flex-1 px-4 py-8 sm:px-6">
+        <div className="mx-auto max-w-lg">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -268,15 +301,15 @@ export function PublicProfileClient({ params }: Props) {
             {isOwner ? (
               // STATE 1: Profile owner - redirect to my-card
               <div className="text-center py-12">
-                <h2 className="text-xl font-semibold text-foreground mb-2">
+                <h2 className="font-heading text-2xl font-semibold mb-2">
                   This is your profile
                 </h2>
-                <p className="text-foreground/70 mb-6">
+                <p className="text-muted-foreground mb-6">
                   View your full profile on your card page
                 </p>
                 <Link
                   href="/my-card"
-                  className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-2xl font-medium transition-colors"
+                  className={buttonVariants({ size: "lg" })}
                 >
                   Go to My Card
                 </Link>
@@ -284,8 +317,9 @@ export function PublicProfileClient({ params }: Props) {
             ) : isConnected && isFullProfile(profile) ? (
               // STATE 3: Connected user - show full profile
               <div>
-                <div className="mb-4 flex items-center justify-center gap-2 bg-green-500/10 text-green-600 px-4 py-2 rounded-full">
-                  <span className="text-sm font-medium">Connected</span>
+                <div className="mb-4 flex items-center justify-center gap-2 rounded-full bg-secondary/15 px-4 py-2 text-teal-ink">
+                  <CircleCheckIcon className="size-4" aria-hidden="true" />
+                  <span className="text-sm font-semibold">Connected</span>
                 </div>
                 <ProfileCard
                   profile={profile}
@@ -301,18 +335,17 @@ export function PublicProfileClient({ params }: Props) {
                   </h3>
                   {isEditingNote ? (
                     <div className="space-y-2">
-                      <textarea
+                      <Textarea
                         value={editingNoteText}
                         onChange={(e) => setEditingNoteText(e.target.value)}
-                        placeholder="Add a private note..."
-                        className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+                        placeholder="Add a private note"
                         rows={3}
                         aria-label="Edit connection note"
                       />
                       <div className="flex gap-2">
                         <button
                           onClick={handleSaveNote}
-                          className="text-sm text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
+                          className="inline-flex h-9 items-center gap-1.5 rounded-lg px-2 text-sm font-semibold text-gold transition-colors hover:bg-primary/10"
                           aria-label="Save note"
                         >
                           <Save className="w-3 h-3" />
@@ -320,7 +353,7 @@ export function PublicProfileClient({ params }: Props) {
                         </button>
                         <button
                           onClick={handleCancelEditNote}
-                          className="text-sm text-foreground/50 hover:text-foreground transition-colors"
+                          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                           aria-label="Cancel editing note"
                         >
                           Cancel
@@ -328,12 +361,12 @@ export function PublicProfileClient({ params }: Props) {
                       </div>
                     </div>
                   ) : connectionNotes?.note ? (
-                    <div className="p-3 bg-muted/30 rounded-lg">
-                      <p className="text-sm text-foreground/70 italic">{connectionNotes.note}</p>
+                    <div className="rounded-xl border border-border bg-card p-4">
+                      <p className="text-sm text-muted-foreground italic">{connectionNotes.note}</p>
                       <div className="mt-2 flex gap-2">
                         <button
                           onClick={handleStartEditNote}
-                          className="text-xs text-foreground/50 hover:text-primary transition-colors flex items-center gap-1"
+                          className="text-xs text-muted-foreground hover:text-gold transition-colors flex items-center gap-1"
                           aria-label="Edit note"
                         >
                           <Edit2 className="w-3 h-3" />
@@ -341,7 +374,7 @@ export function PublicProfileClient({ params }: Props) {
                         </button>
                         <button
                           onClick={handleDeleteNote}
-                          className="text-xs text-foreground/50 hover:text-destructive transition-colors"
+                          className="text-xs text-muted-foreground hover:text-destructive transition-colors"
                           aria-label="Delete note"
                         >
                           Delete
@@ -351,7 +384,7 @@ export function PublicProfileClient({ params }: Props) {
                   ) : (
                     <button
                       onClick={handleStartEditNote}
-                      className="text-sm text-foreground/50 hover:text-primary transition-colors flex items-center gap-1"
+                      className="text-sm text-muted-foreground hover:text-gold transition-colors flex items-center gap-1"
                       aria-label="Add note"
                     >
                       <MessageSquare className="w-4 h-4" />
@@ -369,7 +402,7 @@ export function PublicProfileClient({ params }: Props) {
                     </h3>
                     <button
                       onClick={() => setShowTagDialog(true)}
-                      className="text-sm text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
+                      className="inline-flex h-9 items-center gap-1.5 rounded-lg px-2 text-sm font-semibold text-gold transition-colors hover:bg-primary/10"
                       aria-label="Manage tags"
                     >
                       <Plus className="w-4 h-4" />
@@ -381,7 +414,7 @@ export function PublicProfileClient({ params }: Props) {
                       {connectionNotes.tags.map((tag) => (
                         <span
                           key={tag.id}
-                          className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary text-sm rounded-full"
+                          className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-gold text-sm rounded-full"
                         >
                           {tag.tag_name}
                           <button
@@ -395,7 +428,7 @@ export function PublicProfileClient({ params }: Props) {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-foreground/50">No tags assigned yet</p>
+                    <p className="text-sm text-muted-foreground">No tags assigned yet</p>
                   )}
                 </div>
               </div>
@@ -415,43 +448,45 @@ export function PublicProfileClient({ params }: Props) {
       <BottomNav />
 
       {/* Tag Management Dialog */}
-      {showTagDialog && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-card rounded-xl p-6 w-full max-w-md max-h-[80vh] overflow-y-auto">
-            <h3 className="text-lg font-semibold text-foreground mb-4">
-              Manage Your Tags
-            </h3>
-
+      <Dialog
+        open={showTagDialog}
+        onOpenChange={(open) => {
+          if (!open) {
+            setShowTagDialog(false);
+            setNewTagName('');
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Manage your tags</DialogTitle>
+            <DialogDescription>Tags are private to you. Other people never see them.</DialogDescription>
+          </DialogHeader>
+          <div>
             {/* Create new tag */}
-            <div className="flex gap-2 mb-4">
-              <input
+            <div className="mb-4 flex gap-2">
+              <Input
                 type="text"
-                placeholder="New tag name..."
+                placeholder="New tag name"
                 value={newTagName}
                 onChange={(e) => setNewTagName(e.target.value)}
-                onKeyPress={(e) => {
+                onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
                     handleCreateTag();
                   }
                 }}
-                className="flex-1 px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
                 aria-label="New tag name"
               />
-              <button
-                onClick={handleCreateTag}
-                disabled={!newTagName.trim()}
-                className="px-3 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors disabled:opacity-50"
-                aria-label="Create tag"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
+              <Button size="icon-lg" onClick={handleCreateTag} disabled={!newTagName.trim()} aria-label="Create tag">
+                <Plus aria-hidden="true" />
+              </Button>
             </div>
 
             {/* Tag list */}
             <div className="space-y-2">
               {userTags.length === 0 ? (
-                <p className="text-sm text-foreground/50 text-center py-4">
+                <p className="text-sm text-muted-foreground text-center py-4">
                   No tags yet. Create one above.
                 </p>
               ) : (
@@ -473,10 +508,10 @@ export function PublicProfileClient({ params }: Props) {
                               handleAssignTag(tag.id);
                             }
                           }}
-                          className={`text-xs px-2 py-1 rounded ${
+                          className={`h-8 rounded-lg px-3 text-xs font-semibold transition-colors ${
                             isAssigned
                               ? 'bg-primary text-primary-foreground'
-                              : 'bg-background border border-border hover:border-primary/50'
+                              : 'border border-input bg-card hover:border-primary/60'
                           }`}
                           aria-label={isAssigned ? 'Remove tag' : 'Assign tag'}
                         >
@@ -489,20 +524,9 @@ export function PublicProfileClient({ params }: Props) {
               )}
             </div>
 
-            <div className="flex justify-end mt-4">
-              <button
-                onClick={() => {
-                  setShowTagDialog(false);
-                  setNewTagName('');
-                }}
-                className="px-4 py-2 text-sm border border-border rounded-lg hover:bg-muted transition-colors"
-              >
-                Close
-              </button>
-            </div>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

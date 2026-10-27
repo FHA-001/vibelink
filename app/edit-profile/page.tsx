@@ -370,29 +370,29 @@ export default function EditProfilePage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <Loader2 className="w-8 h-8 animate-spin text-gold" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="page-canvas min-h-screen flex flex-col">
       {/* Navigation */}
-      <nav className="p-4 sm:p-6 flex items-center justify-between">
+      <nav aria-label="Site" className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-5 sm:px-8">
         <Link href="/my-card">
           <Logo />
         </Link>
         <Button
           variant="ghost"
           onClick={() => router.push("/my-card")}
-          className="text-foreground/70 hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground"
         >
           Cancel
         </Button>
       </nav>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8">
+      <main id="main-content" className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -407,7 +407,7 @@ export default function EditProfilePage() {
                 transition={{ duration: 0.6, delay: 0.2 }}
                 className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center mx-auto mb-4"
               >
-                <User className="w-8 h-8 text-white" />
+                <User className="w-8 h-8 text-navy" />
               </motion.div>
               <CardTitle className="text-2xl sm:text-3xl">Edit Profile</CardTitle>
               <CardDescription className="text-base">
@@ -446,7 +446,7 @@ export default function EditProfilePage() {
                   
                   <div className="flex items-center gap-6">
                     {/* Current Avatar */}
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold overflow-hidden">
+                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-navy font-semibold overflow-hidden">
                       {currentPhotoUrl ? (
                         <img
                           src={currentPhotoUrl}
@@ -529,7 +529,7 @@ export default function EditProfilePage() {
                         </div>
                       )}
 
-                      <p className="text-xs text-foreground/50">
+                      <p className="text-xs text-muted-foreground">
                         JPEG, PNG, or WebP. Max 5 MB.
                       </p>
                     </div>
@@ -556,7 +556,7 @@ export default function EditProfilePage() {
                     />
                     {isCheckingUsername && (
                       <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                        <Loader2 className="w-4 h-4 animate-spin text-foreground/50" />
+                        <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
                       </div>
                     )}
                   </div>
@@ -572,9 +572,9 @@ export default function EditProfilePage() {
                       ) : usernameAvailable === false ? (
                         <span className="text-destructive">Username taken</span>
                       ) : profile && formData.username === profile.username ? (
-                        <span className="text-foreground/50">Current username</span>
+                        <span className="text-muted-foreground">Current username</span>
                       ) : (
-                        <span className="text-foreground/50">Checking availability...</span>
+                        <span className="text-muted-foreground">Checking availability...</span>
                       )}
                     </p>
                   )}
@@ -659,7 +659,7 @@ export default function EditProfilePage() {
                     onChange={handleChange}
                     disabled={isSaving}
                     rows={4}
-                    className="flex w-full rounded-2xl border border-border bg-background px-4 py-3 text-base ring-offset-background placeholder:text-foreground/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
+                    className="flex w-full rounded-2xl border border-border bg-background px-4 py-3 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
                     aria-invalid={!!errors.bio}
                     aria-describedby={errors.bio ? "bio-error" : undefined}
                   />
@@ -669,7 +669,7 @@ export default function EditProfilePage() {
                         {errors.bio}
                       </p>
                     )}
-                    <p className="text-sm text-foreground/50 ml-auto">
+                    <p className="text-sm text-muted-foreground ml-auto">
                       {formData.bio.length}/500
                     </p>
                   </div>
@@ -690,7 +690,7 @@ export default function EditProfilePage() {
                     onChange={handleChange}
                     disabled={isSaving}
                   />
-                  <p className="text-sm text-foreground/50">
+                  <p className="text-sm text-muted-foreground">
                     Separate multiple interests with commas
                   </p>
                 </div>
@@ -779,10 +779,10 @@ export default function EditProfilePage() {
                 {/* Profile Visibility Settings */}
                 <div className="space-y-4 pt-4 border-t border-border">
                   <div className="flex items-center gap-2">
-                    <Shield className="w-4 h-4 text-primary" />
+                    <Shield className="w-4 h-4 text-gold" />
                     <Label className="text-base font-semibold">Profile Visibility</Label>
                   </div>
-                  <p className="text-sm text-foreground/70">
+                  <p className="text-sm text-muted-foreground">
                     Choose which fields are visible to people you're not connected with
                   </p>
                   
@@ -793,7 +793,7 @@ export default function EditProfilePage() {
                           {field.replace('_', ' ')}
                         </Label>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs text-foreground/50">
+                          <span className="text-xs text-muted-foreground">
                             {visibilityConfig[field as keyof ProfileVisibility] ? 'Public' : 'Private'}
                           </span>
                           <input
@@ -817,7 +817,7 @@ export default function EditProfilePage() {
                 <Button
                   type="submit"
                   size="lg"
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 rounded-2xl"
+                  className="w-full bg-primary hover:bg-[#D4B13F] text-primary-foreground"
                   disabled={isSaving}
                 >
                   {isSaving ? (
@@ -839,8 +839,8 @@ export default function EditProfilePage() {
       </main>
 
       {/* Footer */}
-      <footer className="p-4 sm:p-6 text-center text-sm text-foreground/50">
-        <Link href="/my-card" className="hover:text-primary transition-colors">
+      <footer className="p-4 sm:p-6 text-center text-sm text-muted-foreground">
+        <Link href="/my-card" className="hover:text-gold transition-colors">
           Back to My Card
         </Link>
       </footer>

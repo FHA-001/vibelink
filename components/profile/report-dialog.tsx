@@ -103,7 +103,7 @@ export function ReportDialog({ open, onOpenChange, targetUsername, onConfirm }: 
               maxLength={2000}
             />
             {details && (
-              <p className="text-xs text-foreground/50">
+              <p className="text-xs text-muted-foreground">
                 {details.length}/2000 characters
               </p>
             )}

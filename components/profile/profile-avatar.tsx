@@ -12,10 +12,10 @@ interface ProfileAvatarProps {
 
 export function ProfileAvatar({ src, name, size = "md", className }: ProfileAvatarProps) {
   const sizeClasses = {
-    sm: "w-12 h-12",
-    md: "w-16 h-16",
-    lg: "w-24 h-24",
-    xl: "w-32 h-32",
+    sm: "w-12 h-12 text-base",
+    md: "w-16 h-16 text-xl",
+    lg: "w-24 h-24 text-3xl",
+    xl: "w-32 h-32 text-4xl",
   };
 
   const iconSizes = {
@@ -27,6 +27,7 @@ export function ProfileAvatar({ src, name, size = "md", className }: ProfileAvat
 
   const initials = name
     .split(" ")
+    .filter(Boolean)
     .map((n) => n[0])
     .join("")
     .toUpperCase()
@@ -35,7 +36,7 @@ export function ProfileAvatar({ src, name, size = "md", className }: ProfileAvat
   return (
     <div
       className={cn(
-        "rounded-full flex items-center justify-center bg-gradient-to-br from-primary to-secondary text-white font-bold overflow-hidden",
+        "flex items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-primary to-secondary font-heading font-semibold text-navy",
         sizeClasses[size],
         className
       )}
@@ -44,15 +45,13 @@ export function ProfileAvatar({ src, name, size = "md", className }: ProfileAvat
         <img
           src={src}
           alt={name}
-          className="w-full h-full object-cover"
+          loading="lazy"
+          decoding="async"
+          className="h-full w-full object-cover"
         />
       ) : (
-        <div className="flex items-center justify-center">
-          {initials ? (
-            <span className="text-xl">{initials}</span>
-          ) : (
-            <User className={iconSizes[size]} />
-          )}
+        <div className="flex items-center justify-center" aria-hidden="true">
+          {initials ? <span>{initials}</span> : <User className={iconSizes[size]} />}
         </div>
       )}
     </div>

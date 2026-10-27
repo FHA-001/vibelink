@@ -1,152 +1,134 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { QrCode, Tag, Clock, Wifi } from "lucide-react";
+import { Clock, Wifi, Tag } from "lucide-react";
 import Link from "next/link";
+import { Reveal } from "./motion";
+
+function ComingSoon() {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/12 px-3 py-1.5 text-xs font-semibold text-gold">
+      <Clock className="size-3.5" aria-hidden="true" />
+      Coming soon
+    </span>
+  );
+}
+
+function Chip({ children }: { children: React.ReactNode }) {
+  return (
+    <li className="rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground">
+      {children}
+    </li>
+  );
+}
 
 export function PhysicalProducts() {
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/30">
-      <div className="max-w-7xl mx-auto">
-        {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">
-            Your connections. Beyond the screen.
+    <section id="physical-products" className="bg-background px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        <Reveal className="max-w-2xl">
+          <h2 className="font-heading text-3xl font-semibold sm:text-4xl lg:text-5xl">
+            Your connections, beyond the screen
           </h2>
-          <p className="text-lg text-foreground/70 max-w-2xl mx-auto">
-            Premium physical products designed to elevate how you share your VibeLink profile in the real world.
+          <p className="mt-4 text-lg text-muted-foreground">
+            Two physical products are on the way. Your digital card is available today.
           </p>
-        </motion.div>
+        </Reveal>
 
-        {/* NFC Card - Flagship Product */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="mb-12"
-        >
-          <div className="bg-card rounded-3xl p-8 sm:p-12 shadow-lg hover:shadow-xl transition-all duration-300 border border-border/50 relative overflow-hidden">
-            <div className="absolute top-4 right-4">
-              <span className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-semibold px-3 py-1.5 rounded-full">
-                <Clock className="w-3 h-3" />
-                Coming Soon
-              </span>
-            </div>
-
-            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-              {/* Card Visual */}
-              <div className="relative mx-auto lg:mx-0">
-                <div className="relative max-w-sm mx-auto">
-                  <img
-                    src="/images/vibelink-nfc-card.png"
-                    alt="VibeLink NFC Card concept design showing NFC and QR code features"
-                    className="rounded-2xl shadow-2xl w-full"
-                  />
-                </div>
-                
-                {/* Decorative elements */}
-                <div className="absolute -top-4 -right-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl" />
-                <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-secondary/10 rounded-full blur-2xl" />
+        <div className="mt-14 space-y-6">
+          {/* NFC card */}
+          <Reveal>
+            <article className="grid items-center gap-10 overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-card sm:p-10 lg:grid-cols-2 lg:gap-14">
+              <div className="relative mx-auto w-full max-w-md">
+                <img
+                  src="/images/vibelink-nfc-card.webp"
+                  alt="Concept design of the VibeLink NFC card with a printed QR code"
+                  width={1200}
+                  height={675}
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full rounded-2xl shadow-2xl"
+                />
               </div>
-
-              {/* Card Details */}
-              <div className="text-center lg:text-left">
-                <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-primary/10 rounded-2xl flex items-center justify-center mb-6 mx-auto lg:mx-0">
-                  <Wifi className="w-8 h-8 text-primary" />
+              <div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="flex size-12 items-center justify-center rounded-2xl bg-primary/15 text-gold">
+                    <Wifi className="size-6" aria-hidden="true" />
+                  </span>
+                  <ComingSoon />
                 </div>
-                
-                <h3 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">
+                <h3 className="mt-6 font-heading text-2xl font-semibold sm:text-3xl">
                   VibeLink NFC Card
                 </h3>
-                <p className="text-foreground/70 leading-relaxed mb-6">
-                  Tap to instantly share your profile. No app required for scanners, just a simple tap with any NFC-enabled device. Also features a printed QR code for universal compatibility.
+                <p className="mt-4 leading-relaxed text-muted-foreground">
+                  Tap to share your profile with any NFC-enabled phone. A printed QR code on the
+                  same card covers everyone else.
                 </p>
-                <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
-                  <span className="text-xs text-foreground/50 bg-muted px-2 py-1 rounded-md">NFC tap to share</span>
-                  <span className="text-xs text-foreground/50 bg-muted px-2 py-1 rounded-md">Printed QR code</span>
-                  <span className="text-xs text-foreground/50 bg-muted px-2 py-1 rounded-md">Premium finish</span>
-                </div>
+                <ul className="mt-6 flex flex-wrap gap-2" aria-label="NFC card details">
+                  <Chip>NFC tap to share</Chip>
+                  <Chip>Printed QR code</Chip>
+                  <Chip>Premium finish</Chip>
+                </ul>
               </div>
-            </div>
-          </div>
-        </motion.div>
+            </article>
+          </Reveal>
 
-        {/* Tags Section - Distinct product family */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
-          <div className="bg-card rounded-3xl p-8 sm:p-12 shadow-lg border border-border/50 relative overflow-hidden">
-            <div className="absolute top-4 right-4">
-              <span className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-semibold px-3 py-1.5 rounded-full">
-                <Clock className="w-3 h-3" />
-                Coming Soon
-              </span>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-8 items-center">
-              <div>
-                <div className="w-16 h-16 bg-gradient-to-br from-accent/20 to-accent/10 rounded-2xl flex items-center justify-center mb-6">
-                  <Tag className="w-8 h-8 text-accent-foreground" />
+          {/* VibeTags */}
+          <Reveal>
+            <article className="grid items-center gap-10 overflow-hidden rounded-3xl bg-navy p-6 text-ivory shadow-xl sm:p-10 lg:grid-cols-2 lg:gap-14">
+              <div className="order-2 lg:order-1">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="flex size-12 items-center justify-center rounded-2xl bg-white/10 text-primary">
+                    <Tag className="size-6" aria-hidden="true" />
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/50 bg-primary/15 px-3 py-1.5 text-xs font-semibold text-[#E9CF72]">
+                    <Clock className="size-3.5" aria-hidden="true" />
+                    Coming soon
+                  </span>
                 </div>
-                
-                <h3 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">
+                <h3 className="mt-6 font-heading text-2xl font-semibold text-ivory sm:text-3xl">
                   VibeTags
                 </h3>
-                <p className="text-foreground/70 leading-relaxed mb-6">
-                  Stylish branded tags for your bags, backpacks, lanyards, clothing accessories, and other personal items. Each tag displays your unique QR code, making it easy for others to connect with you wherever you go.
+                <p className="mt-4 leading-relaxed text-ivory/75">
+                  Branded tags for bags, lanyards and other personal items. Each one carries your
+                  QR code so people can connect with you wherever you go.
                 </p>
-                <div className="flex flex-wrap gap-2">
-                  <span className="text-xs text-foreground/50 bg-muted px-2 py-1 rounded-md">Bags and backpacks</span>
-                  <span className="text-xs text-foreground/50 bg-muted px-2 py-1 rounded-md">Lanyards</span>
-                  <span className="text-xs text-foreground/50 bg-muted px-2 py-1 rounded-md">Clothing accessories</span>
-                </div>
+                <ul className="mt-6 flex flex-wrap gap-2" aria-label="VibeTags uses">
+                  {["Bags and backpacks", "Lanyards", "Clothing accessories"].map((label) => (
+                    <li
+                      key={label}
+                      className="rounded-full border border-white/20 px-3 py-1.5 text-xs font-medium text-ivory/80"
+                    >
+                      {label}
+                    </li>
+                  ))}
+                </ul>
               </div>
-
-              <div className="relative">
-                <div className="relative">
-                  <img
-                    src="/images/vibetags-showcase.png"
-                    alt="VibeTags product family showcase featuring Classic, Circle, and Loop design concepts"
-                    className="rounded-2xl shadow-lg w-full"
-                  />
-                </div>
-                {/* Decorative elements */}
-                <div className="absolute -top-4 -right-4 w-24 h-24 bg-accent/10 rounded-full blur-2xl" />
-                <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-primary/10 rounded-full blur-2xl" />
+              <div className="order-1 mx-auto w-full max-w-lg lg:order-2">
+                <img
+                  src="/images/vibetags-showcase.webp"
+                  alt="Concept designs for the VibeTags family: Classic, Circle and Loop"
+                  width={1200}
+                  height={675}
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full rounded-2xl shadow-2xl"
+                />
               </div>
-            </div>
-          </div>
-        </motion.div>
+            </article>
+          </Reveal>
+        </div>
 
-        {/* CTA for interest */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="mt-12 text-center"
-        >
-          <p className="text-foreground/60 text-sm mb-4">
-            Interested in physical products? Let us know.
+        <Reveal className="mt-10 text-center">
+          <p className="text-sm text-muted-foreground">
+            Want to hear when they launch?{" "}
+            <Link
+              href="/contact"
+              className="font-semibold text-gold underline underline-offset-4 transition-colors hover:text-navy"
+            >
+              Contact us for launch updates
+            </Link>
           </p>
-          <Link
-            href="/contact"
-            className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-medium transition-colors"
-          >
-            Contact us for launch updates
-            <QrCode className="w-4 h-4" />
-          </Link>
-        </motion.div>
+        </Reveal>
       </div>
     </section>
   );

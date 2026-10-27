@@ -1,92 +1,91 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { ArrowRight, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { motion, useReducedMotion } from "framer-motion";
+import { ArrowRight, QrCode, MessageSquare, ShieldCheck } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import Link from "next/link";
 
+const EASE = [0.22, 1, 0.36, 1] as const;
+
+const points = [
+  { icon: QrCode, text: "A card and QR code that open your profile in one scan" },
+  { icon: MessageSquare, text: "Private notes and tags that only you can see" },
+  { icon: ShieldCheck, text: "Visibility controls for what each person can view" },
+];
+
 export default function WelcomePage() {
+  const reduce = useReducedMotion();
+  const rise = (delay: number) => ({
+    initial: reduce ? false : { opacity: 0, y: 16 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.6, delay, ease: EASE },
+  });
+
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Navigation */}
-      <nav className="p-4 sm:p-6">
-        <Link href="/">
+    <div className="page-canvas flex min-h-screen flex-col">
+      <nav aria-label="Site" className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-5 sm:px-8">
+        <Link href="/" aria-label="VibeLink home" className="rounded-lg">
           <Logo />
+        </Link>
+        <Link href="/signin" className="rounded-lg px-3 py-2 text-sm font-semibold text-navy transition-colors hover:text-gold">
+          Sign in
         </Link>
       </nav>
 
-      {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center px-4 sm:px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="max-w-2xl w-full text-center"
-        >
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="inline-flex items-center gap-2 bg-primary/10 rounded-full px-4 py-2 mb-8"
-          >
-            <Sparkles className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-primary">Start your journey</span>
-          </motion.div>
-
-          {/* Heading */}
+      <main id="main-content" className="flex flex-1 items-center justify-center px-4 py-10 sm:px-6">
+        <div className="w-full max-w-2xl text-center">
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6"
+            {...rise(0)}
+            className="font-heading text-4xl font-semibold leading-[1.08] sm:text-5xl lg:text-6xl"
           >
             Welcome to VibeLink
           </motion.h1>
 
-          {/* Description */}
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-lg sm:text-xl text-foreground/70 mb-12 max-w-xl mx-auto"
+            {...rise(0.1)}
+            className="mx-auto mt-5 max-w-xl text-lg text-muted-foreground sm:text-xl"
           >
-            Create your digital introduction card and start building meaningful connections today.
+            Create your digital introduction card and start building connections you will remember.
           </motion.p>
 
-          {/* CTA Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center"
+          <motion.ul
+            {...rise(0.18)}
+            className="mx-auto mt-10 grid max-w-xl gap-3 text-left"
           >
-            <Link href="/signup">
-              <Button
-                size="lg"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground text-base px-8 py-6 rounded-2xl w-full sm:w-auto"
+            {points.map((point) => (
+              <li
+                key={point.text}
+                className="flex items-center gap-4 rounded-2xl border border-border bg-card px-4 py-3.5 shadow-sm"
               >
-                Get Started
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/12 text-gold">
+                  <point.icon className="size-5" aria-hidden="true" />
+                </span>
+                <span className="text-sm font-medium text-navy sm:text-base">{point.text}</span>
+              </li>
+            ))}
+          </motion.ul>
+
+          <motion.div
+            {...rise(0.26)}
+            className="mt-10 flex flex-col justify-center gap-3 sm:flex-row"
+          >
+            <Link href="/signup" className={buttonVariants({ size: "lg", className: "px-8" })}>
+              Create an account
+              <ArrowRight data-icon="inline-end" />
             </Link>
-            <Link href="/signin">
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-2 border-foreground/20 hover:border-foreground/40 text-foreground text-base px-8 py-6 rounded-2xl w-full sm:w-auto"
-              >
-                Sign In
-              </Button>
+            <Link
+              href="/signin"
+              className={buttonVariants({ variant: "outline", size: "lg", className: "px-8" })}
+            >
+              Sign in
             </Link>
           </motion.div>
-        </motion.div>
+        </div>
       </main>
 
-      {/* Footer */}
-      <footer className="p-4 sm:p-6 text-center text-sm text-foreground/50">
-        <Link href="/" className="hover:text-primary transition-colors">
+      <footer className="px-4 py-6 text-center text-sm text-muted-foreground">
+        <Link href="/" className="rounded-md transition-colors hover:text-gold">
           Back to home
         </Link>
       </footer>

@@ -1,94 +1,79 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { 
-  GraduationCap, 
-  Briefcase, 
-  Code, 
-  Rocket, 
-  PenTool, 
-  Building2 
+import {
+  GraduationCap,
+  Briefcase,
+  Code,
+  Rocket,
+  PenTool,
+  Building2,
 } from "lucide-react";
+import { Reveal, Stagger, StaggerItem } from "./motion";
+
+const audiences = [
+  {
+    icon: GraduationCap,
+    title: "Students",
+    description: "Stay in touch with peers, lecturers and mentors long after the semester ends.",
+  },
+  {
+    icon: Briefcase,
+    title: "Professionals",
+    description: "Hand over your details at conferences without fumbling for a card.",
+  },
+  {
+    icon: Code,
+    title: "Developers",
+    description: "Share your GitHub and portfolio at hackathons and meetups in one scan.",
+  },
+  {
+    icon: Rocket,
+    title: "Founders",
+    description: "Make a clear first impression with investors, partners and early customers.",
+  },
+  {
+    icon: PenTool,
+    title: "Freelancers",
+    description: "Give prospective clients one place to see your work and reach you.",
+  },
+  {
+    icon: Building2,
+    title: "Business owners",
+    description: "Meet suppliers and partners, then remember who said what and when.",
+  },
+];
 
 export function WhoIsItFor() {
-  const audiences = [
-    {
-      icon: GraduationCap,
-      title: "Students",
-      description: "Build your professional network while studying. Make lasting connections with peers and professors.",
-    },
-    {
-      icon: Briefcase,
-      title: "Professionals",
-      description: "Stand out at conferences and networking events. Share your contact info instantly and professionally.",
-    },
-    {
-      icon: Code,
-      title: "Developers",
-      description: "Connect with other developers at hackathons and meetups. Share your GitHub and portfolio seamlessly.",
-    },
-    {
-      icon: Rocket,
-      title: "Founders",
-      description: "Make memorable first impressions with investors and partners. Your startup deserves a premium introduction.",
-    },
-    {
-      icon: PenTool,
-      title: "Freelancers",
-      description: "Share your portfolio and contact info with potential clients. Make it easy for them to reach out and hire you.",
-    },
-    {
-      icon: Building2,
-      title: "Business Owners",
-      description: "Elevate your business networking. Share your professional profile and build valuable partnerships.",
-    },
-  ];
-
   return (
-    <section id="about" className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/30">
-      <div className="max-w-7xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">
-            Who Is It For?
+    <section id="who-is-it-for" className="bg-card px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
+      <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.8fr_1.4fr] lg:gap-20">
+        <Reveal className="lg:sticky lg:top-28 lg:self-start">
+          <h2 className="font-heading text-3xl font-semibold sm:text-4xl lg:text-5xl">
+            Built for people who meet people
           </h2>
-          <p className="text-lg text-foreground/70 max-w-2xl mx-auto">
-            VibeLink is perfect for anyone who wants to make meaningful connections
+          <p className="mt-4 text-lg text-muted-foreground">
+            If introductions are part of your week, VibeLink keeps them tidy.
           </p>
-        </motion.div>
+        </Reveal>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {audiences.map((audience, index) => (
-            <motion.div
+        <Stagger className="grid gap-x-10 sm:grid-cols-2">
+          {audiences.map((audience) => (
+            <StaggerItem
               key={audience.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="group"
+              className="flex gap-4 border-t border-border py-7"
             >
-              <div className="bg-card rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 h-full border border-border/50 hover:border-secondary/30">
-                {/* Icon */}
-                <div className="w-14 h-14 bg-gradient-to-br from-secondary/20 to-primary/20 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <audience.icon className="w-7 h-7 text-secondary" />
-                </div>
-
-                {/* Content */}
-                <h3 className="text-xl font-bold text-foreground mb-3">
-                  {audience.title}
-                </h3>
-                <p className="text-foreground/70 leading-relaxed">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-secondary/15 text-teal-ink">
+                <audience.icon className="size-5" />
+              </span>
+              <div>
+                <h3 className="font-heading text-lg font-semibold">{audience.title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
                   {audience.description}
                 </p>
               </div>
-            </motion.div>
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
       </div>
     </section>
   );
