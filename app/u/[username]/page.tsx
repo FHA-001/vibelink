@@ -9,7 +9,8 @@ type Props = {
 export async function generateMetadata(
   { params }: Props
 ): Promise<Metadata> {
-  const { username } = await params;
+  const { username: rawUsername } = await params;
+  const username = rawUsername.toLowerCase();
   const profile = await getProfileByUsernameServer(username);
   
   if (!profile) {

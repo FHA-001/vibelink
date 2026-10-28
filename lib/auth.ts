@@ -55,6 +55,23 @@ export interface Profile extends ConnectedProfile {
   profile_visibility: ProfileVisibility;
 }
 
+export const USERNAME_MIN_LENGTH = 3;
+export const USERNAME_MAX_LENGTH = 20;
+
+export function normalizeUsername(username: string): string {
+  return username.trim().toLowerCase();
+}
+
+// Returns an error message, or null if the username is valid
+export function validateUsername(username: string): string | null {
+  const value = normalizeUsername(username);
+  if (!value) return "Username is required";
+  if (value.length < USERNAME_MIN_LENGTH) return `Username must be at least ${USERNAME_MIN_LENGTH} characters`;
+  if (value.length > USERNAME_MAX_LENGTH) return `Username must be ${USERNAME_MAX_LENGTH} characters or fewer`;
+  if (!/^[a-z0-9_]+$/.test(value)) return "Username can only contain letters, numbers, and underscores";
+  return null;
+}
+
 export async function signUp(email: string, password: string, redirectTo?: string): Promise<AuthResult> {
   const supabase = createClient();
   
@@ -256,9 +273,12 @@ export async function profileExists(userId: string): Promise<boolean> {
 export async function isUsernameAvailable(username: string): Promise<boolean> {
   const supabase = createClient();
   
-  // Use secure RPC for username availability check
+  // Invalid usernames are never available
+  if (validateUsername(username)) return false;
+
+  // Use secure RPC for username availability check (always lowercase)
   const { data, error } = await supabase
-    .rpc('is_username_available', { candidate_username: username });
+    .rpc('is_username_available', { candidate_username: normalizeUsername(username) });
 
   if (error) {
     console.error('Error checking username availability:', error);
@@ -275,7 +295,7 @@ export async function getProfileByUsername(username: string): Promise<ConnectedP
   // This function is used for viewing OTHER users' profiles in browser components
   // Own profile is retrieved via getUserProfile() which uses direct SELECT
   const { data, error } = await supabase
-    .rpc('get_profile_for_view', { target_username: username });
+    .rpc('get_profile_for_view', { target_username: normalizeUsername(username) });
 
   // Log only unexpected errors (network, RPC failure, etc.)
   // Blocked/nonexistent profiles return null data without error - this is expected
@@ -320,6 +340,12 @@ export async function saveUserProfile(userId: string, profileData: {
 }): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient();
   
+  const usernameError = validateUsername(profileData.username);
+  if (usernameError) {
+    return { success: false, error: usernameError };
+  }
+  const username = normalizeUsername(profileData.username);
+
   // First check if profile exists
   const exists = await profileExists(userId);
   
@@ -343,7 +369,7 @@ export async function saveUserProfile(userId: string, profileData: {
       job_title?: string | null;
       bio?: string | null;
     } = {
-      username: profileData.username,
+      username,
       full_name: profileData.full_name,
       company_school: profileData.company_school || null,
       profile_photo: profileData.profile_photo || null,
@@ -378,7 +404,7 @@ export async function saveUserProfile(userId: string, profileData: {
       .from('profiles')
       .insert({
         id: userId,
-        username: profileData.username,
+        username,
         full_name: profileData.full_name,
         job_title: profileData.job_title || null,
         company_school: profileData.company_school || null,
@@ -397,6 +423,10 @@ export async function saveUserProfile(userId: string, profileData: {
   }
 
   if (error) {
+    // 23505 = unique violation (someone already has this username)
+    if (error.code === '23505') {
+      return { success: false, error: "That username is already taken" };
+    }
     return { success: false, error: error.message };
   }
 

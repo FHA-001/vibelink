@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Logo } from "@/components/logo";
-import { getCurrentUser, getUserProfile, saveUserProfile, isUsernameAvailable, uploadProfilePhoto, deleteProfilePhoto, validateProfilePhoto, Profile, ProfileVisibility } from "@/lib/auth";
+import { getCurrentUser, getUserProfile, saveUserProfile, isUsernameAvailable, validateUsername, uploadProfilePhoto, deleteProfilePhoto, validateProfilePhoto, Profile, ProfileVisibility } from "@/lib/auth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -123,10 +123,9 @@ export default function EditProfilePage() {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.username.trim()) {
-      newErrors.username = "Username is required";
-    } else if (!/^[a-zA-Z0-9_]{3,20}$/.test(formData.username)) {
-      newErrors.username = "Username must be 3-20 characters (letters, numbers, underscores only)";
+        const usernameError = validateUsername(formData.username);
+    if (usernameError) {
+      newErrors.username = usernameError;
     } else if (usernameAvailable === false) {
       newErrors.username = "Username is already taken";
     }
@@ -163,11 +162,10 @@ export default function EditProfilePage() {
       return;
     }
 
-    if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+        if (validateUsername(username)) {
       setUsernameAvailable(null);
       return;
     }
-
     setIsCheckingUsername(true);
     try {
       const available = await isUsernameAvailable(username);
@@ -244,8 +242,11 @@ export default function EditProfilePage() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
+        const { name } = e.target;
+    // Usernames are always lowercase
+    const value = name === "username" ? e.target.value.toLowerCase() : e.target.value;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === "username") setUsernameAvailable(null);
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
@@ -548,6 +549,10 @@ export default function EditProfilePage() {
                       name="username"
                       type="text"
                       placeholder="johndoe"
+                      maxLength={20}
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      spellCheck={false}
                       value={formData.username}
                       onChange={handleChange}
                       disabled={isSaving}
@@ -574,8 +579,7 @@ export default function EditProfilePage() {
                       ) : profile && formData.username === profile.username ? (
                         <span className="text-muted-foreground">Current username</span>
                       ) : (
-                        <span className="text-muted-foreground">Checking availability...</span>
-                      )}
+                        <span className="text-muted-foreground">{validateUsername(formData.username) ?? "Checking availability..."}</span>                      )}
                     </p>
                   )}
                 </div>

@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Logo } from "@/components/logo";
-import { getCurrentUser, signOut, getUserProfile, saveUserProfile, isUsernameAvailable, ProfileVisibility } from "@/lib/auth";
+import { getCurrentUser, signOut, getUserProfile, saveUserProfile, isUsernameAvailable, validateUsername, ProfileVisibility } from "@/lib/auth";
 import { getSafeRedirectWithFallback } from "@/lib/redirect";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -81,10 +81,9 @@ function CompleteProfileContent() {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.username.trim()) {
-      newErrors.username = "Username is required";
-    } else if (!/^[a-zA-Z0-9_]{3,20}$/.test(formData.username)) {
-      newErrors.username = "Username must be 3-20 characters (letters, numbers, underscores only)";
+    const usernameError = validateUsername(formData.username);
+    if (usernameError) {
+      newErrors.username = usernameError;
     } else if (usernameAvailable === false) {
       newErrors.username = "Username is already taken";
     }
@@ -98,7 +97,7 @@ function CompleteProfileContent() {
   };
 
   const checkUsernameAvailability = async (username: string) => {
-    if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+        if (validateUsername(username)) {
       setUsernameAvailable(null);
       return;
     }
@@ -160,8 +159,11 @@ function CompleteProfileContent() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
+        const { name } = e.target;
+    // Usernames are always lowercase
+    const value = name === "username" ? e.target.value.toLowerCase() : e.target.value;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === "username") setUsernameAvailable(null);
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
@@ -261,6 +263,10 @@ function CompleteProfileContent() {
                       name="username"
                       type="text"
                       placeholder="johndoe"
+                      maxLength={20}
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      spellCheck={false}
                       value={formData.username}
                       onChange={handleChange}
                       disabled={isSaving}
@@ -285,8 +291,7 @@ function CompleteProfileContent() {
                       ) : usernameAvailable === false ? (
                         <span className="text-destructive">Username taken</span>
                       ) : (
-                        <span className="text-muted-foreground">Checking availability...</span>
-                      )}
+                        <span className="text-muted-foreground">{validateUsername(formData.username) ?? "Checking availability..."}</span>                      )}
                     </p>
                   )}
                 </div>
