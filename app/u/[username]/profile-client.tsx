@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Share2, MessageSquare, Edit2, Save, Tag, X, Plus, CircleCheckIcon } from "lucide-react";
+import { ArrowLeft, Share2, MessageSquare, Edit2, Save, Tag, X, Plus, CircleCheckIcon, UserPlus } from "lucide-react";
 import { getProfileByUsername, PublicProfile, ConnectedProfile, getCurrentUser, getConnectionStatus, getConnectionId, getConnectionNotesAndTags, upsertConnectionNote, deleteConnectionNote, getUserTags, assignTagToConnection, removeTagFromConnection, createConnectionTag, ConnectionNotesAndTags, ConnectionTag } from "@/lib/auth";
 import { PublicProfilePreview } from "@/components/profile/public-profile-preview";
 import { ProfileCard } from "@/components/profile/profile-card";
@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/use-toast";
+import { downloadVCard } from "@/lib/vcard";
 import { BottomNav } from "@/components/bottom-nav";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -210,6 +211,17 @@ export function PublicProfileClient({ params }: Props) {
           variant: "destructive",
         });
       }
+    }
+  };
+
+  const handleSaveContact = () => {
+    if (!profile) return;
+    try {
+      downloadVCard(profile, `${window.location.origin}/u/${profile.username}`);
+      toast({ title: "Contact file downloaded", description: "Open it to add this person to your contacts." });
+    } catch (error) {
+      console.error("Save contact failed:", error);
+      toast({ title: "Could not create the contact file", description: "Please try again.", variant: "destructive" });
     }
   };
 
@@ -439,6 +451,21 @@ export function PublicProfileClient({ params }: Props) {
                 isOwner={false}
                 connectionStatus={connectionStatus}
               />
+            )}
+
+            {!isOwner && (
+              <div className="mt-6">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                  className="w-full"
+                  onClick={handleSaveContact}
+                >
+                  <UserPlus aria-hidden="true" />
+                  Save to contacts
+                </Button>
+              </div>
             )}
           </motion.div>
         </div>
