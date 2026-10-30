@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { motion } from "framer-motion";
-import { Download, Edit, Settings, Users, Sparkles, X, Copy } from "lucide-react";
+import { Download, Edit, Settings, Users, Copy } from "lucide-react";
 import { getCurrentUser, getUserProfile, signOut, Profile } from "@/lib/auth";
 import { ProfileCard } from "@/components/profile/profile-card";
+import { ProfileCompleteness } from "@/components/profile/profile-completeness";
 import { QRCode } from "@/components/profile/qr-code";
 import { BottomNav } from "@/components/bottom-nav";
 import { AppHeader } from "@/components/app-header";
@@ -23,19 +23,11 @@ export default function MyCardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showQR, setShowQR] = useState(false);
   const [downloadError, setDownloadError] = useState("");
-  const [showReminder, setShowReminder] = useState(false);
   const qrRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     checkAuth();
   }, []);
-
-  useEffect(() => {
-    // Show reminder if profile is missing job_title or bio
-    if (profile && (!profile.job_title || !profile.bio)) {
-      setShowReminder(true);
-    }
-  }, [profile]);
 
   const checkAuth = async () => {
     try {
@@ -182,34 +174,7 @@ export default function MyCardPage() {
             <h1 className="font-heading text-3xl font-semibold">My Card</h1>
             <p className="mt-1 text-muted-foreground">Your digital identity, ready to share.</p>
 
-            {/* Profile Completion Reminder */}
-            {showReminder && (
-              <motion.div
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                role="status"
-                className="mt-6 flex items-start gap-3 rounded-2xl border border-primary/30 bg-primary/[0.08] p-4"
-              >
-                <Sparkles className="mt-0.5 size-5 shrink-0 text-gold" aria-hidden="true" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-navy">Finish your card to stand out</p>
-                  <p className="mt-0.5 text-sm text-muted-foreground">
-                    Add a job title and a short bio so people know who they are meeting.
-                  </p>
-                  <Button size="sm" className="mt-3" onClick={handleEdit}>
-                    Add details
-                  </Button>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowReminder(false)}
-                  className="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-card hover:text-navy"
-                  aria-label="Dismiss reminder"
-                >
-                  <X className="size-4" />
-                </button>
-              </motion.div>
-            )}
+            <ProfileCompleteness profile={profile} onEdit={handleEdit} />
 
             {/* Quick navigation */}
             <nav aria-label="Shortcuts" className="mb-6 mt-6 grid grid-cols-3 gap-3">
