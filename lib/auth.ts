@@ -72,7 +72,7 @@ export function validateUsername(username: string): string | null {
   return null;
 }
 
-export async function signUp(email: string, password: string, redirectTo?: string): Promise<AuthResult> {
+export async function signUp(email: string, password: string, redirectTo?: string, captchaToken?: string): Promise<AuthResult> {
   const supabase = createClient();
   
   // Always provide emailRedirectTo to avoid Supabase defaults
@@ -85,7 +85,7 @@ export async function signUp(email: string, password: string, redirectTo?: strin
     password,
     options: {
       emailRedirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent(destination)}`,
-    },
+      captchaToken,    },
   });
 
   if (error) {
@@ -95,12 +95,12 @@ export async function signUp(email: string, password: string, redirectTo?: strin
   return { success: true, user: data.user || undefined };
 }
 
-export async function signIn(email: string, password: string): Promise<AuthResult> {
-  const supabase = createClient();
+export async function signIn(email: string, password: string, captchaToken?: string): Promise<AuthResult> {  const supabase = createClient();
   
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
+    options: { captchaToken },
   });
 
   if (error) {
@@ -122,12 +122,11 @@ export async function signOut(): Promise<AuthResult> {
   return { success: true };
 }
 
-export async function forgotPassword(email: string): Promise<AuthResult> {
-  const supabase = createClient();
+export async function forgotPassword(email: string, captchaToken?: string): Promise<AuthResult> {  const supabase = createClient();
   
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${window.location.origin}/auth/confirm?next=/reset-password`,
-  });
+    captchaToken,  });
 
   if (error) {
     return { success: false, error: error.message };

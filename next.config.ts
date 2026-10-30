@@ -34,20 +34,21 @@ const nextConfig: NextConfig = {
       "font-src 'self'",
       "worker-src 'self'",
       "media-src 'self'",
+      "frame-src https://challenges.cloudflare.com",
       
       // Script-src: Next.js 16.3.4 requires 'unsafe-inline' for hydration scripts
       // Development adds 'unsafe-eval' for Next.js hot module replacement
       isDevelopment 
-        ? "script-src 'self' 'unsafe-eval' 'unsafe-inline'"
-        : "script-src 'self' 'unsafe-inline'",
+        ? "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://challenges.cloudflare.com"
+        : "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
       
       // Style-src: Tailwind CSS and Next.js styled-jsx require 'unsafe-inline'
       "style-src 'self' 'unsafe-inline'",
       
       // Connect-src: Allow Supabase API (REST, Auth, Realtime/WebSocket)
       supabaseOrigin && supabaseHost
-        ? `connect-src 'self' ${supabaseOrigin} wss://${supabaseHost}`
-        : "connect-src 'self'",
+        ? `connect-src 'self' ${supabaseOrigin} wss://${supabaseHost} https://challenges.cloudflare.com`
+        : "connect-src 'self' https://challenges.cloudflare.com",
       
       // Img-src: Allow self, data: (QR download: canvas.toDataURL), and Supabase Storage
       supabaseOrigin

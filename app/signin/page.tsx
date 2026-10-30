@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Logo } from "@/components/logo";
 import { signIn, getUserProfile } from "@/lib/auth";
 import { getSafeRedirectWithFallback } from "@/lib/redirect";
+import { Turnstile, TURNSTILE_SITE_KEY } from "@/components/turnstile";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -28,7 +29,8 @@ function SignInContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState("");
-
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaReset, setCaptchaReset] = useState(0);
   // Prefill email from query parameter if present
   useEffect(() => {
     const emailParam = searchParams.get('email');
@@ -58,15 +60,19 @@ function SignInContent() {
     e.preventDefault();
     setAuthError("");
 
-    if (!validateForm()) {
+        if (!validateForm()) {
+      return;
+    }
+
+    if (TURNSTILE_SITE_KEY && !captchaToken) {
+      setAuthError("Please complete the security check");
       return;
     }
 
     setIsLoading(true);
 
     try {
-      const result = await signIn(formData.email, formData.password);
-
+      const result = await signIn(formData.email, formData.password, captchaToken ?? undefined);
       if (result.success && result.user) {
         // Check if user has already completed their profile
         const profile = await getUserProfile(result.user.id);
@@ -84,8 +90,10 @@ function SignInContent() {
     } catch (error) {
       console.error("Sign in error:", error);
       setAuthError(error instanceof Error ? error.message : "An unexpected error occurred");
-    } finally {
+        } finally {
       setIsLoading(false);
+      // Each token works only once, so get a fresh one
+      setCaptchaReset((n) => n + 1);
     }
   };
 
@@ -201,6 +209,8 @@ function SignInContent() {
                     </p>
                   )}
                 </div>
+
+                <Turnstile onToken={setCaptchaToken} resetSignal={captchaReset} />
 
                 {/* Submit Button */}
                 <Button

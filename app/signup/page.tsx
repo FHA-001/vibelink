@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Logo } from "@/components/logo";
 import { signUp, getUserProfile } from "@/lib/auth";
 import { getSafeRedirectWithFallback } from "@/lib/redirect";
+import { Turnstile, TURNSTILE_SITE_KEY } from "@/components/turnstile";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -31,6 +32,8 @@ function SignUpContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [authError, setAuthError] = useState("");
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaReset, setCaptchaReset] = useState(0);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -65,14 +68,19 @@ function SignUpContent() {
     e.preventDefault();
     setAuthError("");
 
-    if (!validateForm()) {
+        if (!validateForm()) {
+      return;
+    }
+
+    if (TURNSTILE_SITE_KEY && !captchaToken) {
+      setAuthError("Please complete the security check");
       return;
     }
 
     setIsLoading(true);
 
     try {
-      const result = await signUp(formData.email, formData.password, safeRedirect);
+      const result = await signUp(formData.email, formData.password, safeRedirect, captchaToken ?? undefined);
 
       if (result.success && result.user) {
         // Check if user has an active session (email confirmation not required)
@@ -99,8 +107,10 @@ function SignUpContent() {
       }
     } catch (error) {
       setAuthError("An unexpected error occurred");
-    } finally {
+        } finally {
       setIsLoading(false);
+      // Each token works only once, so get a fresh one
+      setCaptchaReset((n) => n + 1);
     }
   };
 
@@ -286,8 +296,9 @@ function SignUpContent() {
                   )}
                 </div>
 
-                {/* Submit Button */}
-                <Button
+                <Turnstile onToken={setCaptchaToken} resetSignal={captchaReset} />
+
+                {/* Submit Button */}                <Button
                   type="submit"
                   size="lg"
                   className="w-full bg-primary hover:bg-[#D4B13F] text-primary-foreground"

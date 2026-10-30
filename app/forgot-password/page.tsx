@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Logo } from "@/components/logo";
 import { forgotPassword } from "@/lib/auth";
+import { Turnstile, TURNSTILE_SITE_KEY } from "@/components/turnstile";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -19,6 +20,8 @@ export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaReset, setCaptchaReset] = useState(0);
 
   const validateEmail = () => {
     if (!email) {
@@ -40,11 +43,15 @@ export default function ForgotPasswordPage() {
       return;
     }
 
+    if (TURNSTILE_SITE_KEY && !captchaToken) {
+      setError("Please complete the security check");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const result = await forgotPassword(email);
-
+      const result = await forgotPassword(email, captchaToken ?? undefined);
       if (result.success) {
         setSuccess(true);
       } else {
@@ -53,8 +60,10 @@ export default function ForgotPasswordPage() {
     } catch (error) {
       console.error("Forgot password error:", error);
       setError("An unexpected error occurred");
-    } finally {
+        } finally {
       setIsLoading(false);
+      // Each token works only once, so get a fresh one
+      setCaptchaReset((n) => n + 1);
     }
   };
 
@@ -112,8 +121,9 @@ export default function ForgotPasswordPage() {
                     />
                   </div>
 
-                  {/* Submit Button */}
-                  <Button
+                  <Turnstile onToken={setCaptchaToken} resetSignal={captchaReset} />
+
+                  {/* Submit Button */}                  <Button
                     type="submit"
                     size="lg"
                     className="w-full bg-primary hover:bg-[#D4B13F] text-primary-foreground"
