@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Users, UserPlus, Check, X, Loader2, Trash2, Calendar, Clock, Search, ArrowUpDown, MessageSquare, Tag, Plus, Edit2, Save } from "lucide-react";
+import { Users, UserPlus, Check, X, Loader2, Trash2, Calendar, Clock, Search, ArrowUpDown, MessageSquare, Tag, Plus, Edit2, Save, CalendarClock, MapPin } from "lucide-react";
 import { BottomNav } from "@/components/bottom-nav";
 import { AppHeader } from "@/components/app-header";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -34,10 +34,27 @@ import {
   deleteConnectionTag,
   assignTagToConnection,
   removeTagFromConnection,
-  ConnectionNotesAndTags,
-  ConnectionTag
+    ConnectionNotesAndTags,
+  ConnectionTag,
+  getMyFollowUps,
+  FollowUpItem
 } from "@/lib/auth";
 import { toast } from "@/components/ui/use-toast";
+
+function todayLocal(): string {
+  const d = new Date();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${m}-${day}`;
+}
+
+function formatDate(iso: string): string {
+  return new Date(`${iso}T00:00:00`).toLocaleDateString(undefined, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
 
 export default function ConnectionsPage() {
   const router = useRouter();
@@ -67,6 +84,7 @@ export default function ConnectionsPage() {
   const [showTagDialog, setShowTagDialog] = useState(false);
   const [newTagName, setNewTagName] = useState("");
   const [selectedConnectionForTags, setSelectedConnectionForTags] = useState<string | null>(null);
+  const [followUps, setFollowUps] = useState<FollowUpItem[]>([]);
 
   useEffect(() => {
     checkAuth();
@@ -78,6 +96,7 @@ export default function ConnectionsPage() {
       loadSentRequests();
       loadConnections();
       loadUserTags();
+      loadFollowUps();
     }
   }, [user]);
 
@@ -132,6 +151,15 @@ export default function ConnectionsPage() {
       }
     } catch (error) {
       console.error("Error loading connections:", error);
+    }
+  };
+
+  const loadFollowUps = async () => {
+    try {
+      setFollowUps(await getMyFollowUps());
+    } catch (error) {
+      console.error("Error loading follow-ups:", error);
+      setFollowUps([]);
     }
   };
 
@@ -483,6 +511,14 @@ export default function ConnectionsPage() {
       }
     });
 
+    // Open reminders that match a connection you currently have, soonest first
+  const openFollowUps = followUps
+    .flatMap((item) => {
+      const connection = connections.find((c) => c.id === item.connection_id);
+      return connection ? [{ item, connection }] : [];
+    })
+    .slice(0, 5);
+
   if (isLoading) {
     return (
       <div className="page-canvas flex min-h-screen flex-col pb-24" aria-busy="true">
@@ -647,6 +683,57 @@ export default function ConnectionsPage() {
               </motion.div>
             )}
             
+                        {/* Follow-up reminders */}
+            {openFollowUps.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.28 }}
+                className="mb-6"
+              >
+                <div className="bg-card rounded-2xl shadow-md p-5 border border-border">
+                  <div className="flex items-center gap-2 mb-4">
+                    <CalendarClock className="w-5 h-5 text-gold" />
+                    <h2 className="font-heading text-lg font-semibold">Follow up</h2>
+                  </div>
+
+                  <div className="space-y-3">
+                    {openFollowUps.map(({ item, connection }) => {
+                      const profile = connection.other_user_profile;
+                      const overdue = item.follow_up_at < todayLocal();
+                      return (
+                        <Link
+                          key={item.connection_id}
+                          href={`/u/${profile?.username}`}
+                          className="bg-muted/30 rounded-xl p-3 flex items-center justify-between gap-3 transition-colors hover:bg-muted/60"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <p className="font-medium text-foreground text-sm truncate">
+                              {profile?.full_name || profile?.username}
+                            </p>
+                            {item.met_at && (
+                              <p className="flex items-center gap-1 text-xs text-muted-foreground truncate">
+                                <MapPin className="size-3 shrink-0" aria-hidden="true" />
+                                {item.met_at}
+                              </p>
+                            )}
+                          </div>
+                          <span
+                            className={`shrink-0 text-xs font-semibold ${
+                              overdue ? 'text-destructive' : 'text-muted-foreground'
+                            }`}
+                          >
+                            {overdue ? 'Overdue: ' : ''}
+                            {formatDate(item.follow_up_at)}
+                          </span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
             {/* No Connections State */}
             {pendingRequests.length === 0 && sentRequests.length === 0 && connections.length === 0 && (
               <EmptyState

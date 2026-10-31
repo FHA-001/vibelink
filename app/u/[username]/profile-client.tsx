@@ -14,12 +14,29 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/use-toast";
 import { downloadVCard } from "@/lib/vcard";
+import { getConnectionDetails, saveConnectionDetails, setFollowUpDone, ConnectionDetails } from "@/lib/auth";
+import { MapPin, CalendarClock } from "lucide-react";
 import { BottomNav } from "@/components/bottom-nav";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 type Props = {
   params: Promise<{ username: string }>
+}
+
+function todayLocal(): string {
+  const d = new Date();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${m}-${day}`;
+}
+
+function formatDate(iso: string): string {
+  return new Date(`${iso}T00:00:00`).toLocaleDateString(undefined, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
 }
 
 export function PublicProfileClient({ params }: Props) {
@@ -41,6 +58,12 @@ export function PublicProfileClient({ params }: Props) {
   const [userTags, setUserTags] = useState<ConnectionTag[]>([]);
   const [showTagDialog, setShowTagDialog] = useState(false);
   const [newTagName, setNewTagName] = useState('');
+
+  // Where we met + follow-up reminder
+  const [details, setDetails] = useState<ConnectionDetails | null>(null);
+  const [isEditingDetails, setIsEditingDetails] = useState(false);
+  const [metAtText, setMetAtText] = useState('');
+  const [followUpDate, setFollowUpDate] = useState('');
 
   // Type guard to check if profile has full connected user data
   const isFullProfile = (profile: ConnectedProfile | PublicProfile): profile is ConnectedProfile => {
@@ -89,6 +112,7 @@ export function PublicProfileClient({ params }: Props) {
           if (connId) {
             setConnectionId(connId);
             await loadConnectionNotesAndTags(connId);
+            await loadConnectionDetails(connId);
           }
         }
       }
@@ -104,6 +128,43 @@ export function PublicProfileClient({ params }: Props) {
     const result = await getConnectionNotesAndTags(connId);
     if (result.success && result.data) {
       setConnectionNotes(result.data);
+    }
+  };
+
+  const loadConnectionDetails = async (connId: string) => {
+    const result = await getConnectionDetails(connId);
+    if (result.success && result.data) {
+      setDetails(result.data);
+    }
+  };
+
+  const handleStartEditDetails = () => {
+    setMetAtText(details?.met_at || '');
+    setFollowUpDate(details?.follow_up_at || '');
+    setIsEditingDetails(true);
+  };
+
+  const handleSaveDetails = async () => {
+    if (!connectionId) return;
+
+    const result = await saveConnectionDetails(connectionId, metAtText, followUpDate || null);
+    if (result.success) {
+      await loadConnectionDetails(connectionId);
+      setIsEditingDetails(false);
+      toast({ title: "Details saved" });
+    } else {
+      toast({ title: "Could not save the details", description: result.error || "Please try again.", variant: "destructive" });
+    }
+  };
+
+  const handleToggleFollowUpDone = async () => {
+    if (!connectionId || !details) return;
+
+    const result = await setFollowUpDone(connectionId, !details.follow_up_done);
+    if (result.success) {
+      await loadConnectionDetails(connectionId);
+    } else {
+      toast({ title: "Could not update the reminder", description: result.error || "Please try again.", variant: "destructive" });
     }
   };
 
@@ -338,6 +399,116 @@ export function PublicProfileClient({ params }: Props) {
                   isOwner={false}
                   showActions={false}
                 />
+
+                {/* Where you met + follow-up reminder */}
+                <div className="mt-6 border-t border-border pt-6">
+                  <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                    <MapPin className="w-4 h-4" />
+                    Where you met
+                  </h3>
+                  {isEditingDetails ? (
+                    <div className="space-y-3">
+                      <div className="space-y-1.5">
+                        <label htmlFor="met-at" className="text-sm text-muted-foreground">
+                          Place or event
+                        </label>
+                        <Input
+                          id="met-at"
+                          type="text"
+                          placeholder="For example: Tech meetup in Abuja"
+                          maxLength={100}
+                          value={metAtText}
+                          onChange={(e) => setMetAtText(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label htmlFor="follow-up-date" className="text-sm text-muted-foreground">
+                          Remind me to follow up on
+                        </label>
+                        <Input
+                          id="follow-up-date"
+                          type="date"
+                          value={followUpDate}
+                          onChange={(e) => setFollowUpDate(e.target.value)}
+                        />
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Button size="sm" onClick={handleSaveDetails}>
+                          <Save aria-hidden="true" />
+                          Save
+                        </Button>
+                        <button
+                          type="button"
+                          onClick={() => setIsEditingDetails(false)}
+                          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        {followUpDate && (
+                          <button
+                            type="button"
+                            onClick={() => setFollowUpDate('')}
+                            className="ml-auto text-sm text-muted-foreground hover:text-destructive transition-colors"
+                          >
+                            Clear date
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ) : details && (details.met_at || details.follow_up_at) ? (
+                    <div className="space-y-3 rounded-xl border border-border bg-card p-4">
+                      {details.met_at && (
+                        <p className="flex items-center gap-2 text-sm text-foreground">
+                          <MapPin className="size-4 shrink-0 text-gold" aria-hidden="true" />
+                          {details.met_at}
+                        </p>
+                      )}
+                      {details.follow_up_at && (
+                        <div className="flex items-center justify-between gap-3">
+                          <p
+                            className={`flex items-center gap-2 text-sm ${
+                              details.follow_up_done
+                                ? 'text-muted-foreground line-through'
+                                : details.follow_up_at < todayLocal()
+                                  ? 'font-semibold text-destructive'
+                                  : 'text-foreground'
+                            }`}
+                          >
+                            <CalendarClock className="size-4 shrink-0" aria-hidden="true" />
+                            <span>
+                              Follow up {formatDate(details.follow_up_at)}
+                              {!details.follow_up_done && details.follow_up_at < todayLocal() ? ' (overdue)' : ''}
+                            </span>
+                          </p>
+                          <button
+                            type="button"
+                            onClick={handleToggleFollowUpDone}
+                            className="shrink-0 text-xs font-semibold text-gold hover:underline"
+                          >
+                            {details.follow_up_done ? 'Undo' : 'Mark done'}
+                          </button>
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={handleStartEditDetails}
+                        className="text-xs text-muted-foreground hover:text-gold transition-colors flex items-center gap-1"
+                      >
+                        <Edit2 className="w-3 h-3" />
+                        Edit
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleStartEditDetails}
+                      className="text-sm text-muted-foreground hover:text-gold transition-colors flex items-center gap-1"
+                    >
+                      <CalendarClock className="w-4 h-4" />
+                      Add where you met and a reminder
+                    </button>
+                  )}
+                </div>
 
                 {/* Your Notes Section */}
                 <div className="mt-6 border-t border-border pt-6">

@@ -1190,3 +1190,86 @@ export async function getConnectionNotesAndTags(
 
   return { success: true, data: data as ConnectionNotesAndTags };
 }
+// ============================================
+// CONNECTION DETAILS: where you met + follow-up reminder
+// ============================================
+
+export interface ConnectionDetails {
+  met_at: string | null;
+  follow_up_at: string | null; // YYYY-MM-DD
+  follow_up_done: boolean;
+}
+
+export interface FollowUpItem {
+  connection_id: string;
+  met_at: string | null;
+  follow_up_at: string;
+}
+
+export async function getConnectionDetails(
+  connectionId: string
+): Promise<{ success: boolean; error?: string; data?: ConnectionDetails }> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .rpc('get_connection_details', { p_connection_id: connectionId });
+
+  if (error) {
+    console.error('Error getting connection details:', error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true, data: data as ConnectionDetails };
+}
+
+export async function saveConnectionDetails(
+  connectionId: string,
+  metAt: string,
+  followUpAt: string | null
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .rpc('upsert_connection_details', {
+      p_connection_id: connectionId,
+      p_met_at: metAt,
+      p_follow_up_at: followUpAt || null,
+    });
+
+  if (error) {
+    console.error('Error saving connection details:', error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function setFollowUpDone(
+  connectionId: string,
+  done: boolean
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .rpc('set_follow_up_done', { p_connection_id: connectionId, p_done: done });
+
+  if (error) {
+    console.error('Error updating follow-up:', error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function getMyFollowUps(): Promise<FollowUpItem[]> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase.rpc('get_my_follow_ups');
+
+  if (error) {
+    console.error('Error fetching follow-ups:', error);
+    return [];
+  }
+
+  return (data || []) as FollowUpItem[];
+}
