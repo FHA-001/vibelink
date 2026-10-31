@@ -281,3 +281,10 @@
   }
   .lift:hover { transform: none; }
 }
+/* Dark mode: text set to the brand navy would vanish on a navy background, so show it as ivory. */
+@layer utilities {
+  :where(.dark) .text-navy,
+  :where(.dark) .hover\:text-navy:hover {
+    color: var(--ivory);
+  }
+}

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { Logo } from "./logo";
+import { ThemeToggle } from "./theme-toggle";
 
 /** Sticky header for signed-in screens. `right` holds page-level actions such as Sign out. */
 export function AppHeader({
@@ -16,7 +17,10 @@ export function AppHeader({
         <Link href={homeHref} aria-label="VibeLink home" className="rounded-lg">
           <Logo />
         </Link>
-        {right ? <div className="flex items-center gap-1">{right}</div> : null}
+        <div className="flex items-center gap-1">
+          <ThemeToggle />
+          {right}
+        </div>
       </div>
     </header>
   );

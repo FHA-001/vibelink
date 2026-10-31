@@ -16,6 +16,9 @@ const inter = Inter({
   display: "swap",
 });
 
+// Runs before first paint so a saved dark choice never flashes white
+const themeScript = `try{if(localStorage.getItem('vibelink-theme')==='dark'){document.documentElement.classList.add('dark');document.documentElement.style.colorScheme='dark';}}catch(e){}`;
+
 export const viewport: Viewport = {
   themeColor: "#F8F7F3",
   colorScheme: "light",
@@ -97,8 +100,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${sora.variable} ${inter.variable} h-full antialiased`}
+            className={`${sora.variable} ${inter.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className="min-h-full flex flex-col">
         <a href="#main-content" className="skip-link">
           Skip to main content
