@@ -207,7 +207,7 @@ export default function ScanPage() {
     }
 
     // Navigate to the scanned profile immediately after cleanup
-    router.push(`/u/${username}`);
+    router.push(`/u/${username}?src=qr`);
   };
 
   const stopScanner = async () => {
