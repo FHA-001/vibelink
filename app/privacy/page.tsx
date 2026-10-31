@@ -5,7 +5,6 @@ import { Footer } from "@/components/footer";
 import { motion } from "framer-motion";
 
 export default function PrivacyPolicyPage() {
-  const currentYear = new Date().getFullYear();
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -28,7 +27,7 @@ export default function PrivacyPolicyPage() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-lg text-muted-foreground mb-4"
             >
-              Last updated: {currentYear}
+              Last updated: 31 October 2026
             </motion.p>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -66,6 +65,7 @@ export default function PrivacyPolicyPage() {
                   <li><strong>Personal Tags:</strong> Custom tags you create to organize your connections. These tags are visible only to you and are not shared with tagged connections or any other users.</li>
                   <li><strong>Blocking Information:</strong> Users you have blocked and users who have blocked you</li>
                   <li><strong>Report Data:</strong> Reports you submit about inappropriate profiles</li>
+                  <li><strong>Waitlist Product Preferences:</strong> If you join the waitlist for a physical product, we store which product you chose together with your account, and we use it only to tell you when it launches.</li>
                 </ul>
               </div>
             </motion.div>

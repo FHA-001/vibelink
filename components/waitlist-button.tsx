@@ -81,6 +81,7 @@ export function WaitlistButton({ product, onDark = false }: Props) {
   };
 
   const darkOutline = onDark ? "border-white/30 text-ivory hover:bg-white/10 hover:text-ivory" : "";
+  const darkButton = onDark ? "bg-transparent border-white/30 text-ivory hover:bg-white/10 hover:text-ivory hover:border-white/50" : "";
 
   if (status === "loading") {
     return <div className="h-11" aria-hidden="true" />;
@@ -90,7 +91,7 @@ export function WaitlistButton({ product, onDark = false }: Props) {
     return (
       <Link
         href="/signup"
-        className={buttonVariants({ variant: "outline", size: "lg", className: darkOutline })}
+        className={buttonVariants({ variant: "outline", size: "lg", className: onDark ? darkButton : "" })}
       >
         <BellRing aria-hidden="true" />
         Create an account to join the waitlist
@@ -127,8 +128,8 @@ export function WaitlistButton({ product, onDark = false }: Props) {
     <Button
       type="button"
       size="lg"
-      variant={onDark ? "outline" : "default"}
-      className={darkOutline}
+      variant="outline"
+      className={onDark ? darkButton : ""}
       onClick={handleJoin}
       disabled={busy}
     >
