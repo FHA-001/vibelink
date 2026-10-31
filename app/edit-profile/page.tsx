@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Logo } from "@/components/logo";
+import { VisibilitySettings } from "@/components/profile/visibility-settings";
 import { getCurrentUser, getUserProfile, saveUserProfile, isUsernameAvailable, validateUsername, uploadProfilePhoto, deleteProfilePhoto, validateProfilePhoto, Profile, ProfileVisibility } from "@/lib/auth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -780,42 +781,11 @@ export default function EditProfilePage() {
                   </div>
                 </div>
 
-                {/* Profile Visibility Settings */}
-                <div className="space-y-4 pt-4 border-t border-border">
-                  <div className="flex items-center gap-2">
-                    <Shield className="w-4 h-4 text-gold" />
-                    <Label className="text-base font-semibold">Profile Visibility</Label>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Choose which fields are visible to people you're not connected with
-                  </p>
-                  
-                  <div className="space-y-3 bg-muted/30 p-4 rounded-xl">
-                    {Object.keys(visibilityConfig).map((field) => (
-                      <div key={field} className="flex items-center justify-between">
-                        <Label htmlFor={`visibility-${field}`} className="text-sm capitalize">
-                          {field.replace('_', ' ')}
-                        </Label>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-muted-foreground">
-                            {visibilityConfig[field as keyof ProfileVisibility] ? 'Public' : 'Private'}
-                          </span>
-                          <input
-                            type="checkbox"
-                            id={`visibility-${field}`}
-                            checked={visibilityConfig[field as keyof ProfileVisibility]}
-                            onChange={(e) => setVisibilityConfig(prev => ({
-                              ...prev,
-                              [field]: e.target.checked
-                            }))}
-                            disabled={isSaving}
-                            className="w-4 h-4 rounded border-border accent-primary"
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <VisibilitySettings
+                  value={visibilityConfig}
+                  onChange={setVisibilityConfig}
+                  disabled={isSaving}
+                />
 
                 {/* Submit Button */}
                 <Button
