@@ -1273,3 +1273,51 @@ export async function getMyFollowUps(): Promise<FollowUpItem[]> {
 
   return (data || []) as FollowUpItem[];
 }
+// ============================================
+// WAITLIST (NFC card and VibeTags)
+// ============================================
+
+export type WaitlistProduct = 'nfc_card' | 'vibetags';
+
+export async function joinWaitlist(
+  product: WaitlistProduct
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+
+  const { error } = await supabase.rpc('join_waitlist', { p_product: product });
+
+  if (error) {
+    console.error('Error joining waitlist:', error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function leaveWaitlist(
+  product: WaitlistProduct
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+
+  const { error } = await supabase.rpc('leave_waitlist', { p_product: product });
+
+  if (error) {
+    console.error('Error leaving waitlist:', error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function getMyWaitlist(): Promise<string[]> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase.rpc('get_my_waitlist');
+
+  if (error) {
+    console.error('Error fetching waitlist:', error);
+    return [];
+  }
+
+  return (data || []) as string[];
+}

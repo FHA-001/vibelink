@@ -3,6 +3,7 @@
 import { Clock, Wifi, Tag } from "lucide-react";
 import Link from "next/link";
 import { Reveal } from "./motion";
+import { WaitlistButton } from "./waitlist-button";
 
 function ComingSoon() {
   return (
@@ -68,6 +69,9 @@ export function PhysicalProducts() {
                   <Chip>Printed QR code</Chip>
                   <Chip>Premium finish</Chip>
                 </ul>
+                <div className="mt-8">
+                  <WaitlistButton product="nfc_card" />
+                </div>
               </div>
             </article>
           </Reveal>
@@ -100,8 +104,11 @@ export function PhysicalProducts() {
                     >
                       {label}
                     </li>
-                  ))}
+                                    ))}
                 </ul>
+                <div className="mt-8">
+                  <WaitlistButton product="vibetags" onDark />
+                </div>
               </div>
               <div className="order-1 mx-auto w-full max-w-lg lg:order-2">
                 <img
