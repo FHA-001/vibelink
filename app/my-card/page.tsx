@@ -2,9 +2,10 @@
 
 import { useEffect, useState, useRef } from "react";
 import { Download, Edit, Settings, Users, Copy } from "lucide-react";
-import { getCurrentUser, getUserProfile, signOut, Profile } from "@/lib/auth";
+import { getCurrentUser, getUserProfile, signOut, getMyViewStats, Profile, ViewStats } from "@/lib/auth";
 import { ProfileCard } from "@/components/profile/profile-card";
 import { ProfileCompleteness } from "@/components/profile/profile-completeness";
+import { ProfileActivity } from "@/components/profile/profile-activity";
 import { QRCode } from "@/components/profile/qr-code";
 import { BottomNav } from "@/components/bottom-nav";
 import { AppHeader } from "@/components/app-header";
@@ -23,6 +24,7 @@ export default function MyCardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showQR, setShowQR] = useState(false);
   const [downloadError, setDownloadError] = useState("");
+  const [stats, setStats] = useState<ViewStats | null>(null);
   const qrRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -45,6 +47,7 @@ export default function MyCardPage() {
 
       setUser(currentUser);
       setProfile(userProfile);
+      getMyViewStats().then(setStats);
     } catch (error) {
       console.error("Auth check failed:", error);
       router.push("/signin");
@@ -151,6 +154,8 @@ export default function MyCardPage() {
   }
 
   const publicProfileUrl = `${window.location.origin}/u/${profile.username}`;
+  // The QR image carries ?src=qr so scans can be counted. The visible link and Copy link stay clean.
+  const qrScanUrl = `${publicProfileUrl}?src=qr`;
 
   const quickLinks = [
     { href: "/connections", label: "Connections", icon: Users },
@@ -175,6 +180,7 @@ export default function MyCardPage() {
             <p className="mt-1 text-muted-foreground">Your digital identity, ready to share.</p>
 
             <ProfileCompleteness profile={profile} onEdit={handleEdit} />
+            <ProfileActivity stats={stats} />
 
             {/* Quick navigation */}
             <nav aria-label="Shortcuts" className="mb-6 mt-6 grid grid-cols-3 gap-3">
@@ -200,7 +206,7 @@ export default function MyCardPage() {
               onShare={handleShare}
               onDownloadQR={handleDownloadQR}
               showQR={true}
-              qrUrl={publicProfileUrl}
+              qrUrl={qrScanUrl}
             />
           </PageIn>
         </div>
@@ -215,7 +221,7 @@ export default function MyCardPage() {
           </DialogHeader>
 
           <div className="flex justify-center">
-            <QRCode ref={qrRef} value={publicProfileUrl} size={220} />
+            <QRCode ref={qrRef} value={qrScanUrl} size={220} />
           </div>
 
           <p className="break-all text-center text-xs text-muted-foreground">{publicProfileUrl}</p>

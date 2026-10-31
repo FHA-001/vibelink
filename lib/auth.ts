@@ -1321,3 +1321,40 @@ export async function getMyWaitlist(): Promise<string[]> {
 
   return (data || []) as string[];
 }
+// ============================================
+// PRIVATE PROFILE VIEW STATS
+// ============================================
+
+export interface ViewStats {
+  views_7d: number;
+  scans_7d: number;
+  views_30d: number;
+  scans_30d: number;
+  views_total: number;
+  scans_total: number;
+}
+
+// Counts one view of a profile. Stores only daily totals, never who looked.
+export async function recordProfileView(username: string, source: 'link' | 'qr'): Promise<void> {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .rpc('record_profile_view', { p_username: username, p_source: source });
+
+  if (error) {
+    console.error('Error recording profile view:', error);
+  }
+}
+
+export async function getMyViewStats(): Promise<ViewStats | null> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase.rpc('get_my_view_stats');
+
+  if (error) {
+    console.error('Error fetching view stats:', error);
+    return null;
+  }
+
+  return data as ViewStats;
+}

@@ -14,7 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/use-toast";
 import { downloadVCard } from "@/lib/vcard";
-import { getConnectionDetails, saveConnectionDetails, setFollowUpDone, ConnectionDetails } from "@/lib/auth";
+import { getConnectionDetails, saveConnectionDetails, setFollowUpDone, recordProfileView, ConnectionDetails } from "@/lib/auth";
 import { MapPin, CalendarClock } from "lucide-react";
 import { BottomNav } from "@/components/bottom-nav";
 import Link from "next/link";
@@ -83,6 +83,20 @@ export function PublicProfileClient({ params }: Props) {
     }
   }, [username]);
 
+    // Counts one view per profile per browser tab session, so refreshes don't inflate the number.
+  // A QR code opens the profile with ?src=qr, which is counted as a scan.
+  const trackView = (profileUsername: string) => {
+    try {
+      const key = `vl-viewed:${profileUsername}`;
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, "1");
+    } catch {
+      // storage unavailable: count anyway
+    }
+    const source = new URLSearchParams(window.location.search).get("src") === "qr" ? "qr" : "link";
+    void recordProfileView(profileUsername, source);
+  };
+
   const loadProfile = async () => {
     if (!username) {
       return;
@@ -95,6 +109,7 @@ export function PublicProfileClient({ params }: Props) {
         return;
       }
       setProfile(userProfile);
+      trackView(userProfile.username);
 
       // Check if current user is the profile owner
       const currentUser = await getCurrentUser();
