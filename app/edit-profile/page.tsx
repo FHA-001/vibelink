@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Logo } from "@/components/logo";
 import { VisibilitySettings } from "@/components/profile/visibility-settings";
+import { ContactDetailsCard } from "@/components/profile/contact-details-card";
 import { getCurrentUser, getUserProfile, saveUserProfile, isUsernameAvailable, validateUsername, uploadProfilePhoto, deleteProfilePhoto, validateProfilePhoto, Profile, ProfileVisibility } from "@/lib/auth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -780,6 +781,8 @@ export default function EditProfilePage() {
                     />
                   </div>
                 </div>
+
+                <ContactDetailsCard />
 
                 <VisibilitySettings
                   value={visibilityConfig}

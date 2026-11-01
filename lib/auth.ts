@@ -1358,3 +1358,140 @@ export async function getMyViewStats(): Promise<ViewStats | null> {
 
   return data as ViewStats;
 }
+// ============================================
+// CONTACT DETAILS AND REQUESTS (email and phone, shared only after approval)
+// ============================================
+
+export type ContactKind = 'email' | 'phone';
+export type ContactRequestStatus = 'pending' | 'approved' | 'declined';
+
+export interface MyContactDetails {
+  email: string | null;
+  phone: string | null;
+}
+
+// What a signed-in visitor may know about another person's contact details.
+// email and phone hold the real value only after the owner approved.
+export interface ContactCard {
+  email_available: boolean;
+  phone_available: boolean;
+  email_status: ContactRequestStatus | null;
+  phone_status: ContactRequestStatus | null;
+  email: string | null;
+  phone: string | null;
+}
+
+export interface ContactRequestItem {
+  id: string;
+  kind: ContactKind;
+  status: 'pending' | 'approved';
+  requester_id: string;
+  username: string;
+  full_name: string | null;
+  profile_photo: string | null;
+  created_at: string;
+}
+
+export async function getMyContactDetails(): Promise<MyContactDetails | null> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase.rpc('get_my_contact_details');
+
+  if (error) {
+    console.error('Error fetching contact details:', error);
+    return null;
+  }
+
+  return data as MyContactDetails;
+}
+
+export async function saveMyContactDetails(
+  email: string,
+  phone: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .rpc('save_my_contact_details', { p_email: email, p_phone: phone });
+
+  if (error) {
+    console.error('Error saving contact details:', error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function getContactCard(ownerId: string): Promise<ContactCard | null> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .rpc('get_contact_card', { p_owner_id: ownerId });
+
+  if (error) {
+    console.error('Error fetching contact card:', error);
+    return null;
+  }
+
+  return data as ContactCard;
+}
+
+export async function requestContact(
+  ownerId: string,
+  kind: ContactKind
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .rpc('request_contact', { p_owner_id: ownerId, p_kind: kind });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function respondContactRequest(
+  requestId: string,
+  approve: boolean
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .rpc('respond_contact_request', { p_request_id: requestId, p_approve: approve });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function revokeContactAccess(
+  requestId: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .rpc('revoke_contact_access', { p_request_id: requestId });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function getMyContactRequests(): Promise<ContactRequestItem[]> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase.rpc('get_my_contact_requests');
+
+  if (error) {
+    console.error('Error fetching contact requests:', error);
+    return [];
+  }
+
+  return (data || []) as ContactRequestItem[];
+}
