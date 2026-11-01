@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Users, UserPlus, Check, X, Loader2, Trash2, Calendar, Clock, Search, ArrowUpDown, MessageSquare, Tag, Plus, Edit2, Save, CalendarClock, MapPin } from "lucide-react";
+import { Users, UserPlus, Check, X, Loader2, Trash2, Calendar, Clock, Search, ArrowUpDown, MessageSquare, Tag, Plus, Edit2, Save, CalendarClock, MapPin, Mail, Phone, Lock } from "lucide-react";
 import { BottomNav } from "@/components/bottom-nav";
 import { AppHeader } from "@/components/app-header";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -34,10 +34,14 @@ import {
   deleteConnectionTag,
   assignTagToConnection,
   removeTagFromConnection,
-    ConnectionNotesAndTags,
+  ConnectionNotesAndTags,
   ConnectionTag,
   getMyFollowUps,
-  FollowUpItem
+  FollowUpItem,
+  getMyContactRequests,
+  respondContactRequest,
+  revokeContactAccess,
+  ContactRequestItem
 } from "@/lib/auth";
 import { toast } from "@/components/ui/use-toast";
 
@@ -85,6 +89,8 @@ export default function ConnectionsPage() {
   const [newTagName, setNewTagName] = useState("");
   const [selectedConnectionForTags, setSelectedConnectionForTags] = useState<string | null>(null);
   const [followUps, setFollowUps] = useState<FollowUpItem[]>([]);
+  const [contactRequests, setContactRequests] = useState<ContactRequestItem[]>([]);
+  const [contactBusyId, setContactBusyId] = useState<string | null>(null);
 
   useEffect(() => {
     checkAuth();
@@ -97,6 +103,7 @@ export default function ConnectionsPage() {
       loadConnections();
       loadUserTags();
       loadFollowUps();
+      loadContactRequests();
     }
   }, [user]);
 
@@ -160,6 +167,56 @@ export default function ConnectionsPage() {
     } catch (error) {
       console.error("Error loading follow-ups:", error);
       setFollowUps([]);
+    }
+  };
+
+    const loadContactRequests = async () => {
+    try {
+      setContactRequests(await getMyContactRequests());
+    } catch (error) {
+      console.error("Error loading contact requests:", error);
+      setContactRequests([]);
+    }
+  };
+
+  const handleRespondContact = async (requestId: string, approve: boolean) => {
+    setContactBusyId(requestId);
+    const result = await respondContactRequest(requestId, approve);
+    setContactBusyId(null);
+
+    if (result.success) {
+      await loadContactRequests();
+      toast({ title: approve ? "Request approved" : "Request declined" });
+    } else {
+      toast({
+        title: "Could not answer the request",
+        description: result.error || "Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleRevokeContact = (request: ContactRequestItem) => {
+    const what = request.kind === "email" ? "email" : "phone number";
+    setConfirmAction({
+      title: `Stop sharing your ${what}?`,
+      description: `@${request.username} will no longer be able to see your ${what}.`,
+      confirmLabel: "Stop sharing",
+      run: () => performRevokeContact(request.id),
+    });
+  };
+
+  const performRevokeContact = async (requestId: string) => {
+    const result = await revokeContactAccess(requestId);
+    if (result.success) {
+      await loadContactRequests();
+      toast({ title: "Access removed" });
+    } else {
+      toast({
+        title: "Could not remove access",
+        description: result.error || "Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -511,7 +568,10 @@ export default function ConnectionsPage() {
       }
     });
 
-    // Open reminders that match a connection you currently have, soonest first
+  const pendingContactRequests = contactRequests.filter((r) => r.status === "pending");
+  const approvedContactRequests = contactRequests.filter((r) => r.status === "approved");
+
+  // Open reminders that match a connection you currently have, soonest first
   const openFollowUps = followUps
     .flatMap((item) => {
       const connection = connections.find((c) => c.id === item.connection_id);
@@ -614,6 +674,121 @@ export default function ConnectionsPage() {
                       );
                     })}
                   </div>
+                </div>
+              </motion.div>
+            )}
+
+                        {/* Contact requests (email and phone) */}
+            {contactRequests.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.22 }}
+                className="mb-6"
+              >
+                <div className="bg-card rounded-2xl shadow-lg p-5 border border-primary/40">
+                  <div className="flex items-center gap-2">
+                    <Lock className="w-5 h-5 text-gold" />
+                    <h2 className="font-heading text-lg font-semibold">
+                      Contact requests{pendingContactRequests.length > 0 ? ` (${pendingContactRequests.length})` : ""}
+                    </h2>
+                  </div>
+                  <p className="mb-4 mt-1 text-xs text-muted-foreground">
+                    People ask before they can see your email or phone. You decide.
+                  </p>
+
+                  {pendingContactRequests.length > 0 && (
+                    <div className="space-y-3">
+                      {pendingContactRequests.map((request) => (
+                        <div
+                          key={request.id}
+                          className="bg-muted/30 rounded-xl p-3 flex items-center justify-between gap-3"
+                        >
+                          <Link
+                            href={`/u/${request.username}`}
+                            className="flex min-w-0 flex-1 items-center gap-3"
+                          >
+                            <span className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+                              {request.profile_photo ? (
+                                <img
+                                  src={request.profile_photo}
+                                  alt=""
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <span className="text-gold font-semibold">
+                                  {(request.full_name || request.username).charAt(0).toUpperCase()}
+                                </span>
+                              )}
+                            </span>
+                            <span className="min-w-0">
+                              <span className="block truncate text-sm font-medium text-foreground">
+                                {request.full_name || `@${request.username}`}
+                              </span>
+                              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                {request.kind === "email" ? (
+                                  <Mail className="size-3" />
+                                ) : (
+                                  <Phone className="size-3" />
+                                )}
+                                Wants your {request.kind === "email" ? "email" : "phone number"}
+                              </span>
+                            </span>
+                          </Link>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleRespondContact(request.id, true)}
+                              disabled={contactBusyId === request.id}
+                              className="flex size-10 items-center justify-center rounded-xl bg-secondary/15 text-teal-ink transition-colors hover:bg-secondary/25 active:scale-95 disabled:opacity-50"
+                              aria-label={`Approve ${request.kind} request`}
+                            >
+                              <Check className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleRespondContact(request.id, false)}
+                              disabled={contactBusyId === request.id}
+                              className="flex size-10 items-center justify-center rounded-xl bg-destructive/10 text-destructive transition-colors hover:bg-destructive/15 active:scale-95 disabled:opacity-50"
+                              aria-label={`Decline ${request.kind} request`}
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {approvedContactRequests.length > 0 && (
+                    <div className={pendingContactRequests.length > 0 ? "mt-5" : ""}>
+                      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Can see your details
+                      </h3>
+                      <div className="space-y-2">
+                        {approvedContactRequests.map((request) => (
+                          <div
+                            key={request.id}
+                            className="flex items-center justify-between gap-3 rounded-xl bg-muted/30 px-3 py-2"
+                          >
+                            <p className="min-w-0 truncate text-sm text-foreground">
+                              <span className="font-medium">
+                                {request.full_name || `@${request.username}`}
+                              </span>
+                              <span className="text-muted-foreground">
+                                {" "}
+                                sees your {request.kind === "email" ? "email" : "phone number"}
+                              </span>
+                            </p>
+                            <button
+                              onClick={() => handleRevokeContact(request)}
+                              className="shrink-0 text-xs font-semibold text-destructive hover:underline"
+                            >
+                              Stop sharing
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             )}
@@ -735,7 +910,7 @@ export default function ConnectionsPage() {
             )}
 
             {/* No Connections State */}
-            {pendingRequests.length === 0 && sentRequests.length === 0 && connections.length === 0 && (
+            {pendingRequests.length === 0 && sentRequests.length === 0 && connections.length === 0 && contactRequests.length === 0 && (
               <EmptyState
                 icon={<Users />}
                 title="No connections yet"

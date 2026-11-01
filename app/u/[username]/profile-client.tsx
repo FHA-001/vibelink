@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/use-toast";
 import { downloadVCard } from "@/lib/vcard";
+import { ContactRequestCard } from "@/components/profile/contact-request-card";
 import { getConnectionDetails, saveConnectionDetails, setFollowUpDone, recordProfileView, ConnectionDetails } from "@/lib/auth";
 import { MapPin, CalendarClock } from "lucide-react";
 import { BottomNav } from "@/components/bottom-nav";
@@ -638,6 +639,8 @@ export function PublicProfileClient({ params }: Props) {
                 connectionStatus={connectionStatus}
               />
             )}
+
+            {!isOwner && <ContactRequestCard ownerId={profile.id} />}
 
             {!isOwner && (
               <div className="mt-6">
