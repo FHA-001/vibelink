@@ -1512,3 +1512,83 @@ export async function getMessageFormStatus(username: string): Promise<boolean> {
 
   return data === true;
 }
+// ============================================
+// VISITOR MESSAGES (owner side)
+// ============================================
+
+export interface VisitorMessage {
+  id: string;
+  sender_name: string;
+  sender_contact: string;
+  message: string;
+  created_at: string;
+  read_at: string | null;
+}
+
+export async function getMyMessageSettings(): Promise<boolean> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase.rpc('get_my_message_settings');
+
+  if (error) {
+    console.error('Error fetching message settings:', error);
+    return false;
+  }
+
+  return data === true;
+}
+
+export async function setAcceptsMessages(
+  enabled: boolean
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+
+  const { error } = await supabase.rpc('set_accepts_messages', { p_enabled: enabled });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function getMyVisitorMessages(): Promise<VisitorMessage[]> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase.rpc('get_my_visitor_messages');
+
+  if (error) {
+    console.error('Error fetching visitor messages:', error);
+    return [];
+  }
+
+  return (data || []) as VisitorMessage[];
+}
+
+export async function markVisitorMessageRead(
+  id: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+
+  const { error } = await supabase.rpc('mark_visitor_message_read', { p_id: id });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function deleteVisitorMessage(
+  id: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+
+  const { error } = await supabase.rpc('delete_visitor_message', { p_id: id });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}

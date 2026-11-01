@@ -27,7 +27,7 @@ export default function PrivacyPolicyPage() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-lg text-muted-foreground mb-4"
             >
-              Last updated: 31 October 2026
+              Last updated: 1 November 2026
             </motion.p>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -67,6 +67,12 @@ export default function PrivacyPolicyPage() {
                   <li><strong>Report Data:</strong> Reports you submit about inappropriate profiles</li>
                   <li><strong>Waitlist Product Preferences:</strong> If you join the waitlist for a physical product, we store which product you chose together with your account, and we use it only to tell you when it launches.</li>
                 </ul>
+                <p>
+                  If you add an email address or phone number for sharing, we store it separately from your public profile. We show it only to people whose request you approve, and you can stop sharing it at any time.
+                </p>
+                <p>
+                  If you turn on messages from visitors, people without an account can send you their name, their contact details and a message through your profile. We store these only so you can read them. They are visible only to you, and we delete them automatically after 90 days. You can delete any message yourself at any time.
+                </p>
               </div>
             </motion.div>
 

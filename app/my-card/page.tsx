@@ -6,6 +6,7 @@ import { getCurrentUser, getUserProfile, signOut, getMyViewStats, Profile, ViewS
 import { ProfileCard } from "@/components/profile/profile-card";
 import { ProfileCompleteness } from "@/components/profile/profile-completeness";
 import { ProfileActivity } from "@/components/profile/profile-activity";
+import { VisitorInboxCard } from "@/components/profile/visitor-inbox-card";
 import { QRCode } from "@/components/profile/qr-code";
 import { BottomNav } from "@/components/bottom-nav";
 import { AppHeader } from "@/components/app-header";
@@ -181,6 +182,7 @@ export default function MyCardPage() {
 
             <ProfileCompleteness profile={profile} onEdit={handleEdit} />
             <ProfileActivity stats={stats} />
+            <VisitorInboxCard />
 
             {/* Quick navigation */}
             <nav aria-label="Shortcuts" className="mb-6 mt-6 grid grid-cols-3 gap-3">
