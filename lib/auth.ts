@@ -1495,3 +1495,20 @@ export async function getMyContactRequests(): Promise<ContactRequestItem[]> {
 
   return (data || []) as ContactRequestItem[];
 }
+// ============================================
+// VISITOR MESSAGE FORM STATUS (public)
+// ============================================
+
+export async function getMessageFormStatus(username: string): Promise<boolean> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .rpc('get_message_form_status', { p_username: username });
+
+  if (error) {
+    console.error('Error checking message form status:', error);
+    return false;
+  }
+
+  return data === true;
+}

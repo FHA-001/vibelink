@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { toast } from "@/components/ui/use-toast";
 import { downloadVCard } from "@/lib/vcard";
 import { ContactRequestCard } from "@/components/profile/contact-request-card";
+import { VisitorMessageForm } from "@/components/profile/visitor-message-form";
 import { getConnectionDetails, saveConnectionDetails, setFollowUpDone, recordProfileView, ConnectionDetails } from "@/lib/auth";
 import { MapPin, CalendarClock } from "lucide-react";
 import { BottomNav } from "@/components/bottom-nav";
@@ -48,6 +49,7 @@ export function PublicProfileClient({ params }: Props) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isOwner, setIsOwner] = useState(false);
+  const [viewerSignedIn, setViewerSignedIn] = useState<boolean | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'pending_sent' | 'pending_received' | 'declined' | 'none'>('none');
 
@@ -115,6 +117,7 @@ export function PublicProfileClient({ params }: Props) {
       // Check if current user is the profile owner
       const currentUser = await getCurrentUser();
       setIsOwner(currentUser?.id === userProfile.id);
+      setViewerSignedIn(!!currentUser);
 
       // Check connection status if not owner
       if (currentUser && currentUser.id !== userProfile.id) {
@@ -640,6 +643,7 @@ export function PublicProfileClient({ params }: Props) {
               />
             )}
 
+            {viewerSignedIn === false && <VisitorMessageForm username={profile.username} />}
             {!isOwner && <ContactRequestCard ownerId={profile.id} />}
 
             {!isOwner && (
