@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Download, Edit, Settings, Users, Copy } from "lucide-react";
+import { Download, Edit, Settings, Users, Copy, Share2, QrCode } from "lucide-react";
 import { getCurrentUser, getUserProfile, signOut, getMyViewStats, Profile, ViewStats } from "@/lib/auth";
 import { ProfileCard } from "@/components/profile/profile-card";
 import { ProfileCompleteness } from "@/components/profile/profile-completeness";
@@ -176,13 +176,32 @@ export default function MyCardPage() {
 
       <main id="main-content" className="flex-1 px-4 py-8 sm:px-6">
         <div className="mx-auto max-w-lg">
-          <PageIn>
-            <h1 className="font-heading text-3xl font-semibold">My Card</h1>
-            <p className="mt-1 text-muted-foreground">Your digital identity, ready to share.</p>
+                    <PageIn>
+            <h1 className="sr-only">My Card</h1>
 
-            <ProfileCompleteness profile={profile} onEdit={handleEdit} />
-            <ProfileActivity stats={stats} />
-            <VisitorInboxCard />
+            {/* Profile Card first */}
+            <ProfileCard
+              profile={profile}
+              isOwner={true}
+              showActions={false}
+              onEdit={handleEdit}
+              onShare={handleShare}
+              onDownloadQR={handleDownloadQR}
+              showQR={true}
+              qrUrl={qrScanUrl}
+            />
+
+            {/* Card actions */}
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <Button size="lg" onClick={handleShare}>
+                <Share2 aria-hidden="true" />
+                Share profile
+              </Button>
+              <Button size="lg" variant="outline" onClick={handleDownloadQR}>
+                <QrCode aria-hidden="true" />
+                Show QR
+              </Button>
+            </div>
 
             {/* Quick navigation */}
             <nav aria-label="Shortcuts" className="mb-6 mt-6 grid grid-cols-3 gap-3">
@@ -200,16 +219,9 @@ export default function MyCardPage() {
               ))}
             </nav>
 
-            {/* Profile Card */}
-            <ProfileCard
-              profile={profile}
-              isOwner={true}
-              onEdit={handleEdit}
-              onShare={handleShare}
-              onDownloadQR={handleDownloadQR}
-              showQR={true}
-              qrUrl={qrScanUrl}
-            />
+            <ProfileCompleteness profile={profile} onEdit={handleEdit} />
+            <ProfileActivity stats={stats} />
+            <VisitorInboxCard />
           </PageIn>
         </div>
       </main>
