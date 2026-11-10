@@ -1637,3 +1637,25 @@ export async function isCurrentUserAdmin(): Promise<boolean> {
     return false;
   }
 }
+// Generic admin-only fetch. Returns the status so pages can tell "not allowed" from "server error".
+export async function fetchAdminJson<T>(
+  path: string
+): Promise<{ ok: boolean; status: number; data?: T }> {
+  if (!path.startsWith('/api/admin/')) return { ok: false, status: 400 };
+  try {
+    const supabase = createClient();
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    if (!token) return { ok: false, status: 401 };
+
+    const res = await fetch(path, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: 'no-store',
+    });
+    if (!res.ok) return { ok: false, status: res.status };
+
+    return { ok: true, status: res.status, data: (await res.json()) as T };
+  } catch {
+    return { ok: false, status: 0 };
+  }
+}

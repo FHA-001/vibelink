@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -6,6 +7,7 @@ import { notFound } from "next/navigation";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { fetchAdminWaitlist, AdminWaitlistRow } from "@/lib/auth";
+import { AdminShell } from "@/components/admin/admin-shell";
 
 type Filter = "all" | "nfc_card" | "vibetags";
 
@@ -28,15 +30,19 @@ export default function AdminWaitlistPage() {
 
   useEffect(() => {
     let cancelled = false;
+
     fetchAdminWaitlist().then((data) => {
       if (cancelled) return;
+
       if (!data) {
         setState("denied");
         return;
       }
+
       setRows(data);
       setState("ready");
     });
+
     return () => {
       cancelled = true;
     };
@@ -70,6 +76,7 @@ export default function AdminWaitlistPage() {
 
   const downloadCsv = () => {
     const header = ["Product", "Type", "Name", "Username", "Email", "Joined"];
+
     const lines = shown.map((r) =>
       [
         PRODUCT_LABELS[r.product] ?? r.product,
@@ -82,14 +89,18 @@ export default function AdminWaitlistPage() {
         .map((cell) => csvCell(cell))
         .join(",")
     );
+
     const blob = new Blob([[header.join(","), ...lines].join("\n")], {
       type: "text/csv;charset=utf-8;",
     });
+
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
+
     a.href = url;
     a.download = `vibelink-waitlist-${filter}.csv`;
     a.click();
+
     URL.revokeObjectURL(url);
   };
 
@@ -100,10 +111,12 @@ export default function AdminWaitlistPage() {
   ];
 
   return (
-    <main className="mx-auto max-w-5xl px-4 pb-32 pt-24 sm:px-6">
+    <AdminShell>
       <h1 className="font-heading text-3xl font-semibold">Waitlist</h1>
+
       <p className="mt-2 text-sm text-muted-foreground">
-        Everyone who asked to hear about the NFC card and VibeTags. Only you can see this page.
+        Everyone who asked to hear about the NFC card and VibeTags. Only you can
+        see this page.
       </p>
 
       <div className="mt-6 flex flex-wrap items-center gap-2">
@@ -122,6 +135,7 @@ export default function AdminWaitlistPage() {
             {f.label} ({counts[f.key]})
           </button>
         ))}
+
         <Button
           type="button"
           variant="outline"
@@ -135,7 +149,9 @@ export default function AdminWaitlistPage() {
       </div>
 
       {shown.length === 0 ? (
-        <p className="mt-10 text-center text-sm text-muted-foreground">No signups yet.</p>
+        <p className="mt-10 text-center text-sm text-muted-foreground">
+          No signups yet.
+        </p>
       ) : (
         <div className="mt-6 overflow-x-auto rounded-2xl border border-border bg-card">
           <table className="w-full min-w-[40rem] text-left text-sm">
@@ -148,17 +164,29 @@ export default function AdminWaitlistPage() {
                 <th className="px-4 py-3 font-semibold">Profile</th>
               </tr>
             </thead>
+
             <tbody>
               {shown.map((r) => (
-                <tr key={r.id} className="border-b border-border last:border-b-0">
+                <tr
+                  key={r.id}
+                  className="border-b border-border last:border-b-0"
+                >
                   <td className="px-4 py-3">
-                    {r.name || <span className="text-muted-foreground">Visitor</span>}
+                    {r.name || (
+                      <span className="text-muted-foreground">Visitor</span>
+                    )}
                   </td>
+
                   <td className="px-4 py-3 break-all">{r.email || "-"}</td>
-                  <td className="px-4 py-3">{PRODUCT_LABELS[r.product] ?? r.product}</td>
+
+                  <td className="px-4 py-3">
+                    {PRODUCT_LABELS[r.product] ?? r.product}
+                  </td>
+
                   <td className="px-4 py-3 whitespace-nowrap">
                     {new Date(r.createdAt).toLocaleDateString()}
                   </td>
+
                   <td className="px-4 py-3">
                     {r.username ? (
                       <Link
@@ -168,7 +196,9 @@ export default function AdminWaitlistPage() {
                         @{r.username}
                       </Link>
                     ) : (
-                      <span className="text-muted-foreground">No account</span>
+                      <span className="text-muted-foreground">
+                        No account
+                      </span>
                     )}
                   </td>
                 </tr>
@@ -177,6 +207,6 @@ export default function AdminWaitlistPage() {
           </table>
         </div>
       )}
-    </main>
+    </AdminShell>
   );
 }

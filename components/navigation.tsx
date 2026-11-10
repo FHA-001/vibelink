@@ -52,7 +52,7 @@ export function Navigation() {
   const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   const visibleAccountLinks = isAdmin
-    ? [...accountLinks, { name: "Admin", href: "/admin/waitlist", icon: Shield }]
+    ? [...accountLinks, { name: "Admin", href: "/admin", icon: Shield }]
     : accountLinks;
 
   useEffect(() => {

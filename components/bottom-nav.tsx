@@ -21,7 +21,7 @@ const navItems: NavItem[] = [
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
-const adminItem: NavItem = { label: "Admin", href: "/admin/waitlist", icon: Shield };
+const adminItem: NavItem = { label: "Admin", href: "/admin", icon: Shield };
 
 const itemBase =
   "relative flex min-w-0 flex-1 flex-col items-center gap-1 rounded-2xl px-1 py-2 text-[11px] font-medium transition-colors sm:px-3 sm:text-xs";
