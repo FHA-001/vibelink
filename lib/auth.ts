@@ -1592,3 +1592,48 @@ export async function deleteVisitorMessage(
 
   return { success: true };
 }
+// ============================================
+// ADMIN (waitlist list)
+// ============================================
+
+export type AdminWaitlistRow = {
+  id: string;
+  product: string;
+  createdAt: string;
+  kind: 'member' | 'visitor';
+  name: string | null;
+  username: string | null;
+  email: string | null;
+};
+
+// Returns the list only if the signed-in user is the admin. Anyone else gets null.
+export async function fetchAdminWaitlist(): Promise<AdminWaitlistRow[] | null> {
+  try {
+    const supabase = createClient();
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    if (!token) return null;
+
+    const res = await fetch('/api/admin/waitlist', {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+
+    const json = (await res.json()) as { rows?: AdminWaitlistRow[] };
+    return json.rows ?? null;
+  } catch {
+    return null;
+  }
+}
+
+// Used by the menus to decide whether to show the Admin link
+export async function isCurrentUserAdmin(): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase.rpc('is_admin');
+    return !error && data === true;
+  } catch {
+    return false;
+  }
+}
