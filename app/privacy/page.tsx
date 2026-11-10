@@ -65,7 +65,7 @@ export default function PrivacyPolicyPage() {
                   <li><strong>Personal Tags:</strong> Custom tags you create to organize your connections. These tags are visible only to you and are not shared with tagged connections or any other users.</li>
                   <li><strong>Blocking Information:</strong> Users you have blocked and users who have blocked you</li>
                   <li><strong>Report Data:</strong> Reports you submit about inappropriate profiles</li>
-                  <li><strong>Waitlist Product Preferences:</strong> If you join the waitlist for a physical product, we store which product you chose together with your account, and we use it only to tell you when it launches.</li>
+                  <li><strong>Waitlist Product Preferences:</strong> If you join the waitlist for a physical product while signed in, we store which product you chose together with your account. If you join without an account, we store your email address and the product you chose instead. We use this only to tell you when the product launches, and only the VibeLink team can see it. To ask us to remove your email, contact us through the Contact page.</li>
                 </ul>
                 <p>
                   If you add an email address or phone number for sharing, we store it separately from your public profile. We show it only to people whose request you approve, and you can stop sharing it at any time.
