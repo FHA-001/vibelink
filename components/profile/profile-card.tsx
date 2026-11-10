@@ -15,6 +15,7 @@ import { QRCode } from "./qr-code";
 import { Calendar, Link as LinkIcon, Share2, QrCode as QrIcon, Edit as Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
+import { cn } from "@/lib/utils";
 
 interface ProfileCardProps {
   profile: ConnectedProfile; // Covers both ConnectedProfile and Profile (owner) since Profile extends ConnectedProfile
@@ -25,6 +26,8 @@ interface ProfileCardProps {
   onDownloadQR?: () => void;
   showQR?: boolean;
   qrUrl?: string;
+  // Tighter layout that fits one phone screen, for screenshots
+  compact?: boolean;
 }
 
 export function ProfileCard({
@@ -36,6 +39,7 @@ export function ProfileCard({
   onDownloadQR,
   showQR = false,
   qrUrl,
+  compact = false,
 }: ProfileCardProps) {
   const router = useRouter();
   const [blockDialogOpen, setBlockDialogOpen] = useState(false);
@@ -148,6 +152,10 @@ export function ProfileCard({
       });
     }
   };
+
+  const interests = profile.interests ?? [];
+  const shownInterests = compact ? interests.slice(0, 4) : interests;
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 16 }}
@@ -156,7 +164,7 @@ export function ProfileCard({
       className="overflow-hidden rounded-3xl border border-border bg-card shadow-xl"
     >
       {/* Profile Header */}
-      <div className="card-surface relative px-6 pb-16 pt-10">
+      <div className={cn("card-surface relative px-6", compact ? "pb-10 pt-6" : "pb-16 pt-10")}>
         <div className="gold-rule absolute inset-x-8 top-0" aria-hidden="true" />
         {!isOwner && (
           <div className="absolute right-3 top-3">
@@ -173,68 +181,119 @@ export function ProfileCard({
           <ProfileAvatar
             src={profile.profile_photo || undefined}
             name={profile.full_name || profile.username}
-            size="xl"
-            className="mb-4 ring-4 ring-white/20"
+            size={compact ? "lg" : "xl"}
+            className={cn("ring-4 ring-white/20", compact ? "mb-2" : "mb-4")}
           />
-          <h1 className="text-center font-heading text-2xl font-semibold text-ivory sm:text-3xl">
+          <h1
+            className={cn(
+              "text-center font-heading font-semibold text-ivory",
+              compact ? "text-xl" : "text-2xl sm:text-3xl"
+            )}
+          >
             {profile.full_name || profile.username}
           </h1>
-          <p className="mt-1 text-center text-ivory/75">@{profile.username}</p>
+          <p className={cn("text-center text-ivory/75", compact ? "mt-0.5 text-sm" : "mt-1")}>
+            @{profile.username}
+          </p>
         </div>
       </div>
 
       {/* Profile Content */}
-      <div className="px-4 pb-6 sm:px-6">
-        <div className="-mt-8 space-y-6 rounded-2xl border border-border bg-card p-6 shadow-lg sm:p-8">
+      <div className={cn("px-4 sm:px-6", compact ? "pb-4" : "pb-6")}>
+        <div
+          className={cn(
+            "rounded-2xl border border-border bg-card shadow-lg",
+            compact ? "-mt-6 space-y-3 p-4" : "-mt-8 space-y-6 p-6 sm:p-8"
+          )}
+        >
           {/* Job Title & Company */}
           {profile.job_title && (
             <div className="text-center">
-              <p className="font-heading text-lg font-semibold text-navy">{profile.job_title}</p>
+              <p
+                className={cn(
+                  "font-heading font-semibold text-navy",
+                  compact ? "text-base" : "text-lg"
+                )}
+              >
+                {profile.job_title}
+              </p>
               {profile.company_school && (
-                <p className="mt-1 text-muted-foreground">{profile.company_school}</p>
+                <p className={cn("text-muted-foreground", compact ? "mt-0.5 text-sm" : "mt-1")}>
+                  {profile.company_school}
+                </p>
               )}
             </div>
           )}
 
           {/* Bio */}
           {profile.bio && (
-            <p className="text-center leading-relaxed text-foreground">{profile.bio}</p>
+            <p
+              className={cn(
+                "text-center text-foreground",
+                compact ? "line-clamp-2 text-sm leading-snug" : "leading-relaxed"
+              )}
+            >
+              {profile.bio}
+            </p>
           )}
 
           {/* Interests */}
-          {profile.interests && profile.interests.length > 0 && (
+          {shownInterests.length > 0 && (
             <div>
-              <h2 className="mb-3 text-sm font-semibold text-navy">Interests</h2>
-              <ProfileTags tags={profile.interests} variant="primary" />
+              <h2 className={cn("font-semibold text-navy", compact ? "mb-2 text-xs" : "mb-3 text-sm")}>
+                Interests
+              </h2>
+              <ProfileTags tags={shownInterests} variant="primary" />
             </div>
           )}
 
           {/* Social Links */}
-          <SocialLinks profile={profile} />
+          <SocialLinks profile={profile} compact={compact} />
 
           {/* QR Code and Connect Panel */}
-          <div className="flex flex-col items-center justify-between gap-5 border-t border-border pt-6 sm:flex-row sm:items-start sm:gap-6">
+          <div
+            className={cn(
+              "border-t border-border",
+              compact
+                ? "flex flex-row items-center justify-between gap-4 pt-3"
+                : "flex flex-col items-center justify-between gap-5 pt-6 sm:flex-row sm:items-start sm:gap-6"
+            )}
+          >
             {/* QR Code */}
             {showQR && qrUrl && (
               <div className="shrink-0">
-                <QRCode value={qrUrl} size={128} className="!p-2 !shadow-sm" />
-                <p className="mt-2 text-center text-xs text-muted-foreground">Scan to connect</p>
+                <QRCode value={qrUrl} size={compact ? 96 : 128} className="!p-2 !shadow-sm" />
+                <p className={cn("text-center text-xs text-muted-foreground", compact ? "mt-1" : "mt-2")}>
+                  Scan to connect
+                </p>
               </div>
             )}
 
             {/* Connect Panel */}
-            <div className="shrink-0 text-center sm:text-left">
-              <div className="card-surface rounded-2xl p-4 shadow-md sm:p-5">
+            <div className={cn(compact ? "min-w-0 flex-1" : "shrink-0 text-center sm:text-left")}>
+              <div className={cn("card-surface rounded-2xl shadow-md", compact ? "p-3" : "p-4 sm:p-5")}>
                 <h2 className="mb-1 font-heading text-base font-semibold text-ivory">Let&apos;s connect</h2>
-                <p className="mb-3 text-xs text-ivory/75">Your next connection starts here.</p>
-                <div className="flex items-center justify-center gap-2 sm:justify-start">
+                <p className={cn("text-xs text-ivory/75", compact ? "mb-2" : "mb-3")}>
+                  Your next connection starts here.
+                </p>
+                <div
+                  className={cn(
+                    "flex items-center gap-2",
+                    compact ? "justify-start" : "justify-center sm:justify-start"
+                  )}
+                >
                   <LinkIcon className="size-4 text-primary" aria-hidden="true" />
                   <span className="text-xs font-semibold text-primary">VibeLink</span>
                 </div>
               </div>
               {/* Joined Date */}
               {profile.created_at && (
-                <div className="mt-3 flex items-center justify-center gap-2 text-xs text-muted-foreground sm:justify-start">
+                <div
+                  className={cn(
+                    "flex items-center gap-2 text-xs text-muted-foreground",
+                    compact ? "mt-2 justify-start" : "mt-3 justify-center sm:justify-start"
+                  )}
+                >
                   <Calendar className="size-4 shrink-0" aria-hidden="true" />
                   <span>Joined {new Date(profile.created_at).toLocaleDateString()}</span>
                 </div>

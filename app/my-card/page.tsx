@@ -184,6 +184,7 @@ export default function MyCardPage() {
               profile={profile}
               isOwner={true}
               showActions={false}
+              compact
               onEdit={handleEdit}
               onShare={handleShare}
               onDownloadQR={handleDownloadQR}
