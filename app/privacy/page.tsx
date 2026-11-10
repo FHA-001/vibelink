@@ -71,6 +71,12 @@ export default function PrivacyPolicyPage() {
                   If you add an email address or phone number for sharing, we store it separately from your public profile. We show it only to people whose request you approve, and you can stop sharing it at any time.
                 </p>
                 <p>
+                   A small number of VibeLink administrators can see account email addresses and basic account
+                  details, such as sign-up date, profile completion and who is connected to whom, so they can
+                  run and support the service. Passwords, private connection notes and personal tags are never
+                  visible to them.
+                </p>
+                <p>
                   If you turn on messages from visitors, people without an account can send you their name, their contact details and a message through your profile. We store these only so you can read them. They are visible only to you, and we delete them automatically after 90 days. You can delete any message yourself at any time.
                 </p>
               </div>
