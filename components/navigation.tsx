@@ -1,11 +1,25 @@
+
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown, User, Users, Settings, LogOut } from "lucide-react";
+import {
+  Menu,
+  X,
+  ChevronDown,
+  User,
+  Users,
+  Settings,
+  LogOut,
+  Shield,
+} from "lucide-react";
 import { Logo } from "./logo";
 import { buttonVariants } from "./ui/button";
-import { getCurrentUser, signOut } from "@/lib/auth";
+import {
+  getCurrentUser,
+  signOut,
+  isCurrentUserAdmin,
+} from "@/lib/auth";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -26,28 +40,41 @@ const accountLinks = [
 export function Navigation() {
   const router = useRouter();
   const pathname = usePathname();
+
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
   const userMenuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
 
+  const visibleAccountLinks = isAdmin
+    ? [...accountLinks, { name: "Admin", href: "/admin/waitlist", icon: Shield }]
+    : accountLinks;
+
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 8);
+
     handleScroll();
+
     window.addEventListener("scroll", handleScroll, { passive: true });
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const checkAuth = useCallback(async () => {
     try {
       const user = await getCurrentUser();
+
       setIsAuthenticated(!!user);
+      setIsAdmin(user ? await isCurrentUserAdmin() : false);
     } catch (error) {
       console.error("Auth check failed:", error);
       setIsAuthenticated(false);
+      setIsAdmin(false);
     } finally {
       setIsLoading(false);
     }
@@ -66,18 +93,25 @@ export function Navigation() {
   // Close user menu on outside click or Escape
   useEffect(() => {
     if (!isUserMenuOpen) return;
+
     const handleClickOutside = (event: MouseEvent) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target as Node)
+      ) {
         setIsUserMenuOpen(false);
       }
     };
+
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setIsUserMenuOpen(false);
       }
     };
+
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", handleEscape);
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleEscape);
@@ -87,15 +121,20 @@ export function Navigation() {
   // Mobile menu: lock page scroll, close on Escape and return focus to the toggle
   useEffect(() => {
     if (!isMobileMenuOpen) return;
+
     const previousOverflow = document.body.style.overflow;
+
     document.body.style.overflow = "hidden";
+
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setIsMobileMenuOpen(false);
         menuButtonRef.current?.focus();
       }
     };
+
     document.addEventListener("keydown", handleEscape);
+
     return () => {
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", handleEscape);
@@ -104,9 +143,12 @@ export function Navigation() {
 
   const handleSignOut = async () => {
     await signOut();
+
     setIsAuthenticated(false);
+    setIsAdmin(false);
     setIsUserMenuOpen(false);
     setIsMobileMenuOpen(false);
+
     router.push("/");
   };
 
@@ -138,15 +180,20 @@ export function Navigation() {
               aria-current={isActive(link.href) ? "page" : undefined}
               className={cn(
                 "group relative rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                isActive(link.href) ? "text-navy" : "text-muted-foreground hover:text-navy"
+                isActive(link.href)
+                  ? "text-navy"
+                  : "text-muted-foreground hover:text-navy"
               )}
             >
               {link.name}
+
               <span
                 aria-hidden="true"
                 className={cn(
                   "absolute inset-x-3 -bottom-0.5 h-px origin-left bg-primary transition-transform duration-300 ease-out",
-                  isActive(link.href) ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+                  isActive(link.href)
+                    ? "scale-x-100"
+                    : "scale-x-0 group-hover:scale-x-100"
                 )}
               />
             </Link>
@@ -157,9 +204,13 @@ export function Navigation() {
               <div className="skeleton h-10 w-40" aria-hidden="true" />
             ) : isAuthenticated ? (
               <>
-                <Link href="/my-card" className={buttonVariants({ variant: "default" })}>
+                <Link
+                  href="/my-card"
+                  className={buttonVariants({ variant: "default" })}
+                >
                   My Card
                 </Link>
+
                 <div className="relative" ref={userMenuRef}>
                   <button
                     type="button"
@@ -187,7 +238,7 @@ export function Navigation() {
                         transition={{ duration: 0.16 }}
                         className="absolute right-0 mt-2 w-56 origin-top-right rounded-xl border border-border bg-card p-1.5 shadow-xl"
                       >
-                        {accountLinks.map((item) => (
+                        {visibleAccountLinks.map((item) => (
                           <Link
                             key={item.href}
                             href={item.href}
@@ -199,7 +250,9 @@ export function Navigation() {
                             {item.name}
                           </Link>
                         ))}
+
                         <div className="my-1.5 h-px bg-border" />
+
                         <button
                           type="button"
                           role="menuitem"
@@ -222,7 +275,11 @@ export function Navigation() {
                 >
                   Sign in
                 </Link>
-                <Link href="/welcome" className={buttonVariants({ variant: "default" })}>
+
+                <Link
+                  href="/welcome"
+                  className={buttonVariants({ variant: "default" })}
+                >
                   Get started
                 </Link>
               </>
@@ -240,7 +297,11 @@ export function Navigation() {
           aria-expanded={isMobileMenuOpen}
           aria-controls="mobile-menu"
         >
-          {isMobileMenuOpen ? <X className="size-6" /> : <Menu className="size-6" />}
+          {isMobileMenuOpen ? (
+            <X className="size-6" />
+          ) : (
+            <Menu className="size-6" />
+          )}
         </button>
       </nav>
 
@@ -276,12 +337,13 @@ export function Navigation() {
               <div className="mt-6 space-y-3">
                 {isLoading ? null : isAuthenticated ? (
                   <>
-                    {accountLinks.map((item) => (
+                    {visibleAccountLinks.map((item) => (
                       <Link
                         key={item.href}
                         href={item.href}
                         className={buttonVariants({
-                          variant: item.href === "/my-card" ? "default" : "outline",
+                          variant:
+                            item.href === "/my-card" ? "default" : "outline",
                           size: "lg",
                           className: "w-full justify-start",
                         })}
@@ -290,13 +352,15 @@ export function Navigation() {
                         {item.name}
                       </Link>
                     ))}
+
                     <button
                       type="button"
                       onClick={handleSignOut}
                       className={buttonVariants({
                         variant: "ghost",
                         size: "lg",
-                        className: "w-full justify-start text-destructive hover:text-destructive",
+                        className:
+                          "w-full justify-start text-destructive hover:text-destructive",
                       })}
                     >
                       <LogOut />
@@ -307,10 +371,14 @@ export function Navigation() {
                   <>
                     <Link
                       href="/welcome"
-                      className={buttonVariants({ size: "lg", className: "w-full" })}
+                      className={buttonVariants({
+                        size: "lg",
+                        className: "w-full",
+                      })}
                     >
                       Get started
                     </Link>
+
                     <Link
                       href="/signin"
                       className={buttonVariants({

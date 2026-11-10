@@ -2,11 +2,11 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, Scan, Users, Settings, Bell, X, BellOff } from "lucide-react";
+import { User, Scan, Users, Settings, Bell, X, BellOff, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { getCurrentUser, getUnreadNotificationCount, getUserNotifications, markNotificationAsRead, markAllNotificationsAsRead, Notification } from "@/lib/auth";
+import { getCurrentUser, isCurrentUserAdmin, getUnreadNotificationCount, getUserNotifications, markNotificationAsRead, markAllNotificationsAsRead, Notification } from "@/lib/auth";
 
 interface NavItem {
   label: string;
@@ -21,6 +21,8 @@ const navItems: NavItem[] = [
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
+const adminItem: NavItem = { label: "Admin", href: "/admin/waitlist", icon: Shield };
+
 const itemBase =
   "relative flex min-w-0 flex-1 flex-col items-center gap-1 rounded-2xl px-1 py-2 text-[11px] font-medium transition-colors sm:px-3 sm:text-xs";
 
@@ -28,6 +30,8 @@ export function BottomNav() {
   const pathname = usePathname();
   const router = useRouter();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const items = isAdmin ? [...navItems, adminItem] : navItems;
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
@@ -36,6 +40,7 @@ export function BottomNav() {
 
   useEffect(() => {
     loadUnreadCount();
+    isCurrentUserAdmin().then(setIsAdmin);
   }, []);
 
   // Close notification panel on outside click or escape key
@@ -155,7 +160,7 @@ export function BottomNav() {
         className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:inset-x-auto md:bottom-5 md:left-1/2 md:w-[26rem] md:-translate-x-1/2 md:rounded-3xl md:border md:pb-0 md:shadow-xl"
       >
         <div className="mx-auto flex max-w-lg items-stretch justify-around gap-0.5 px-2 py-1.5 sm:gap-1 sm:px-3">
-          {navItems.map((item) => {
+          {items.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
 
