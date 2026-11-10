@@ -1604,6 +1604,8 @@ export type AdminWaitlistRow = {
   name: string | null;
   username: string | null;
   email: string | null;
+  status: string;
+  adminNote: string | null;
 };
 
 // Returns the list only if the signed-in user is the admin. Anyone else gets null.
@@ -1655,6 +1657,34 @@ export async function fetchAdminJson<T>(
     if (!res.ok) return { ok: false, status: res.status };
 
     return { ok: true, status: res.status, data: (await res.json()) as T };
+  } catch {
+    return { ok: false, status: 0 };
+  }
+}
+
+// Admin-only save (status and note changes)
+export async function sendAdminJson(
+  path: string,
+  method: 'PATCH' | 'POST',
+  body: unknown
+): Promise<{ ok: boolean; status: number }> {
+  if (!path.startsWith('/api/admin/')) return { ok: false, status: 400 };
+  try {
+    const supabase = createClient();
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    if (!token) return { ok: false, status: 401 };
+
+    const res = await fetch(path, {
+      method,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+      cache: 'no-store',
+    });
+    return { ok: res.ok, status: res.status };
   } catch {
     return { ok: false, status: 0 };
   }

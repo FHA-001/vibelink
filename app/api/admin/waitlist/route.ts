@@ -1,45 +1,19 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { requireAdmin, adminNotFound } from "@/lib/admin-server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// Everyone who is not the admin gets the same empty 404
-function notFound() {
-  return new NextResponse(null, { status: 404 });
-}
+const STATUSES = ["new", "contacted", "interested", "converted", "unsubscribed"];
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function GET(request: Request) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !serviceKey) {
-    console.error("Admin route is missing a server setting");
-    return notFound();
-  }
-
-  const header = request.headers.get("authorization") ?? "";
-  const token = header.startsWith("Bearer ") ? header.slice(7) : "";
-  if (!token) return notFound();
-
-  const supabase = createClient(supabaseUrl, serviceKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-
-  // Who is asking?
-  const { data: userData, error: userError } = await supabase.auth.getUser(token);
-  if (userError || !userData.user) return notFound();
-
-  // Are they the admin?
-  const { data: me } = await supabase
-    .from("profiles")
-    .select("is_admin")
-    .eq("id", userData.user.id)
-    .maybeSingle();
-  if (!me || me.is_admin !== true) return notFound();
+  const supabase = await requireAdmin(request);
+  if (!supabase) return adminNotFound();
 
   const { data: signups, error: signupsError } = await supabase
     .from("waitlist_signups")
-    .select("id, user_id, email, product, created_at")
+    .select("id, user_id, email, product, created_at, status, admin_note")
     .order("created_at", { ascending: false })
     .limit(2000);
   if (signupsError) {
@@ -83,11 +57,65 @@ export async function GET(request: Request) {
       name: profile?.full_name ?? null,
       username: profile?.username ?? null,
       email: r.user_id ? emailMap.get(r.user_id) ?? null : (r.email as string | null),
+      status: (r.status as string) ?? "new",
+      adminNote: (r.admin_note as string | null) ?? null,
     };
   });
 
-  return NextResponse.json(
-    { rows: result },
-    { headers: { "Cache-Control": "no-store" } }
-  );
+  return NextResponse.json({ rows: result }, { headers: { "Cache-Control": "no-store" } });
+}
+
+export async function PATCH(request: Request) {
+  const supabase = await requireAdmin(request);
+  if (!supabase) return adminNotFound();
+
+  let body: { id?: unknown; status?: unknown; note?: unknown };
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+  }
+
+  const id = typeof body.id === "string" ? body.id : "";
+  if (!UUID_RE.test(id)) {
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+  }
+
+  const update: Record<string, unknown> = {};
+
+  if (body.status !== undefined) {
+    if (typeof body.status !== "string" || !STATUSES.includes(body.status)) {
+      return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+    }
+    update.status = body.status;
+  }
+
+  if (body.note !== undefined) {
+    if (typeof body.note !== "string" || body.note.length > 1000) {
+      return NextResponse.json({ error: "Note is too long" }, { status: 400 });
+    }
+    const trimmed = body.note.trim();
+    update.admin_note = trimmed === "" ? null : trimmed;
+  }
+
+  if (Object.keys(update).length === 0) {
+    return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
+  }
+  update.updated_at = new Date().toISOString();
+
+  const { data, error } = await supabase
+    .from("waitlist_signups")
+    .update(update)
+    .eq("id", id)
+    .select("id");
+
+  if (error) {
+    console.error("Admin waitlist update failed:", error.code);
+    return NextResponse.json({ error: "Could not save" }, { status: 500 });
+  }
+  if (!data || data.length === 0) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  return NextResponse.json({ ok: true });
 }
