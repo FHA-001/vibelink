@@ -43,8 +43,7 @@ const faqs = [
       },
       {
         q: "Can I customize my QR code?",
-        a: "Currently, QR codes are automatically generated with your profile URL. Custom QR designs are coming soon in our Pro plan."
-      },
+        a: "Not yet. Your QR code is created automatically from your profile link, and anyone who scans it opens your public profile."      },
       {
         q: "What happens when someone scans my QR code?",
         a: "When someone scans your QR code, they see your public profile. If they're not connected with you, they can send a connection request. Once you accept, you'll be connected and can see each other's full profiles."
