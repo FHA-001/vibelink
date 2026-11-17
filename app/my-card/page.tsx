@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { Download, Edit, Settings, Users, Copy, Share2, QrCode } from "lucide-react";
-import { getCurrentUser, getUserProfile, signOut, getMyViewStats, Profile, ViewStats } from "@/lib/auth";
+import { getCurrentUser, getUserProfile, signOut, getMyViewStats, getMyContactDetails, Profile, ViewStats } from "@/lib/auth";
 import { ProfileCard } from "@/components/profile/profile-card";
 import { ProfileCompleteness } from "@/components/profile/profile-completeness";
 import { ProfileActivity } from "@/components/profile/profile-activity";
@@ -26,6 +26,7 @@ export default function MyCardPage() {
   const [showQR, setShowQR] = useState(false);
   const [downloadError, setDownloadError] = useState("");
   const [stats, setStats] = useState<ViewStats | null>(null);
+  const [numbers, setNumbers] = useState<{ phone?: string | null; whatsapp?: string | null }>({});
   const qrRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -49,6 +50,14 @@ export default function MyCardPage() {
       setUser(currentUser);
       setProfile(userProfile);
       getMyViewStats().then(setStats);
+            getMyContactDetails().then((raw) => {
+        const details = raw as { phone?: string | null; whatsapp?: string | null } | null;
+        const visibility = userProfile.profile_visibility;
+        setNumbers({
+          phone: visibility?.phone ? details?.phone ?? null : null,
+          whatsapp: visibility?.whatsapp ? details?.whatsapp ?? null : null,
+        });
+      });
     } catch (error) {
       console.error("Auth check failed:", error);
       router.push("/signin");
@@ -185,6 +194,7 @@ export default function MyCardPage() {
               isOwner={true}
               showActions={false}
               compact
+              contact={numbers}
               onEdit={handleEdit}
               onShare={handleShare}
               onDownloadQR={handleDownloadQR}

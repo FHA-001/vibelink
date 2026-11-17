@@ -68,7 +68,12 @@ export default function PrivacyPolicyPage() {
                   <li><strong>Waitlist Product Preferences:</strong> If you join the waitlist for a physical product while signed in, we store which product you chose together with your account. If you join without an account, we store your email address and the product you chose instead. We use this only to tell you when the product launches, and only the VibeLink team can see it. To ask us to remove your email, contact us through the Contact page.</li>
                 </ul>
                 <p>
-                  If you add an email address or phone number for sharing, we store it separately from your public profile. We show it only to people whose request you approve, and you can stop sharing it at any time.
+                  If you add an email address, phone number or WhatsApp number, we store it separately from your
+public profile. By default we show your email and phone number only to people whose request you
+approve, and you can stop sharing at any time. Your WhatsApp number is shown to people you are
+connected with. If you choose to make your phone number or WhatsApp number public, anyone who
+visits your profile can see it, so please do this only if you are comfortable with that. You can
+switch it back to private at any time.
                 </p>
                 <p>
                    A small number of VibeLink administrators can see account email addresses and basic account

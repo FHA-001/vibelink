@@ -19,6 +19,8 @@ export interface ProfileVisibility {
   twitter: boolean;
   github: boolean;
   instagram: boolean;
+  phone?: boolean;
+  whatsapp?: boolean;
 }
 
 // Public profile type - fields can be null if not visible to strangers
@@ -1407,12 +1409,13 @@ export async function getMyContactDetails(): Promise<MyContactDetails | null> {
 
 export async function saveMyContactDetails(
   email: string,
-  phone: string
+  phone: string,
+  whatsapp: string = ''
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient();
 
   const { error } = await supabase
-    .rpc('save_my_contact_details', { p_email: email, p_phone: phone });
+    .rpc('save_my_contact_details', { p_email: email, p_phone: phone, p_whatsapp: whatsapp });
 
   if (error) {
     console.error('Error saving contact details:', error);
