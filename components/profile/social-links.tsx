@@ -1,54 +1,63 @@
 "use client";
 
-import { Globe, Link } from "lucide-react";
+import type { ComponentType } from "react";
+import { Globe } from "lucide-react";
 import { ConnectedProfile, PublicProfile } from "@/lib/auth";
 import { cn } from "@/lib/utils";
+import { safeHref } from "@/lib/safe-url";
+import { GitHubIcon, InstagramIcon, LinkedInIcon, XIcon } from "./brand-icons";
+
+type IconProps = { className?: string };
 
 interface SocialLinksProps {
   profile: ConnectedProfile | PublicProfile;
   className?: string;
+  // Icon-only buttons, for the one-screen card
   compact?: boolean;
 }
 
+const LINKS: {
+  key: "website" | "linkedin" | "twitter" | "github" | "instagram";
+  label: string;
+  Icon: ComponentType<IconProps>;
+}[] = [
+  { key: "website", label: "Website", Icon: Globe },
+  { key: "linkedin", label: "LinkedIn", Icon: LinkedInIcon },
+  { key: "twitter", label: "X (Twitter)", Icon: XIcon },
+  { key: "github", label: "GitHub", Icon: GitHubIcon },
+  { key: "instagram", label: "Instagram", Icon: InstagramIcon },
+];
+
 export function SocialLinks({ profile, className, compact = false }: SocialLinksProps) {
-  const links = [];
+  // Every saved link is checked again here, so an unsafe or broken value is never shown
+  const items = LINKS.flatMap(({ key, label, Icon }) => {
+    const href = safeHref(profile[key]);
+    return href ? [{ key, label, Icon, href }] : [];
+  });
 
-  if (profile.website) {
-    links.push({ icon: Globe, href: profile.website, label: "Website" });
-  }
-  if (profile.linkedin) {
-    links.push({ icon: Link, href: profile.linkedin, label: "LinkedIn" });
-  }
-  if (profile.twitter) {
-    links.push({ icon: Link, href: profile.twitter, label: "Twitter" });
-  }
-  if (profile.github) {
-    links.push({ icon: Link, href: profile.github, label: "GitHub" });
-  }
-  if (profile.instagram) {
-    links.push({ icon: Link, href: profile.instagram, label: "Instagram" });
-  }
-
-  if (links.length === 0) {
+  if (items.length === 0) {
     return null;
   }
 
   return (
-    <ul className={cn("flex flex-wrap justify-center", compact ? "gap-1.5" : "gap-2.5", className)}>
-      {links.map((link, index) => (
-        <li key={index}>
+    <ul className={cn("flex flex-wrap justify-center", compact ? "gap-2" : "gap-2.5", className)}>
+      {items.map(({ key, label, Icon, href }) => (
+        <li key={key}>
           <a
-            href={link.href}
+            href={href}
             target="_blank"
             rel="noopener noreferrer"
+            title={label}
+            aria-label={`${label} (opens in a new tab)`}
             className={cn(
-              "inline-flex items-center rounded-xl border border-border bg-background font-medium text-navy transition-[border-color,background-color,transform] duration-200 hover:border-primary/60 hover:bg-primary/10 active:scale-[0.97]",
-              compact ? "h-8 gap-1.5 px-2.5 text-xs" : "h-11 gap-2 px-3.5 text-sm"
+              "border border-border bg-background font-medium text-navy transition-[border-color,background-color,transform] duration-200 hover:border-primary/60 hover:bg-primary/10 active:scale-[0.97]",
+              compact
+                ? "flex size-10 items-center justify-center rounded-xl"
+                : "inline-flex h-11 items-center gap-2 rounded-xl px-3.5 text-sm"
             )}
-            aria-label={`${link.label} (opens in a new tab)`}
           >
-            {!compact && <link.icon className="size-4 text-gold" aria-hidden="true" />}
-            {link.label}
+            <Icon className={cn("text-gold", compact ? "size-5" : "size-4")} />
+            {!compact && label}
           </a>
         </li>
       ))}

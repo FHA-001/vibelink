@@ -11,10 +11,18 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Logo } from "@/components/logo";
 import { VisibilitySettings } from "@/components/profile/visibility-settings";
 import { ContactDetailsCard } from "@/components/profile/contact-details-card";
+import { normalizeWebUrl } from "@/lib/safe-url";
+import { GitHubIcon, InstagramIcon, LinkedInIcon, XIcon } from "@/components/profile/brand-icons";
 import { getCurrentUser, getUserProfile, saveUserProfile, isUsernameAvailable, validateUsername, uploadProfilePhoto, deleteProfilePhoto, validateProfilePhoto, Profile, ProfileVisibility } from "@/lib/auth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+const SOCIAL_FIELDS = [
+  { name: "linkedin", label: "LinkedIn", placeholder: "https://linkedin.com/in/yourprofile", Icon: LinkedInIcon },
+  { name: "twitter", label: "Twitter / X", placeholder: "https://x.com/yourhandle", Icon: XIcon },
+  { name: "github", label: "GitHub", placeholder: "https://github.com/yourusername", Icon: GitHubIcon },
+  { name: "instagram", label: "Instagram", placeholder: "https://instagram.com/yourusername", Icon: InstagramIcon },
+] as const;
 export default function EditProfilePage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
@@ -149,8 +157,18 @@ export default function EditProfilePage() {
       }
     }
 
-    if (formData.website && !/^https?:\/\/.+/.test(formData.website)) {
-      newErrors.website = "Please enter a valid URL (https://example.com)";
+        const linkFields = [
+      ["website", "website"],
+      ["linkedin", "LinkedIn"],
+      ["twitter", "Twitter / X"],
+      ["github", "GitHub"],
+      ["instagram", "Instagram"],
+    ] as const;
+    for (const [field, label] of linkFields) {
+      const value = formData[field].trim();
+      if (value && !normalizeWebUrl(value)) {
+        newErrors[field] = `Please enter a valid ${label} link, for example https://example.com`;
+      }
     }
 
     setErrors(newErrors);
@@ -218,11 +236,11 @@ export default function EditProfilePage() {
         company_school: formData.companySchool,
         bio: formData.bio === "" ? null : formData.bio,
         interests: interestsArray,
-        website: formData.website,
-        linkedin: formData.linkedin,
-        twitter: formData.twitter,
-        github: formData.github,
-        instagram: formData.instagram,
+        website: normalizeWebUrl(formData.website) ?? "",
+        linkedin: normalizeWebUrl(formData.linkedin) ?? "",
+        twitter: normalizeWebUrl(formData.twitter) ?? "",
+        github: normalizeWebUrl(formData.github) ?? "",
+        instagram: normalizeWebUrl(formData.instagram) ?? "",
         // Use current photo URL (may have been updated by photo upload)
         profile_photo: currentPhotoUrl,
         profile_visibility: visibilityConfig,
@@ -710,7 +728,8 @@ export default function EditProfilePage() {
                   <Input
                     id="website"
                     name="website"
-                    type="url"
+                    type="text"
+                    inputMode="url"
                     placeholder="https://yourwebsite.com"
                     value={formData.website}
                     onChange={handleChange}
@@ -725,63 +744,40 @@ export default function EditProfilePage() {
                   )}
                 </div>
 
-                {/* Social Links */}
+                               {/* Social Links */}
                 <div className="space-y-4">
                   <Label className="text-base font-semibold">Social Links (Optional)</Label>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="linkedin" className="text-sm">LinkedIn</Label>
-                    <Input
-                      id="linkedin"
-                      name="linkedin"
-                      type="url"
-                      placeholder="https://linkedin.com/in/yourprofile"
-                      value={formData.linkedin}
-                      onChange={handleChange}
-                      disabled={isSaving}
-                    />
-                  </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="twitter" className="text-sm">Twitter</Label>
-                    <Input
-                      id="twitter"
-                      name="twitter"
-                      type="url"
-                      placeholder="https://twitter.com/yourhandle"
-                      value={formData.twitter}
-                      onChange={handleChange}
-                      disabled={isSaving}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="github" className="text-sm">GitHub</Label>
-                    <Input
-                      id="github"
-                      name="github"
-                      type="url"
-                      placeholder="https://github.com/yourusername"
-                      value={formData.github}
-                      onChange={handleChange}
-                      disabled={isSaving}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="instagram" className="text-sm">Instagram</Label>
-                    <Input
-                      id="instagram"
-                      name="instagram"
-                      type="url"
-                      placeholder="https://instagram.com/yourusername"
-                      value={formData.instagram}
-                      onChange={handleChange}
-                      disabled={isSaving}
-                    />
-                  </div>
+                  {SOCIAL_FIELDS.map(({ name, label, placeholder, Icon }) => (
+                    <div key={name} className="space-y-2">
+                      <Label htmlFor={name} className="flex items-center gap-2 text-sm">
+                        <Icon className="size-4 text-gold" />
+                        {label}
+                      </Label>
+                      <Input
+                        id={name}
+                        name={name}
+                        type="text"
+                        inputMode="url"
+                        autoCapitalize="none"
+                        autoCorrect="off"
+                        spellCheck={false}
+                        placeholder={placeholder}
+                        value={formData[name]}
+                        onChange={handleChange}
+                        disabled={isSaving}
+                        aria-invalid={!!errors[name]}
+                        aria-describedby={errors[name] ? `${name}-error` : undefined}
+                      />
+                      {errors[name] && (
+                        <p id={`${name}-error`} className="text-sm text-destructive">
+                          {errors[name]}
+                        </p>
+                      )}
+                    </div>
+                  ))}
                 </div>
-
+                
                 <ContactDetailsCard />
 
                 <VisibilitySettings
