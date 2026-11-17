@@ -32,6 +32,7 @@ function SignUpContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [authError, setAuthError] = useState("");
+  const [infoMessage, setInfoMessage] = useState("");
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaReset, setCaptchaReset] = useState(0);
 
@@ -67,6 +68,7 @@ function SignUpContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError("");
+    setInfoMessage("");
 
         if (!validateForm()) {
       return;
@@ -99,8 +101,8 @@ function SignUpContent() {
             router.push(`/complete-profile?redirect=${encodeURIComponent(safeRedirect)}`);
           }
         } else {
-          // Email confirmation required - show message
-          setAuthError("Please check your email to confirm your account. You'll be redirected to your intended destination after confirmation.");
+          // Email confirmation required - show info message
+          setInfoMessage("Check your inbox to confirm your account. Didn't get it? Check your spam folder.");
         }
       } else {
         setAuthError(result.error || "Sign up failed");
@@ -157,6 +159,18 @@ function SignUpContent() {
                   >
                     <Alert variant="destructive">
                       <AlertDescription>{authError}</AlertDescription>
+                    </Alert>
+                  </motion.div>
+                )}
+
+                {/* Info Alert */}
+                {infoMessage && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    <Alert className="border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400">
+                      <AlertDescription>{infoMessage}</AlertDescription>
                     </Alert>
                   </motion.div>
                 )}
