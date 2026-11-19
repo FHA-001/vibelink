@@ -12,7 +12,7 @@ import { Logo } from "@/components/logo";
 import { resetPassword, getCurrentUser } from "@/lib/auth";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { createClient } from "@/lib/supabse";
+import { createClient } from "@/lib/supabase";
 
 function ResetPasswordContent() {
   const router = useRouter();
