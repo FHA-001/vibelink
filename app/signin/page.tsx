@@ -31,6 +31,9 @@ function SignInContent() {
   const [authError, setAuthError] = useState("");
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaReset, setCaptchaReset] = useState(0);
+  const justConfirmed = searchParams.get('confirmed') === '1';
+  const linkProblem = searchParams.get('error') === 'link_expired';
+
   // Prefill email from query parameter if present
   useEffect(() => {
     const emailParam = searchParams.get('email');
@@ -84,8 +87,15 @@ function SignInContent() {
           // User needs to complete profile, preserve redirect
           router.push(`/complete-profile?redirect=${encodeURIComponent(safeRedirect)}`);
         }
-      } else {
-        setAuthError(result.error || "Sign in failed");
+            } else {
+        const message = result.error || "Sign in failed";
+        if (/not confirmed/i.test(message)) {
+          router.push(
+            `/verify-email?from=signin&email=${encodeURIComponent(formData.email)}&redirect=${encodeURIComponent(safeRedirect)}`
+          );
+          return;
+        }
+        setAuthError(message);
       }
     } catch (error) {
       console.error("Sign in error:", error);
@@ -143,7 +153,19 @@ function SignInContent() {
                     </Alert>
                   </motion.div>
                 )}
-
+                                {justConfirmed && (
+                  <Alert className="border-green-500/40 bg-green-500/10 text-green-700 dark:text-green-400">
+                    <AlertDescription>Email confirmed. Sign in to continue.</AlertDescription>
+                  </Alert>
+                )}
+                {linkProblem && (
+                  <Alert variant="destructive">
+                    <AlertDescription>
+                      That link has expired or was already used. Sign in, and if your email is not confirmed yet we will help you get a new code.
+                    </AlertDescription>
+                  </Alert>
+                )}
+                
                 {/* Email Field */}
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>

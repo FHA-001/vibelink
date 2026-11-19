@@ -86,7 +86,7 @@ function SignUpContent() {
 
       if (result.success && result.user) {
         // Check if user has an active session (email confirmation not required)
-        const supabase = (await import('@/lib/supabse')).createClient();
+        const supabase = (await import('@/lib/supabase')).createClient();
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session) {
@@ -101,8 +101,12 @@ function SignUpContent() {
             router.push(`/complete-profile?redirect=${encodeURIComponent(safeRedirect)}`);
           }
         } else {
-          // Email confirmation required - show info message
-          setInfoMessage("Check your inbox to confirm your account. Didn't get it? Check your spam folder.");
+          // Email confirmation required - go to the code screen
+          router.push(
+            `/verify-email?email=${encodeURIComponent(formData.email)}&redirect=${encodeURIComponent(safeRedirect)}`
+          );
+          return;
+
         }
       } else {
         setAuthError(result.error || "Sign up failed");

@@ -57,6 +57,7 @@ export async function GET(request: NextRequest) {
     if (type === 'signup' || (code && !type)) {
       // Create response and new client with response binding for signOut
       const signinUrl = new URL('/signin', request.url)
+      signinUrl.searchParams.set('confirmed', '1')
       if (userEmail) {
         signinUrl.searchParams.set('email', userEmail)
       }
@@ -84,9 +85,9 @@ export async function GET(request: NextRequest) {
     console.error('Auth verification failed:', { confirmationType: type, errorCategory: error.name })
     if (type === 'signup' || (code && !type)) {
       // Signup confirmation failed - redirect to signup with error
-      const signupUrl = new URL('/signup', request.url)
-      signupUrl.searchParams.set('error', 'confirmation_failed')
-      return NextResponse.redirect(signupUrl)
+      const signinUrl = new URL('/signin', request.url)
+      signinUrl.searchParams.set('error', 'link_expired')
+      return NextResponse.redirect(signinUrl)
     } else {
       // Recovery failed - redirect to reset-password with error
       const errorUrl = new URL('/reset-password?error=invalid_link', request.url)

@@ -1,4 +1,4 @@
-import { createClient } from "./supabse";
+import { createClient } from "./supabase";
 import type { AuthError, User } from "@supabase/supabase-js";
 
 export interface AuthResult {
@@ -1691,4 +1691,48 @@ export async function sendAdminJson(
   } catch {
     return { ok: false, status: 0 };
   }
+}
+
+// ============================================
+// EMAIL CONFIRMATION (6-digit code)
+// ============================================
+
+export async function verifySignupCode(email: string, code: string): Promise<AuthResult> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase.auth.verifyOtp({
+    email,
+    token: code.trim(),
+    type: 'signup',
+  });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true, user: data.user || undefined };
+}
+
+export async function resendSignupEmail(
+  email: string,
+  redirectTo?: string,
+  captchaToken?: string
+): Promise<AuthResult> {
+  const supabase = createClient();
+  const destination = redirectTo || '/my-card';
+
+  const { error } = await supabase.auth.resend({
+    type: 'signup',
+    email,
+    options: {
+      emailRedirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent(destination)}`,
+      captchaToken,
+    },
+  });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
 }

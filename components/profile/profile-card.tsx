@@ -28,6 +28,8 @@ interface ProfileCardProps {
   qrUrl?: string;
   // Tighter layout that fits one phone screen, for screenshots
   compact?: boolean;
+    // Numbers to show on the card. Only numbers the person made public.
+  contact?: { phone?: string | null; whatsapp?: string | null };
 }
 
 export function ProfileCard({
@@ -40,6 +42,7 @@ export function ProfileCard({
   showQR = false,
   qrUrl,
   compact = false,
+  contact,
 }: ProfileCardProps) {
   const router = useRouter();
   const [blockDialogOpen, setBlockDialogOpen] = useState(false);
@@ -155,6 +158,9 @@ export function ProfileCard({
 
   const interests = profile.interests ?? [];
   const shownInterests = compact ? interests.slice(0, 4) : interests;
+  const extra = profile as ConnectedProfile & { phone?: string | null; whatsapp?: string | null };
+  const phone = contact ? contact.phone ?? null : extra.phone ?? null;
+  const whatsapp = contact ? contact.whatsapp ?? null : extra.whatsapp ?? null;
 
   return (
     <motion.article
@@ -248,8 +254,7 @@ export function ProfileCard({
           )}
 
           {/* Social Links */}
-          <SocialLinks profile={profile} compact={compact} />
-
+          <SocialLinks profile={profile} compact={compact} phone={phone} whatsapp={whatsapp} />
           {/* QR Code and Connect Panel */}
           <div
             className={cn(
