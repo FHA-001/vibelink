@@ -27,7 +27,7 @@ export default function PrivacyPolicyPage() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-lg text-muted-foreground mb-4"
             >
-              Last updated: 1 November 2026
+              Last updated: 22 November 2026
             </motion.p>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -66,17 +66,20 @@ export default function PrivacyPolicyPage() {
                   <li><strong>Blocking Information:</strong> Users you have blocked and users who have blocked you</li>
                   <li><strong>Report Data:</strong> Reports you submit about inappropriate profiles</li>
                   <li><strong>Waitlist Product Preferences:</strong> If you join the waitlist for a physical product while signed in, we store which product you chose together with your account. If you join without an account, we store your email address and the product you chose instead. We use this only to tell you when the product launches, and only the VibeLink team can see it. To ask us to remove your email, contact us through the Contact page.</li>
+                  <li><strong>Contact Details and Requests:</strong> The email address, phone number and WhatsApp number you choose to add, and requests from other users to see them. Private details are shared only after you approve a request.</li>
+                  <li><strong>Follow-up Reminders:</strong> Where you met a connection and any reminder date you set. These are visible only to you.</li>
+                  <li><strong>Profile Activity Counts:</strong> Daily totals of how many times your profile was viewed or your QR code was scanned. We do not store who viewed it.</li>
                 </ul>
                 <p>
                   If you add an email address, phone number or WhatsApp number, we store it separately from your
-public profile. By default we show your email and phone number only to people whose request you
-approve, and you can stop sharing at any time. Your WhatsApp number is shown to people you are
-connected with. If you choose to make your phone number or WhatsApp number public, anyone who
-visits your profile can see it, so please do this only if you are comfortable with that. You can
-switch it back to private at any time.
+                  public profile. By default we show your email and phone number only to people whose request you
+                  approve, and you can stop sharing at any time. Your WhatsApp number is shown to people you are
+                  connected with. If you choose to make your phone number or WhatsApp number public, anyone who
+                  visits your profile can see it, so please do this only if you are comfortable with that. You can
+                  switch it back to private at any time.
                 </p>
                 <p>
-                   A small number of VibeLink administrators can see account email addresses and basic account
+                  A small number of VibeLink administrators can see account email addresses and basic account
                   details, such as sign-up date, profile completion and who is connected to whom, so they can
                   run and support the service. Passwords, private connection notes and personal tags are never
                   visible to them.
@@ -144,7 +147,7 @@ switch it back to private at any time.
                   <li>Apply your privacy preferences to control profile visibility</li>
                   <li>Authenticate your account and maintain security</li>
                   <li>Implement rate limiting and abuse prevention measures</li>
-                  <li>Send password recovery emails</li>
+                  <li>Send confirmation codes and password recovery emails</li>
                   <li>Store and display your private notes about connections for your personal reference</li>
                   <li>Store and apply your personal tags to organize connections</li>
                   <li>Enforce blocking preferences and remove connections/notifications when users block each other</li>
@@ -167,7 +170,8 @@ switch it back to private at any time.
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li><strong>Supabase:</strong> Authentication, database, and storage services</li>
                   <li><strong>Vercel:</strong> Hosting and deployment infrastructure</li>
-                  <li><strong>Resend:</strong> Transactional authentication emails sent through Supabase Custom SMTP. Resend may process recipient email addresses and authentication email content including reset/verification links.</li>
+                  <li><strong>Resend:</strong> Transactional authentication emails (confirmation codes, confirmation links and password reset links) sent through Supabase Custom SMTP. Resend may process recipient email addresses and the content of these emails, including codes and links.</li>
+                  <li><strong>Cloudflare Turnstile:</strong> A security check on sign up, sign in, password reset, waitlist and visitor message forms that helps block automated abuse. It may process technical information such as your IP address and browser details.</li>
                 </ul>
                 <p>
                   These services have their own privacy policies and data handling practices. We encourage you to review their policies.
@@ -193,6 +197,8 @@ switch it back to private at any time.
                   <li>Blocked user relationships are deleted</li>
                   <li>Reports submitted by you or about you are deleted</li>
                   <li>Private connection notes and personal tags are deleted</li>
+                  <li>Your contact details, contact requests, visitor messages, follow-up reminders and profile activity counts are deleted</li>
+                  <li>Waitlist entries linked to your account are deleted</li>
                   <li>This action is intended to be permanent</li>
                 </ul>
                 <p>
@@ -268,4 +274,3 @@ switch it back to private at any time.
     </div>
   );
 }
-
