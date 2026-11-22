@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/use-toast";
 import { downloadVCard } from "@/lib/vcard";
+import type { ContactCard } from "@/lib/auth";
 import { ContactRequestCard } from "@/components/profile/contact-request-card";
 import { VisitorMessageForm } from "@/components/profile/visitor-message-form";
 import { getConnectionDetails, saveConnectionDetails, setFollowUpDone, recordProfileView, ConnectionDetails } from "@/lib/auth";
@@ -67,6 +68,9 @@ export function PublicProfileClient({ params }: Props) {
   const [isEditingDetails, setIsEditingDetails] = useState(false);
   const [metAtText, setMetAtText] = useState('');
   const [followUpDate, setFollowUpDate] = useState('');
+
+  // Private number the owner approved for this viewer, added to Save to contacts
+  const [approvedContact, setApprovedContact] = useState<{ phone?: string | null } | null>(null);
 
   // Type guard to check if profile has full connected user data
   const isFullProfile = (profile: ConnectedProfile | PublicProfile): profile is ConnectedProfile => {
@@ -297,7 +301,7 @@ export function PublicProfileClient({ params }: Props) {
   const handleSaveContact = () => {
     if (!profile) return;
     try {
-      downloadVCard(profile, `${window.location.origin}/u/${profile.username}`);
+      downloadVCard(profile, `${window.location.origin}/u/${profile.username}`, approvedContact ?? {});
       toast({ title: "Contact file downloaded", description: "Open it to add this person to your contacts." });
     } catch (error) {
       console.error("Save contact failed:", error);
@@ -644,7 +648,12 @@ export function PublicProfileClient({ params }: Props) {
             )}
 
             {viewerSignedIn === false && <VisitorMessageForm username={profile.username} />}
-            {!isOwner && <ContactRequestCard ownerId={profile.id} />}
+            {!isOwner && (
+              <ContactRequestCard
+                ownerId={profile.id}
+                onCardChange={(c: ContactCard | null) => setApprovedContact(c ? { phone: c.phone } : null)}
+              />
+            )}
 
             {!isOwner && (
               <div className="mt-6">

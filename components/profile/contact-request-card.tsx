@@ -13,12 +13,23 @@ import {
   requestContact,
 } from "@/lib/auth";
 
-type Props = { ownerId: string };
+type Props = {
+  ownerId: string;
+  // Called whenever the contact card loads or changes, so the page can add an
+  // approved number to Save to contacts. The card only holds numbers this
+  // viewer is allowed to see.
+  onCardChange?: (card: ContactCard | null) => void;
+};
 
-export function ContactRequestCard({ ownerId }: Props) {
+export function ContactRequestCard({ ownerId, onCardChange }: Props) {
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [card, setCard] = useState<ContactCard | null>(null);
   const [busyKind, setBusyKind] = useState<ContactKind | null>(null);
+
+  const updateCard = (next: ContactCard | null) => {
+    setCard(next);
+    onCardChange?.(next);
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -33,7 +44,7 @@ export function ContactRequestCard({ ownerId }: Props) {
         }
         setSignedIn(true);
         const data = await getContactCard(ownerId);
-        if (!cancelled) setCard(data);
+        if (!cancelled) updateCard(data);
       } catch {
         if (!cancelled) setSignedIn(false);
       }
@@ -42,6 +53,7 @@ export function ContactRequestCard({ ownerId }: Props) {
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ownerId]);
 
   const handleRequest = async (kind: ContactKind) => {
@@ -49,7 +61,7 @@ export function ContactRequestCard({ ownerId }: Props) {
     const result = await requestContact(ownerId, kind);
 
     if (result.success) {
-      setCard(await getContactCard(ownerId));
+      updateCard(await getContactCard(ownerId));
       toast({ title: "Request sent", description: "You will see their answer here." });
     } else {
       toast({
