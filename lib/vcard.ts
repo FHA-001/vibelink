@@ -1,4 +1,5 @@
 import type { PublicProfile } from "@/lib/auth";
+import { telHref } from "@/lib/phone";
 
 // Escape special characters for the vCard text format
 function esc(value: string): string {
@@ -9,12 +10,9 @@ function esc(value: string): string {
     .replace(/,/g, "\\,");
 }
 
-// Keeps digits and a leading plus, drops spaces, dashes and brackets
+// Same normalising as the call and WhatsApp buttons (0701... becomes +234701...)
 function cleanNumber(value?: string | null): string | null {
-  if (!value) return null;
-  const trimmed = value.trim();
-  const cleaned = (trimmed.startsWith("+") ? "+" : "") + trimmed.replace(/\D/g, "");
-  return cleaned.replace("+", "").length >= 5 ? cleaned : null;
+  return telHref(value)?.replace("tel:", "") ?? null;
 }
 
 // Numbers a viewer may see but that are not on the profile object,

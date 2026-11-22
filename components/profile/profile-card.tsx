@@ -28,7 +28,7 @@ interface ProfileCardProps {
   qrUrl?: string;
   // Tighter layout that fits one phone screen, for screenshots
   compact?: boolean;
-    // Numbers to show on the card. Only numbers the person made public.
+  // Numbers to show on the card. Only numbers the person made public.
   contact?: { phone?: string | null; whatsapp?: string | null };
 }
 
@@ -159,8 +159,9 @@ export function ProfileCard({
   const interests = profile.interests ?? [];
   const shownInterests = compact ? interests.slice(0, 4) : interests;
   const extra = profile as ConnectedProfile & { phone?: string | null; whatsapp?: string | null };
-  const phone = contact ? contact.phone ?? null : extra.phone ?? null;
-  const whatsapp = contact ? contact.whatsapp ?? null : extra.whatsapp ?? null;
+  // A number passed in from outside wins, otherwise use the public number that came with the profile
+  const phone = contact?.phone ?? extra.phone ?? null;
+  const whatsapp = contact?.whatsapp ?? extra.whatsapp ?? null;
 
   return (
     <motion.article
