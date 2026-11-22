@@ -9,9 +9,29 @@ function esc(value: string): string {
     .replace(/,/g, "\\,");
 }
 
-// Uses only the fields already present on the profile object, so it never
-// includes anything the viewer is not allowed to see.
-export function buildVCard(profile: PublicProfile, profileUrl: string): string {
+// Keeps digits and a leading plus, drops spaces, dashes and brackets
+function cleanNumber(value?: string | null): string | null {
+  if (!value) return null;
+  const trimmed = value.trim();
+  const cleaned = (trimmed.startsWith("+") ? "+" : "") + trimmed.replace(/\D/g, "");
+  return cleaned.replace("+", "").length >= 5 ? cleaned : null;
+}
+
+// Numbers a viewer may see but that are not on the profile object,
+// for example a private number the owner approved through a request.
+export type VCardExtras = {
+  phone?: string | null;
+  whatsapp?: string | null;
+};
+
+// Uses only the fields already present on the profile object (plus anything the
+// caller passes in extras), so it never includes anything the viewer is not
+// allowed to see.
+export function buildVCard(
+  profile: PublicProfile,
+  profileUrl: string,
+  extras: VCardExtras = {}
+): string {
   const name = profile.full_name?.trim() || profile.username;
   const parts = name.split(/\s+/);
   const last = parts.length > 1 ? parts[parts.length - 1] : "";
@@ -27,6 +47,12 @@ export function buildVCard(profile: PublicProfile, profileUrl: string): string {
   if (profile.company_school) lines.push(`ORG:${esc(profile.company_school)}`);
   if (profile.job_title) lines.push(`TITLE:${esc(profile.job_title)}`);
 
+  const phone = cleanNumber(extras.phone ?? profile.phone);
+  const whatsapp = cleanNumber(extras.whatsapp ?? profile.whatsapp);
+
+  if (phone) lines.push(`TEL;TYPE=CELL:${phone}`);
+  if (whatsapp && whatsapp !== phone) lines.push(`TEL;TYPE=CELL:${whatsapp}`);
+
   const urls = [
     profileUrl,
     profile.website,
@@ -39,15 +65,22 @@ export function buildVCard(profile: PublicProfile, profileUrl: string): string {
     if (url) lines.push(`URL:${url}`);
   }
 
-  const note = profile.bio ? `${profile.bio}\n\nMet on VibeLink` : "Met on VibeLink";
-  lines.push(`NOTE:${esc(note)}`);
+  const noteParts: string[] = [];
+  if (profile.bio) noteParts.push(profile.bio);
+  if (whatsapp) noteParts.push(`WhatsApp: ${whatsapp}`);
+  noteParts.push("Met on VibeLink");
+  lines.push(`NOTE:${esc(noteParts.join("\n\n"))}`);
   lines.push("END:VCARD");
 
   return lines.join("\r\n") + "\r\n";
 }
 
-export function downloadVCard(profile: PublicProfile, profileUrl: string): void {
-  const blob = new Blob([buildVCard(profile, profileUrl)], {
+export function downloadVCard(
+  profile: PublicProfile,
+  profileUrl: string,
+  extras: VCardExtras = {}
+): void {
+  const blob = new Blob([buildVCard(profile, profileUrl, extras)], {
     type: "text/vcard;charset=utf-8",
   });
   const href = URL.createObjectURL(blob);

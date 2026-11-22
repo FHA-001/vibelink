@@ -36,11 +36,14 @@ export interface PublicProfile {
   website: string | null;
   linkedin: string | null;
   twitter: string | null;
-  github: string | null;
+    github: string | null;
   instagram: string | null;
+  // Present only when the owner made the number public (or, for WhatsApp, the viewer is connected)
+  phone?: string | null;
+  whatsapp?: string | null;
 }
 
-// Connected profile type - what connected users get from RPC
+// Connected profile type- what connected users get from RPC
 // Same as PublicProfile but with created_at, no updated_at or profile_visibility
 export interface ConnectedProfile extends PublicProfile {
   created_at: string;
